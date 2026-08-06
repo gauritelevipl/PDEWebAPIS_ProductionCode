@@ -8,6 +8,7 @@ using PDEWebAPIS.Helpers;
 using PDEWebAPIS.InputDataModel;
 using PDEWebAPIS.Model;
 using PDEWebAPIS.Services;
+using PDEWebAPIS.ViewModel;
 using System.Net.Http.Headers;
 
 namespace PDEWebAPIS.Controllers
@@ -16,7 +17,7 @@ namespace PDEWebAPIS.Controllers
     [ApiController]
     public class EPCISAPISController : Controller
     {
-        private readonly EPCISAPIService lgdapiServices;
+        private readonly EPCISAPIService epcisServices;
         private readonly UserServices userServices;
         private readonly IConfiguration configuration;
         private readonly ILogger<EPCISAPISController> _logger;
@@ -32,7 +33,7 @@ namespace PDEWebAPIS.Controllers
             _loggers = loggers;
             grievanceService = new GrievanceService(context, contextR);
             _loggeruserService = loggeruserservices;
-            lgdapiServices = new EPCISAPIService(contextR, config, loggers); 
+            epcisServices = new EPCISAPIService(contextR, config, loggers); 
             userServices = new UserServices(context,contextR,loggeruserservices);
             this.configuration = configuration;
         }
@@ -40,8 +41,8 @@ namespace PDEWebAPIS.Controllers
         public async Task<string> GetValue(RequestCTSDetails body)
         {
            
-            var response = await lgdapiServices.getCTSNoDetails(body,_logger); //await lgdapiServices.GetallDistrict(_logger);
-            var res = await lgdapiServices.getFlatList(body,_logger);
+            var response = await epcisServices.getCTSNoDetails(body,_logger); //await epcisServices.GetallDistrict(_logger);
+            var res = await epcisServices.getFlatList(body,_logger);
             return response +" | " +res ;
         }
 
@@ -70,7 +71,7 @@ namespace PDEWebAPIS.Controllers
                     // parmameter will be the token itself.
                 }
 */
-                var response = await lgdapiServices.GetallDistrict(_logger);
+                var response = await epcisServices.GetallDistrict(_logger);
                 _logger.LogInformation("All District Code List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -126,7 +127,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string district_code = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get office by district Request Data - " + district_code);
-                var response = await lgdapiServices.getOfficeByDistrict(district_code,_logger);
+                var response = await epcisServices.getOfficeByDistrict(district_code,_logger);
                 _logger.LogInformation("All Office By District Code List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -173,7 +174,7 @@ namespace PDEWebAPIS.Controllers
         //        var decrypted = Security.DeCryptData(val);
         //        string office_code = JsonConvert.DeserializeObject<string>(decrypted!)!;
         //        _logger.LogInformation("Get Village Name by office Request Data - " + office_code);
-        //        var response = await lgdapiServices.getVillageByOffice(office_code, _logger);
+        //        var response = await epcisServices.getVillageByOffice(office_code, _logger);
         //        _logger.LogInformation("All Village By office Code List Resonse - " + response);
         //        if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
         //        {
@@ -228,7 +229,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string office_code = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Village Name by office Request Data - " + office_code);
-                var response = await lgdapiServices.getVillageByOffice(office_code, _logger);
+                var response = await epcisServices.getVillageByOffice(office_code, _logger);
                 _logger.LogInformation("All Village By office Code List Resonse - " + response);
 
 
@@ -307,7 +308,7 @@ namespace PDEWebAPIS.Controllers
                     // parmameter will be the token itself.
                 }
 */
-                var response = await lgdapiServices.pdeApplicationTypeList(_logger);
+                var response = await epcisServices.pdeApplicationTypeList(_logger);
                 _logger.LogInformation("Get Application Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -363,7 +364,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);
-                var response = await lgdapiServices.getMutationType(mut_category,_logger);
+                var response = await epcisServices.getMutationType(mut_category,_logger);
                 _logger.LogInformation("All Mutation Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -417,11 +418,11 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 EPCISgetDocListMutationtype ePCISgetDocListMutationtype = JsonConvert.DeserializeObject<EPCISgetDocListMutationtype>(decrypted!)!;
                 _logger.LogInformation("Get Document List for Mutation Type Request Data - " + ePCISgetDocListMutationtype.mut_type + " " + ePCISgetDocListMutationtype.mut_category);
-                var response = await lgdapiServices.getDocListMutationtype(ePCISgetDocListMutationtype, _logger);
+                var response = await epcisServices.getDocListMutationtype(ePCISgetDocListMutationtype, _logger);
                 _logger.LogInformation("All Document List for Mutation Type List Resonse - " + response);
                 //string mut_type = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 //_logger.LogInformation("Get Document List for Mutation Type Request Data - " + mut_type);
-                //var response = await lgdapiServices.getDocListMutationtype(mut_type,_logger);
+                //var response = await epcisServices.getDocListMutationtype(mut_type,_logger);
                 _logger.LogInformation("All Document List for Mutation Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -467,7 +468,7 @@ namespace PDEWebAPIS.Controllers
                /* var decrypted = Security.DeCryptData(val);
                 string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.applicationTypeList(_logger);
+                var response = await epcisServices.applicationTypeList(_logger);
                 _logger.LogInformation("All application Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -523,7 +524,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 RequestCTSDetails requestcts = JsonConvert.DeserializeObject<RequestCTSDetails>(decrypted!)!;
                 _logger.LogInformation("Get CTS Details Request Data - " + requestcts);
-                var response = await lgdapiServices.getCTSNoDetails(requestcts, _logger);
+                var response = await epcisServices.getCTSNoDetails(requestcts, _logger);
                 _logger.LogInformation("Get CTS Details Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -578,7 +579,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 RequestOwnerNameInfo requestcts = JsonConvert.DeserializeObject<RequestOwnerNameInfo>(decrypted!)!;
                 _logger.LogInformation("Get Owner Name Details Request Data - " + requestcts);
-                var response = await lgdapiServices.getOwnerNameInfo(requestcts, _logger);
+                var response = await epcisServices.getOwnerNameInfo(requestcts, _logger);
                 _logger.LogInformation("Get Owner Name Details Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -634,7 +635,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 RequestOwnerDetails requestcts = JsonConvert.DeserializeObject<RequestOwnerDetails>(decrypted!)!;
                 _logger.LogInformation("Get Owner Details Details Request Data - " + requestcts);
-                var response = await lgdapiServices.getOwnerDetails(requestcts, _logger);
+                var response = await epcisServices.getOwnerDetails(requestcts, _logger);
                 _logger.LogInformation("Get Owner Details Details Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -678,7 +679,7 @@ namespace PDEWebAPIS.Controllers
                     // parmameter will be the token itself.
                 }
 */
-                var response = await lgdapiServices.nameTitleList(_logger);
+                var response = await epcisServices.nameTitleList(_logger);
                 _logger.LogInformation("Get Name Title List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -736,7 +737,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 RequestCTSDetails requestcts = JsonConvert.DeserializeObject<RequestCTSDetails>(decrypted!)!;
                 _logger.LogInformation("Get Flat Details Request Data - " + requestcts);
-                var response = await lgdapiServices.getFlatList(requestcts, _logger);
+                var response = await epcisServices.getFlatList(requestcts, _logger);
                 _logger.LogInformation("Get Flat Details Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -790,7 +791,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 RequestCTSDetails requestcts = JsonConvert.DeserializeObject<RequestCTSDetails>(decrypted!)!;
                 _logger.LogInformation("Get CTS Details Request Data - " + requestcts);
-                var response = await lgdapiServices.getCTSDetails(requestcts, _logger);
+                var response = await epcisServices.getCTSDetails(requestcts, _logger);
                 _logger.LogInformation("Get CTS Details Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -844,7 +845,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 int district_code = JsonConvert.DeserializeObject<int>(decrypted!)!;
                 _logger.LogInformation("Get SRO Office List By District Code Request Data - " + district_code);
-                var response = await lgdapiServices.getSroOfficeList(district_code, _logger);
+                var response = await epcisServices.getSroOfficeList(district_code, _logger);
                 _logger.LogInformation("Get SRO Office List By District Code Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -890,7 +891,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.poaTypeList(_logger);
+                var response = await epcisServices.poaTypeList(_logger);
                 _logger.LogInformation("Get POA Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -945,7 +946,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string district_code = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Case Type List By District Code Request Data - " + district_code);
-                var response = await lgdapiServices.caseTypeList(district_code, _logger);
+                var response = await epcisServices.caseTypeList(district_code, _logger);
                 _logger.LogInformation("Get Case Type List By District Code Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -991,7 +992,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.deathCertificateList(_logger);
+                var response = await epcisServices.deathCertificateList(_logger);
                 _logger.LogInformation("Get Death Certificate List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1038,7 +1039,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.ownerStatusOrCategory(_logger);
+                var response = await epcisServices.ownerStatusOrCategory(_logger);
                 _logger.LogInformation("Get Owner Status Or Category Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1085,7 +1086,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.holderRelationList(_logger);
+                var response = await epcisServices.holderRelationList(_logger);
                 _logger.LogInformation("Get Holder Relation List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1132,7 +1133,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.genderList(_logger);
+                var response = await epcisServices.genderList(_logger);
                 _logger.LogInformation("Get Gender List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1179,7 +1180,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.apkMasterList(_logger);
+                var response = await epcisServices.apkMasterList(_logger);
                 _logger.LogInformation("Get Apk Master List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1226,7 +1227,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.ownerAccountType(_logger);
+                var response = await epcisServices.ownerAccountType(_logger);
                 _logger.LogInformation("Get Owner Account Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1273,7 +1274,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.bojaInstituteList(_logger);
+                var response = await epcisServices.bojaInstituteList(_logger);
                 _logger.LogInformation("Get All Boja Institute List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1328,7 +1329,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string mut_type = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Property Details By Village Code Request Data - " + mut_type);
-                var response = await lgdapiServices.getPropertyDetails(mut_type, _logger);
+                var response = await epcisServices.getPropertyDetails(mut_type, _logger);
                 _logger.LogInformation("Get Property Details By Village Code Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1382,7 +1383,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string mut_type = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get ULPIN Details By ULPIN No Request Data - " + mut_type);
-                var response = await lgdapiServices.getULPINDetails(mut_type, _logger);
+                var response = await epcisServices.getULPINDetails(mut_type, _logger);
                 _logger.LogInformation("Get ULPIN Details By ULPIN No Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1427,7 +1428,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.getFloorTypeList(_logger);
+                var response = await epcisServices.getFloorTypeList(_logger);
                 _logger.LogInformation("Get floor type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1475,7 +1476,7 @@ namespace PDEWebAPIS.Controllers
                 /* var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);*/
-                var response = await lgdapiServices.getUnitTypeList(_logger);
+                var response = await epcisServices.getUnitTypeList(_logger);
                 _logger.LogInformation("Get All Unit Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -1523,7 +1524,7 @@ namespace PDEWebAPIS.Controllers
                  var decrypted = Security.DeCryptData(val);
                  string mut_category = JsonConvert.DeserializeObject<string>(decrypted!)!;
                  _logger.LogInformation("Get Mutation Type Request Data - " + mut_category);
-                 var response = await lgdapiServices.getMutationType(mut_category);
+                 var response = await epcisServices.getMutationType(mut_category);
                  _logger.LogInformation("All Mutation Type List Resonse - " + response);
                  if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                  {
@@ -1566,7 +1567,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string pincode = JsonConvert.DeserializeObject<string>(decrypted!)!;
 
-                var result = lgdapiServices.GetAndSavePincodeData(pincode);
+                var result = epcisServices.GetAndSavePincodeData(pincode);
 
                 if (result != null && result.Count > 0)
                 {
@@ -1614,7 +1615,7 @@ namespace PDEWebAPIS.Controllers
                      // scheme will be "Bearer"
                      // parmameter will be the token itself.
                  } */
-                var response = await lgdapiServices.GetRegion(_logger);
+                var response = await epcisServices.GetRegion(_logger);
                 _logger.LogInformation("Region data List Resonse - " + response);
 
                 string[] parts = response.Split("$");
@@ -1685,7 +1686,7 @@ namespace PDEWebAPIS.Controllers
                 }
                 var decrypted = Security.DeCryptData(val);
                 string regionCode = JsonConvert.DeserializeObject<string>(decrypted!)!;
-                var response = await lgdapiServices.GetDistrictByRegion(Convert.ToInt32(regionCode), _logger);
+                var response = await epcisServices.GetDistrictByRegion(Convert.ToInt32(regionCode), _logger);
                 _logger.LogInformation("Districts by Region data List Resonse - " + response);
 
                 string[] parts = response.Split("$");
@@ -1762,7 +1763,7 @@ namespace PDEWebAPIS.Controllers
                 }
                 var decrypted = Security.DeCryptData(val);
                 GetAllApplicationIdForReport getAllApplicationIdForReport = JsonConvert.DeserializeObject<GetAllApplicationIdForReport>(decrypted)!;
-                var res = await lgdapiServices.FetchCountOfApplicationsAsync(getAllApplicationIdForReport);
+                var res = await epcisServices.FetchCountOfApplicationsAsync(getAllApplicationIdForReport);
 
                 if (res != null)
                 {
@@ -1829,7 +1830,7 @@ namespace PDEWebAPIS.Controllers
                 }
                 var decrypted = Security.DeCryptData(val);
                 GetAllApplicationIdForReport getAllApplicationIdForReport = JsonConvert.DeserializeObject<GetAllApplicationIdForReport>(decrypted)!;
-                var res = await lgdapiServices.FetchMutationCountAsync(getAllApplicationIdForReport);
+                var res = await epcisServices.FetchMutationCountAsync(getAllApplicationIdForReport);
 
                 if (res != null)
                 {
@@ -1896,7 +1897,7 @@ namespace PDEWebAPIS.Controllers
 
                 _logger.LogInformation("Export excel request Data - " + getAllApplicationIdForReport);// decrypted);
                 DateTime createdDateTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-                var excelFile = lgdapiServices.ExportToExcel(getAllApplicationIdForReport);
+                var excelFile = epcisServices.ExportToExcel(getAllApplicationIdForReport);
 
                 if (excelFile != null)
                 {
@@ -1970,7 +1971,7 @@ namespace PDEWebAPIS.Controllers
 
                 _logger.LogInformation("Export Status Wise excel request Data - " + getAllApplicationIdForReport);// decrypted);
                 DateTime createdDateTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-                var excelFile = lgdapiServices.ExportToExcelPerticularApplicationStatusWise(getAllApplicationIdForReport);
+                var excelFile = epcisServices.ExportToExcelPerticularApplicationStatusWise(getAllApplicationIdForReport);
 
                 if (excelFile != null)
                 {
@@ -2082,7 +2083,7 @@ namespace PDEWebAPIS.Controllers
                 }
                 var decrypted = Security.DeCryptData(val);
                 GetAllApplicationIdForReport getAllApplicationIdForReport = JsonConvert.DeserializeObject<GetAllApplicationIdForReport>(decrypted)!;
-                var res = await lgdapiServices.FetchCountOfApplicationIdForVerticalChartAsync(getAllApplicationIdForReport);
+                var res = await epcisServices.FetchCountOfApplicationIdForVerticalChartAsync(getAllApplicationIdForReport);
 
                 if (res != null)
                 {
@@ -2146,7 +2147,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 RequestvalidateMultipleMutationApplications requestData = JsonConvert.DeserializeObject<RequestvalidateMultipleMutationApplications>(decrypted!)!;
                 _logger.LogInformation("Get CTS Details Request Data - " + requestData);
-                var response = await lgdapiServices.validateMultipleMutationApplications(requestData, _logger);
+                var response = await epcisServices.validateMultipleMutationApplications(requestData, _logger);
                 _logger.LogInformation("Get CTS Details Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -2191,7 +2192,7 @@ namespace PDEWebAPIS.Controllers
                      // parmameter will be the token itself.
                  }
  */
-                var response = await lgdapiServices.reasonForOwnerNameChange(_logger);
+                var response = await epcisServices.reasonForOwnerNameChange(_logger);
                 _logger.LogInformation("All Reason List For Owner Name Change Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -2246,7 +2247,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 EPCISentryDetailsOfRegisteredMutationRequestData ePCISentryDetails = JsonConvert.DeserializeObject<EPCISentryDetailsOfRegisteredMutationRequestData>(decrypted!)!;
                 _logger.LogInformation("Get Entry Details Of Registered Mutation Request Data - " + ePCISentryDetails.district_code + " " + ePCISentryDetails.office_code + " " + ePCISentryDetails.village_code + " " + ePCISentryDetails.cts_no);
-                var response = await lgdapiServices.entryDetailsOfRegisteredMutation(ePCISentryDetails, _logger);
+                var response = await epcisServices.entryDetailsOfRegisteredMutation(ePCISentryDetails, _logger);
                 _logger.LogInformation("All Document List for Mutation Type List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -2290,7 +2291,7 @@ namespace PDEWebAPIS.Controllers
                      // scheme will be "Bearer"
                      // parmameter will be the token itself.
                  } */
-                var response = await lgdapiServices.orderGivenByAuthorityNames(_logger);
+                var response = await epcisServices.orderGivenByAuthorityNames(_logger);
                 _logger.LogInformation("All Order Given By Authority Names Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -2345,7 +2346,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string district_code = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Tenure List Request Data - " + district_code);
-                var response = await lgdapiServices.getTenureList(district_code, _logger);
+                var response = await epcisServices.getTenureList(district_code, _logger);
                 _logger.LogInformation("All Tenure List Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -2401,7 +2402,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 EPCISgetTenureRequestData ePCISgetTenureRequestData = JsonConvert.DeserializeObject<EPCISgetTenureRequestData>(decrypted!)!;
                 _logger.LogInformation("Get getTenure Request Data - " + ePCISgetTenureRequestData.village_code + " " + ePCISgetTenureRequestData.cts_no);
-                var response = await lgdapiServices.getTenure(ePCISgetTenureRequestData, _logger);
+                var response = await epcisServices.getTenure(ePCISgetTenureRequestData, _logger);
                 _logger.LogInformation("getTenure Resonse - " + response);
                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
@@ -2419,6 +2420,150 @@ namespace PDEWebAPIS.Controllers
                 return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
             }
 
+        }
+
+        [HttpPost]
+        [Route("getDashboardMetrics")]
+        public async Task<string> getDashboardMetrics([FromBody] string val)
+        //EPCISgetDashboardMetricsRequestData requestData)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("getDocListMutationtype - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                EPCISgetDashboardMetricsRequestData requestData = JsonConvert.DeserializeObject<EPCISgetDashboardMetricsRequestData>(decrypted!)!;
+                _logger.LogInformation("Get getTenure Request Data - " + requestData.type + " " + requestData.code);
+                var response = await epcisServices.getDashboardMetrics(requestData, _logger);
+                _logger.LogInformation("getTenure Resonse - " + response);
+                DashboardMetricsData dashboardMetricsData = new DashboardMetricsData();
+                if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
+                {
+                    dashboardMetricsData.ePCISgetDashboardMetricsResponse = System.Text.Json.JsonSerializer.Deserialize<List<FetchEPCISgetDashboardMetrics>>(response.Split("|")[0].ToString());
+                    if (requestData.type!.ToUpper() == "MAHARASHTRA" && requestData.code == "9999")
+                    {
+                        GetApplicationCountForNewDashboardInput inputData = new GetApplicationCountForNewDashboardInput();
+                        inputData.region_code = "0";
+                        inputData.district_code = "0";
+                        inputData.office_code = "0";
+                        var resp = await epcisServices.FetchDashboardMetricsData(inputData);
+                        if (resp != null)
+                        {
+                            foreach (KeyValuePair<string, int> data in resp)
+                            {
+                                if (data.Key == "total")
+                                    dashboardMetricsData!.ePCISgetDashboardMetricsResponse[0]!.totalCreatedApplicationCount = data.Value.ToString();
+                            }
+                        }
+                    }
+                    else if (requestData.type!.ToUpper() == "DIVISIONS" && requestData.code == "9999")
+                    {
+                        if (dashboardMetricsData.ePCISgetDashboardMetricsResponse!.Count > 0)
+                        {
+                            foreach (var item in dashboardMetricsData.ePCISgetDashboardMetricsResponse)
+                            {
+                                GetApplicationCountForNewDashboardInput inputData = new GetApplicationCountForNewDashboardInput();
+                                inputData.region_code = item.divisioncode;
+                                inputData.district_code = "0";
+                                inputData.office_code = "0";
+                                var resp = await epcisServices.FetchDashboardMetricsData(inputData);
+                                if (resp != null)
+                                {
+                                    if (resp?.ContainsKey("total") == true)
+                                        item.totalCreatedApplicationCount = resp["total"].ToString();
+                                }
+                            }
+                        }
+                    }
+                    else if (requestData.type!.ToUpper() == "DISTRICTS")
+                    {
+                        if (dashboardMetricsData.ePCISgetDashboardMetricsResponse!.Count > 0)
+                        {
+                            foreach (var item in dashboardMetricsData.ePCISgetDashboardMetricsResponse)
+                            {
+                                GetApplicationCountForNewDashboardInput inputData = new GetApplicationCountForNewDashboardInput();
+                                inputData.region_code = "0";
+                                inputData.district_code = item.districtcode;
+                                inputData.office_code = "0";
+                                var resp = await epcisServices.FetchDashboardMetricsData(inputData);
+                                if (resp != null)
+                                {
+                                    if (resp?.ContainsKey("total") == true)
+                                        item.totalCreatedApplicationCount = resp["total"].ToString();
+                                }
+                            }
+                        }
+                        /* GetApplicationCountForNewDashboardInput inputData = new GetApplicationCountForNewDashboardInput();
+                         inputData.region_code = requestData.code;
+                         inputData.district_code = "0";
+                         inputData.office_code = "0";
+                         var resp = await epcisServices.FetchDashboardMetricsData(inputData);
+                         if (resp != null)
+                         {
+                             foreach (KeyValuePair<string, int> data in resp)
+                             {
+                                 if (data.Key == "total")
+                                     dashboardMetricsData.totalCreatedApplicationCount = data.Value.ToString();
+                             }
+                         }*/
+                    }
+                    else if (requestData.type!.ToUpper() == "OFFICES")
+                    {
+                        if (dashboardMetricsData.ePCISgetDashboardMetricsResponse!.Count > 0)
+                        {
+                            foreach (var item in dashboardMetricsData.ePCISgetDashboardMetricsResponse)
+                            {
+                                GetApplicationCountForNewDashboardInput inputData = new GetApplicationCountForNewDashboardInput();
+                                inputData.region_code = "0";
+                                inputData.district_code = "0";
+                                inputData.office_code = item.officecode;
+                                var resp = await epcisServices.FetchDashboardMetricsData(inputData);
+                                if (resp != null)
+                                {
+                                    if (resp?.ContainsKey("total") == true)
+                                        item.totalCreatedApplicationCount = resp["total"].ToString();
+                                }
+                            }
+                        }
+                        /* GetApplicationCountForNewDashboardInput inputData = new GetApplicationCountForNewDashboardInput();
+                         inputData.region_code = "0";
+                         inputData.district_code = requestData.code;
+                         inputData.office_code = "0";
+                         var resp = await epcisServices.FetchDashboardMetricsData(inputData);
+                         if (resp != null)
+                         {
+                             foreach (KeyValuePair<string, int> data in resp)
+                             {
+                                 if (data.Key == "total")
+                                     dashboardMetricsData.totalCreatedApplicationCount = data.Value.ToString();
+                             }
+                         }*/
+                    }
+                    //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Dashboard Metrics Data Found", dashboardMetricsData)));
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Dashboard Metrics Data Found", dashboardMetricsData))));
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Dashboard Metrics Data Not Found", response.Split("|")[0]))));
+                }
+            }
+            catch (Exception ex)
+            {
+                return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+            }
         }
     }
 }

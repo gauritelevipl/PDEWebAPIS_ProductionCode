@@ -379,5 +379,25 @@ namespace PDEWebAPIS.Model
         public string? village_code { get; set; }
         public string? cts_no { get; set; }
     }
+
+    public class EPCISgetDashboardMetricsRequestData
+    {
+        public string? type { get; set; }
+        public string? code { get; set; }
+    }
+    public class EPCISgetDashboardMetricsResponse
+    {
+        public string? state_name { get; set; }
+        public string? divisioncode { get; set; }
+        public string? divisionname { get; set; }
+        public string? districtcode { get; set; }
+        public string? districtname { get; set; }
+        public string? officecode { get; set; }
+        public string? officename { get; set; }
+        public string? total_inward { get; set; }
+        public string? pending_at_ms_inward { get; set; }
+        public string? pending_at_ctso_inward { get; set; }
+        public string? disposed_inward { get; set; }
+    }
 }
 
