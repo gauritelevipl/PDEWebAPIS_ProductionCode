@@ -1,0 +1,6 @@
+@PDEWebAPIS_HostAddress = http://localhost:5128
+
+GET {{PDEWebAPIS_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
