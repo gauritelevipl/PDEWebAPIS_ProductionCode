@@ -45,5 +45,12 @@ namespace PDEWebAPIS.Repository
         public DateTime createddatetime { set; get; }
         public bool isDeleted { set; get; }
         public DateOnly deleteddate { set; get; }
+
+        // Below code added on 06 Aug 2026
+        // Below new column is added for Error Correc
+        //ALTER TABLE public.applicationdtl ADD COLUMN errorCorrectionIDs text
+        public string? errorcorrectionids { get; set; }
+        public string? namechangeids { get; set; }
+        public string? witnessids { get; set; }
     }
 }

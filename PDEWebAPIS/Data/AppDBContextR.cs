@@ -453,6 +453,50 @@ namespace PDEWebAPIS.Data
             modelBuilder.Entity<BhadepattaInfoDtl>()
        .Property(b => b.leaseperiod)
        .HasDefaultValue(false);
+            modelBuilder.Entity<ErrorCorrectionInformation>()
+     .Property(b => b.createddatetime)
+     .HasDefaultValueSql("current_timestamp");
+
+            modelBuilder.Entity<ErrorCorrectionInformation>()
+          .Property(b => b.isDeleted)
+          .HasDefaultValue(false);
+
+            modelBuilder.Entity<ErrorCorrectionInformation>()
+          .Property(b => b.deleteddate)
+          .HasDefaultValueSql("1900-01-01");
+
+            modelBuilder.Entity<NameChangeDTL>(entity =>
+            {
+                entity.HasCheckConstraint("CK_Address_Type", "(address_type='INDIA'OR address_type='FOREIGN')");
+            });
+
+            modelBuilder.Entity<NameChangeDTL>()
+       .Property(b => b.createddatetime)
+       .HasDefaultValueSql("current_timestamp");
+
+            modelBuilder.Entity<NameChangeDTL>()
+          .Property(b => b.isDeleted)
+          .HasDefaultValue(false);
+
+            modelBuilder.Entity<NameChangeDTL>()
+         .Property(b => b.deleteddate)
+         .HasDefaultValueSql("1900-01-01");
+
+            modelBuilder.Entity<WitnessDTL>()
+            .Property(b => b.createddatetime)
+            .HasDefaultValueSql("current_timestamp");
+            modelBuilder.Entity<WitnessDTL>()
+               .Property(b => b.permission_no)
+               .HasDefaultValue("NA");
+            modelBuilder.Entity<WitnessDTL>()
+                .Property(b => b.permission_date)
+                .HasDefaultValue("NA");
+            modelBuilder.Entity<WitnessDTL>()
+               .Property(b => b.address_type)
+               .HasDefaultValue("NA");
+            modelBuilder.Entity<WitnessDTL>()
+         .Property(b => b.deleteddate)
+         .HasDefaultValueSql("1900-01-01");
 
         }
 
@@ -498,5 +542,8 @@ namespace PDEWebAPIS.Data
         public DbSet<pinCodeMaster> pincodemaster { get; set; }
         public DbSet<ApplicationDataSubmittedHistory> applicationDataSubmittedHistories { get; set; }
         public DbSet<BhadepattaInfoDtl> bhadepattaInfoDtl { get; set; }
+        public DbSet<ErrorCorrectionInformation> errorCorrectionInformation { get; set; }
+        public DbSet<NameChangeDTL> nameChangeDTLs { get; set; }
+        public DbSet<WitnessDTL> witnessDTLs { get; set; }
     }
 }

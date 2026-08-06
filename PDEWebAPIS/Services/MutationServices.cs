@@ -17032,7 +17032,7 @@ namespace PDEWebAPIS.Services
         //        try
         //        {
         //            //string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + BhadepattaGiverData.applicationid + @"\GIVER";
-        //            string FolderPath = @"D:\WWW\MUTATIONDOCS\" + BhadepattaGiverData.applicationid + @"\GIVER";
+        //            string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + BhadepattaGiverData.applicationid + @"\GIVER";
         //            if (BhadepattaGiverData.userDetails != null && !string.IsNullOrEmpty(BhadepattaGiverData.userDetails.firstName))
         //            {
 
@@ -17234,7 +17234,7 @@ namespace PDEWebAPIS.Services
         //    using var transaction = await _context.Database.BeginTransactionAsync();
         //    try
         //    {
-        //        string FolderPath = @"D:\WWW\MUTATIONDOCS\" + BhadepattaGiverData.applicationid + @"\GIVER";
+        //        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + BhadepattaGiverData.applicationid + @"\GIVER";
 
         //        if (BhadepattaGiverData.userDetails != null && !string.IsNullOrEmpty(BhadepattaGiverData.userDetails.firstName))
         //        {
@@ -23854,6 +23854,5109 @@ namespace PDEWebAPIS.Services
                     //string Signature = methodForFile.ConvertImageToBase64(mutationGiverTakerDTL.signed_file_path!);
                     //mutationGiverTakerDTL.signed_file_path = string.IsNullOrEmpty(Signature) ? "NA" : "data:image/" + SignatureExt.Replace(".", "") + ";base64," + Signature;
                     addressForForeign.signatureSrc = mutationGiverTakerDTL.signed_file_path;
+                    addressData.foreignAddress = addressForForeign;
+                }
+                fetchData.address = addressData;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        // Below code added on 06 Aug 2026
+        public string SaveGenericForGiver(List<GenericDataForGiver> inputdataList)
+        {
+            string response = string.Empty;
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            foreach (GenericDataForGiver inputdata in inputdataList)
+            {
+                using (var scope = new TransactionScope())
+                {
+                    try
+                    {
+                        MutationGiverTakerDTL dbTable = new MutationGiverTakerDTL();
+                        MutationGiverTakerDTL fetchData = new MutationGiverTakerDTL();
+                        fetchData = _context.mutationDTL.Include(app => app.applicationDTL).Where(data => data.applicationDTL!.applicationid!.Equals(inputdata.applicationid)
+                        && data.owner_village_code == inputdata.village_code!
+                        && data.cts_number == inputdata.cts_number
+                        && data.mutation_srno == inputdata.mutation_srno
+                        && data.owner_number == inputdata.owner_number
+                        && data.isTaker == 0
+                        && data.isDeleted == false).FirstOrDefault()!;
+
+                        if (fetchData != null)
+                        {
+                            return "Same Owner Name is already exists";
+                        }
+                        if (!string.IsNullOrEmpty(inputdata.first_name))
+                        {
+                            if (string.IsNullOrEmpty(inputdata.nabhu))
+                            {
+                                return "Please select अर्जामधील न.भू.क्र.";
+                            }
+                            if (string.IsNullOrEmpty(inputdata.actualArea!))
+                            {
+                                return "Please wait, मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) is not fetched.";
+                            }
+                            //if (string.IsNullOrEmpty(akumaiNondDataForGiver.userDetails!.firstNameEng!))
+                            //{
+                            //    return "Please Enter First Name in खरेदी देणाराचे नाव (इंग्रजी मध्ये)";
+                            //}
+                            //if (string.IsNullOrEmpty(akumaiNondDataForGiver.areaForMutation!.actualArea!))
+                            //{
+                            //    return "Please wait, मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) is not fetched.";
+                            //}
+
+                            if (methodForFile.ContainsSpecialCharactersInMarathiName(inputdata.first_name!))
+                            {
+                                return "देणाऱ्याचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                            }
+                            //if (methodForFile.ContainsSpecialCharactersInName(akumaiNondDataForGiver.userDetails!.firstNameEng!) ||
+                            //    methodForFile.ContainsSpecialCharactersInName(akumaiNondDataForGiver.userDetails!.middleNameEng!) ||
+                            //    methodForFile.ContainsSpecialCharactersInName(akumaiNondDataForGiver.userDetails!.lastNameEng!))
+                            //{
+                            //    return "देणाऱ्याचे नाव (इंग्रजी मध्ये) Field contains special characters!";
+                            //}
+                            //if (methodForFile.ContainsSpecialCharactersInMarathiName(akumaiNondDataForGiver.userDetails!.aliceName!))
+                            //{
+                            //    return "देणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
+                            //}
+                            //if (methodForFile.ContainsSpecialCharactersInName(akumaiNondDataForGiver.userDetails!.motherNameEng!))
+                            //{
+                            //    return "आईचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                            //}
+                            //if (methodForFile.ContainsSpecialCharactersInMarathiName(akumaiNondDataForGiver.userDetails!.motherName!))
+                            //{
+                            //    return "आईचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                            //}
+                            //if (methodForFile.CheckKArea(akumaiNondDataForGiver.areaForMutation!.actualArea!))
+                            //{
+                            //    return "मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.)";
+                            //}
+                            //if (!string.IsNullOrEmpty(akumaiNondDataForGiver.areaForMutation!.mutationArea!) && methodForFile.CheckKArea(akumaiNondDataForGiver.areaForMutation!.mutationArea!))
+                            //{
+                            //    return "ए.कु.मॅ. देणाऱ्याच्या नावे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit ";
+                            //}
+
+                            // Assign Values to Model
+                            KharediNondModel kharediNondModel = new KharediNondModel();
+                            UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputdata.userid!)!;
+                            kharediNondModel.userMaster = userMaster;
+                            kharediNondModel.owner_village_code = inputdata.village_code;
+                            kharediNondModel.ctsNo = inputdata.cts_number;
+                            kharediNondModel.mutationSroNo = inputdata.mutation_srno;
+                            kharediNondModel.ownerNo = inputdata.owner_number;
+
+                            string nabhu = System.Text.RegularExpressions.Regex.Replace(inputdata.nabhu!, @"\s*\(.*?\)", "").Trim();
+                            MutationCTSNoDTL mutation = _context.mutationCTSNoDTLs.FirstOrDefault(s => s.selected_city_servey_no == nabhu && s.applicationDTL!.applicationid == inputdata.applicationid)!;
+                            kharediNondModel.mutation_cts_no_id = mutation.mutation_cts_no_id;
+
+                            ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputdata.applicationid!)!;
+                            kharediNondModel.applicationDTL = applicationDTL;
+
+                            PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32("0"))!;
+                            kharediNondModel.propType = proptype;
+
+
+                            //kharediNondModel.prefixcode_marathi = inputdata.suffixcode;
+                            //kharediNondModel.prefixcode_eng = inputdata.suffixCodeEng;
+                            //kharediNondModel.prefix_in_eng = inputdata.suffixEng;
+                            //kharediNondModel.fname_in_eng = inputdata.firstNameEng;
+                            //kharediNondModel.mname_in_eng = inputdata.middleNameEng;
+                            //kharediNondModel.lname_in_eng = inputdata.lastNameEng;
+                            //kharediNondModel.prefix_in_marathi = inputdata.suffix;
+                            kharediNondModel.fname_in_marathi = inputdata.first_name;
+                            kharediNondModel.mname_in_marathi = inputdata.middle_name;
+                            kharediNondModel.lname_in_marathi = inputdata.last_name;
+
+                            kharediNondModel.city_servey_no = inputdata.nabhu;
+                            kharediNondModel.lr_property_id = inputdata.lrPropertyUID;
+                            kharediNondModel.milkat = inputdata.milkat;
+                            kharediNondModel.namud = inputdata.namud;
+                            kharediNondModel.actualArea = inputdata.actualArea;
+                            kharediNondModel.sub_property_no = inputdata.subPropNo;
+
+                            dbTable.mobileno = "NA";
+                            dbTable.mobilenoverified = "NA";
+                            dbTable.emailid = "NA";
+                            dbTable.emailidverified = "NA";
+                            dbTable.prefixcode_eng = "0";
+                            dbTable.prefixcode_marathi = "0";
+                            dbTable.prefix_in_marathi = "NA";
+                            dbTable.fname_in_marathi = "NA";
+                            dbTable.mname_in_marathi = "NA";
+                            dbTable.lname_in_marathi = "NA";
+                            dbTable.prefix_in_eng = "NA";
+                            dbTable.fname_in_eng = "NA";
+                            dbTable.mname_in_eng = "NA";
+                            dbTable.lname_in_eng = "NA";
+                            dbTable.alias_name = "NA";
+                            dbTable.holder_type = "NA";
+                            dbTable.owner_status_code = "NA";
+                            dbTable.owner_status_description = "NA";
+                            dbTable.dob = "NA";
+                            dbTable.mother_name_in_marathi = "NA";
+                            dbTable.mother_name_in_eng = "NA";
+                            dbTable.userName = "NA";
+                            dbTable.city_servey_no = "NA";
+                            dbTable.lr_property_id = "NA";
+                            dbTable.milkat = "NA";
+                            dbTable.namud = "NA";
+                            dbTable.sub_property_no = "999999";
+                            dbTable.khatano = "NA";
+                            dbTable.ulpin = "NA";
+                            dbTable.district_code = "NA";
+                            dbTable.district_name_in_eng = "NA";
+                            dbTable.district_name_in_marathi = "NA";
+                            dbTable.ofc_code = "NA";
+                            dbTable.ofc_name = "NA";
+                            dbTable.village_code = "NA";
+                            dbTable.village_name = "NA";
+                            dbTable.khata_type_code = "NA";
+                            dbTable.khata_type_name = "NA";
+                            dbTable.owner_status_code = "NA";
+                            dbTable.owner_status_code = "NA";
+
+                            dbTable.isFullAreaGiven = "NA";
+                            dbTable.actual_area = "NA";
+                            dbTable.mutation_area = "NA";
+                            dbTable.available_area = "NA";
+
+                            dbTable.address_type = "NA";
+
+                            dbTable.flatno_plotno = "NA";
+                            dbTable.societyname = "NA";
+                            dbTable.mainstreet = "NA";
+                            dbTable.landmark = "NA";
+                            dbTable.locality = "NA";
+                            dbTable.pincode = "NA";
+                            dbTable.post_office_name = "NA";
+                            dbTable.city = "NA";
+                            dbTable.taluka = "NA";
+                            dbTable.district = "NA";
+                            dbTable.state = "NA";
+                            dbTable.address_proof_document_name = "NA";
+                            dbTable.address_proof_document_path = "NA";
+
+                            dbTable.address = "NA";
+                            dbTable.signed_file_name = "NA";
+                            dbTable.signed_file_path = "NA";
+
+                            dbTable.user_type = "NA";
+                            dbTable.profile_pic_file_name = "NA";
+                            dbTable.profile_pic_file_path = "NA";
+                            dbTable.has_property = "NA";
+                            //dbTable.prop_type = 0;
+                            // dbTable.khata_type = "NA";
+                            dbTable.company_name_in_marathi = "NA";
+                            dbTable.company_name_in_eng = "NA";
+                            dbTable.apk_code = 1;
+                            dbTable.apk_description = "स्वतः";
+                            dbTable.aapak = "NA";
+                            dbTable.land_buy_area = "NA";
+                            //dbTable.gift_area = "NA";
+                            dbTable.relation_code = 0;
+                            dbTable.relation_name = "NA";
+                            dbTable.cts_number = "NA";
+                            dbTable.mutation_srno = "NA";
+                            dbTable.owner_number = "NA";
+                            dbTable.sellerid = "NA";
+                            dbTable.buyerid = "NA";
+
+                            dbTable.owner_status_code = "NA";
+                            dbTable.owner_status_description = "NA";
+                            dbTable.account_type_code = 0;
+                            dbTable.account_type_description = "NA";
+                            dbTable.varas_relation_code = 0;
+                            dbTable.varas_relation_name = "NA";
+                            dbTable.relation_code = 0;
+                            dbTable.relation_name = "NA";
+                            dbTable.holder_type = "NA";
+                            dbTable.gender_code = "NA";
+                            dbTable.gender_description = "NA";
+                            dbTable.mutation_cts_no_id = 0;
+                            dbTable.apk_code = 0;
+                            dbTable.apk_description = "NA";
+                            //dbTable.aapak_name = "NA";
+                            //dbTable.relation = "NA";
+                            //dbTable.is_address_same = false;
+                            //Set actual Value
+                            dbTable.userMaster = kharediNondModel.userMaster;
+                            dbTable.applicationDTL = kharediNondModel.applicationDTL;
+                            dbTable.mutation_cts_no_id = kharediNondModel.mutation_cts_no_id;
+                            dbTable.prop_type = kharediNondModel.propType;
+                            dbTable.mobileno = kharediNondModel.mobileno;
+                            dbTable.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                            dbTable.emailid = kharediNondModel.emailid;
+                            dbTable.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                            //dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                            //dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                            //dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi!;
+                            //dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng;
+                            //dbTable.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                            //dbTable.fname_in_eng = kharediNondModel.fname_in_eng;
+                            //dbTable.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                            //dbTable.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                            //dbTable.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                            dbTable.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                            dbTable.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                            dbTable.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+                            dbTable.city_servey_no = kharediNondModel.city_servey_no;
+                            dbTable.lr_property_id = kharediNondModel.lr_property_id;
+                            dbTable.sub_property_no = kharediNondModel.sub_property_no;
+                            //Gauri
+                            dbTable.isTaker = 0;
+                            dbTable.cts_number = kharediNondModel.ctsNo;
+                            dbTable.mutation_srno = kharediNondModel.mutationSroNo;
+                            dbTable.owner_number = kharediNondModel.ownerNo;
+                            dbTable.owner_village_code = kharediNondModel.owner_village_code;
+                            dbTable.entry_date = inputdata.entry_date;
+                            dbTable.entry_bracketed = inputdata.entry_bracketed;
+                            dbTable.owner_name = inputdata.owner_name;
+                            dbTable.owner_bracketed = inputdata.owner_bracketed;
+                            dbTable.milkat = kharediNondModel.milkat;
+                            dbTable.namud = kharediNondModel.namud;
+                            dbTable.actual_area = kharediNondModel.actualArea;
+                            _context.mutationDTL.Add(dbTable);
+                            _context.SaveChanges();
+
+                            //Get Saved Row ID
+                            int kharediNondID = (int)dbTable.mutation_givertaker_id!;
+                            var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputdata.applicationid)).FirstOrDefault();
+                            if (applicationDTLdata != null)
+                            {
+                                if (!string.IsNullOrEmpty(applicationDTLdata.mutationgiverIDs) && !applicationDTLdata.mutationgiverIDs.Contains(kharediNondID.ToString()))
+                                {
+                                    applicationDTLdata.mutationgiverIDs = applicationDTLdata.mutationgiverIDs + "," + kharediNondID.ToString();
+                                }
+                                else
+                                {
+                                    applicationDTLdata.mutationgiverIDs = kharediNondID.ToString();
+                                }
+                                _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                                _context.SaveChanges();
+                            }
+                            scope.Complete();
+                            response = "Success";
+                        }
+                        else
+                        {
+                            response = "Please wait! Marathi name is not fetched!";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        //_context.mutationDTL.Remove(dbTable);
+                        //_context.SaveChanges();
+                        throw new HandleException(ex.Message.ToString());
+                    }
+                }
+            }
+            return response;
+        }
+
+        public FetchGenericDataForGiver FetchGenericNondInformationDataForGiver(int mutationdtlid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
+                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchGenericDataForGiver fetchData = new FetchGenericDataForGiver();
+                fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;
+                fetchData.userid = KharedinondInformation.userMaster!.userid;
+                fetchData.applicationid = KharedinondInformation.applicationDTL!.applicationid;
+                fetchData.cts_number = KharedinondInformation.cts_number;
+                fetchData.mutation_srno = KharedinondInformation.mutation_srno;
+                fetchData.owner_number = KharedinondInformation.owner_number;
+                fetchData.village_code = KharedinondInformation.owner_village_code;
+                fetchData.subPropNo = KharedinondInformation.sub_property_no;
+                fetchData.fullNameInMarathi = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_marathi!.Trim());
+                fetchData.fullNameInEng = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_eng!.Trim());
+                fetchData.mobileNo = KharedinondInformation.mobileno;
+
+                fetchData.first_name = KharedinondInformation.fname_in_marathi;
+                fetchData.middle_name = KharedinondInformation.mname_in_marathi;
+                fetchData.last_name = KharedinondInformation.lname_in_marathi;
+                //userDetails.suffixEng = KharedinondInformation.prefix_in_eng;
+                fetchData.firstNameEng = KharedinondInformation.fname_in_eng;
+                fetchData.middleNameEng = KharedinondInformation.mname_in_eng;
+                fetchData.lastNameEng = KharedinondInformation.lname_in_eng;
+                //userDetails.aliceName = KharedinondInformation.alias_name;
+                //userDetails.holderType = KharedinondInformation.holder_type;
+                //userDetails.dob = KharedinondInformation.dob;
+                //userDetails.motherName = KharedinondInformation.mother_name_in_marathi;
+                //userDetails.motherNameEng = KharedinondInformation.mother_name_in_eng;
+                fetchData.nabhu = KharedinondInformation.city_servey_no;
+                //userDetails.userName = KharedinondInformation.userName;
+                fetchData.lrPropertyUID = KharedinondInformation.lr_property_id;
+                fetchData.milkat = KharedinondInformation.milkat;
+                fetchData.namud = KharedinondInformation.namud;
+                //userDetails.subPropNo = KharedinondInformation.sub_property_no;
+
+
+                // Additional Details
+                fetchData.mutationSroNo = KharedinondInformation.mutation_srno;
+                fetchData.ownerNo = KharedinondInformation.owner_number;
+
+
+                UserDTLForGenericGiver userDetails = new UserDTLForGenericGiver();
+                userDetails.suffixcode = KharedinondInformation.prefixcode_marathi;
+                userDetails.suffixCodeEng = KharedinondInformation.prefixcode_eng;
+                userDetails.suffix = KharedinondInformation.prefix_in_marathi;
+                userDetails.firstName = KharedinondInformation.fname_in_marathi;
+                userDetails.middleName = KharedinondInformation.mname_in_marathi;
+                userDetails.lastName = KharedinondInformation.lname_in_marathi;
+                userDetails.firstNameEng = KharedinondInformation.fname_in_eng;
+                userDetails.middleNameEng = KharedinondInformation.mother_name_in_eng;
+                userDetails.lastNameEng = KharedinondInformation.lname_in_eng;
+                userDetails.aliceName = KharedinondInformation.alias_name;
+                userDetails.dob = KharedinondInformation.dob;
+                userDetails.motherName = KharedinondInformation.mother_name_in_marathi;
+                userDetails.motherNameEng = KharedinondInformation.mother_name_in_eng;
+                userDetails.userName = KharedinondInformation.userName;
+                userDetails.subPropNo = KharedinondInformation.sub_property_no;
+                userDetails.lrPropertyUID = KharedinondInformation.lr_property_id;
+                userDetails.nabhu = KharedinondInformation.city_servey_no;
+                userDetails.milkat = KharedinondInformation.milkat;
+                userDetails.namud = KharedinondInformation.namud;
+                fetchData.userDetails = userDetails;
+
+                areaForMutationDTLGenericGiver areaForMutation = new areaForMutationDTLGenericGiver();
+                areaForMutation.isFullAreaGiven = KharedinondInformation.isFullAreaGiven;
+                areaForMutation.actualArea = KharedinondInformation.actual_area;
+                areaForMutation.availableArea = KharedinondInformation.available_area;
+                areaForMutation.mutationArea = KharedinondInformation.mutation_area;
+                fetchData.areaForMutation = areaForMutation;
+
+
+                //AapakDropDownForAkumaiNond aapakDropDown = new AapakDropDownForAkumaiNond();
+                //aapakDropDown.apk_code = KharedinondInformation.apk_code.ToString();
+                //aapakDropDown.apk_description = KharedinondInformation.apk_description;
+                //userDetails!.aapakDropdown = aapakDropDown;
+                //fetchData.userDetails = userDetails;
+
+
+                //InputDataModel.areaForMutationDTLAkumaiNond areamutation = new areaForMutationDTLAkumaiNond();
+                //areamutation.isFullAreaGiven = KharedinondInformation.isFullAreaGiven;
+                fetchData.actualArea = KharedinondInformation.actual_area;
+                //areamutation.mutationArea = KharedinondInformation.mutation_area;
+                //areamutation.availableArea = KharedinondInformation.available_area;
+                //fetchData.areaForMutation = areamutation;
+
+                AddressDTLForGenericGiver addressData = new AddressDTLForGenericGiver();
+                addressData.addressType = KharedinondInformation.address_type;
+                if (KharedinondInformation.address_type == "INDIA")
+                {
+                    IndiaAddressForGenericGiver addressForIndia = new IndiaAddressForGenericGiver();
+                    addressForIndia.state = KharedinondInformation.state;
+                    addressForIndia.district = KharedinondInformation.district;
+                    addressForIndia.city = KharedinondInformation.city;
+                    addressForIndia.taluka = KharedinondInformation.taluka;
+                    addressForIndia.plotNo = KharedinondInformation.flatno_plotno;
+                    addressForIndia.building = KharedinondInformation.societyname;
+                    addressForIndia.mainRoad = KharedinondInformation.mainstreet;
+                    addressForIndia.impSymbol = KharedinondInformation.landmark;
+                    addressForIndia.area = KharedinondInformation.locality;
+                    addressForIndia.pincode = KharedinondInformation.pincode;
+                    addressForIndia.postOfficeName = KharedinondInformation.post_office_name;
+                    addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                    addressForIndia.mobile = KharedinondInformation.mobileno;
+                    addressForIndia.mobileOTP = KharedinondInformation.mobilenoverified;
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+                    if (KharedinondInformation.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(KharedinondInformation.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(KharedinondInformation.address_proof_document_path!);
+                        KharedinondInformation.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+                    addressForIndia.signatureSrc = KharedinondInformation.signed_file_path!;
+                    addressData.indiaAddress = addressForIndia;
+                }
+                else if (KharedinondInformation.address_type == "FOREIGN")
+                {
+                    AddressForForeignForGenericGiver addressForForeign = new AddressForForeignForGenericGiver();
+                    addressForForeign.address = KharedinondInformation.address;
+                    addressForForeign.mobile = KharedinondInformation.mobileno;
+                    addressForForeign.email = KharedinondInformation.emailid;
+                    addressForForeign.emailOTP = KharedinondInformation.emailidverified;
+                    //string SignatureExt = Path.GetExtension(KharedinondInformation.signed_file_path)!;
+                    //string Signature = methodForFile.ConvertImageToBase64(KharedinondInformation.signed_file_path!);
+                    //KharedinondInformation.signed_file_path = string.IsNullOrEmpty(Signature) ? "NA" : "data:image/" + SignatureExt.Replace(".", "") + ";base64," + Signature;
+                    addressForForeign.signatureName = KharedinondInformation.signed_file_name;
+                    addressForForeign.signatureSrc = KharedinondInformation.signed_file_path;
+                    addressData.foreignAddress = addressForForeign;
+                }
+                fetchData.address = addressData;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string SaveGenericAdditionalDataGiver(GenericDataForGiver giverData)
+        {
+            MutationGiverTakerDTL dbTable = new MutationGiverTakerDTL();
+            MutationGiverTakerDTL fetchData = new MutationGiverTakerDTL();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    if (giverData.userDetails != null && !string.IsNullOrEmpty(giverData.userDetails.firstName))
+                    {
+                        if (string.IsNullOrEmpty(giverData.userDetails.nabhu))
+                        {
+                            return "Please select अर्जामधील न.भू.क्र.";
+                        }
+
+                        if (string.IsNullOrEmpty(giverData.userDetails!.firstNameEng!))
+                        {
+                            return "Please Enter First Name in खरेदी देणाराचे नाव (इंग्रजी मध्ये)";
+                        }
+                        if (string.IsNullOrEmpty(giverData.areaForMutation!.actualArea!))
+                        {
+                            return "Please wait, मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) is not fetched.";
+                        }
+
+                        //if (methodForFile.ContainsSpecialCharactersInMarathiName(giverData.userDetails!.firstName!))
+                        //{
+                        //    return "देणाऱ्याचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        //}
+                        //if (methodForFile.ContainsSpecialCharactersInName(giverData.userDetails!.firstNameEng!)||
+                        //    methodForFile.ContainsSpecialCharactersInName(giverData.userDetails!.middleNameEng!)||
+                        //    methodForFile.ContainsSpecialCharactersInName(giverData.userDetails!.lastNameEng!)) 
+                        //{
+                        //    return "देणाऱ्याचे नाव (इंग्रजी मध्ये) Field contains special characters!";
+                        //}
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(giverData.userDetails!.aliceName!))
+                        {
+                            return "देणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInName(giverData.userDetails!.motherNameEng!))
+                        {
+                            return "आईचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(giverData.userDetails!.motherName!))
+                        {
+                            return "आईचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        }
+                        //if (methodForFile.CheckKArea(giverData.areaForMutation!.actualArea!))
+                        //{
+                        //    return "मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.)";
+                        //}
+                        if (!string.IsNullOrEmpty(giverData.areaForMutation!.mutationArea!) && methodForFile.CheckKArea(giverData.areaForMutation!.mutationArea!))
+                        {
+                            return "देणाऱ्याच्या नावे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit देणाऱ्याच्या नावे क्षेत्र (चौ.मी.)";
+                        }
+                        if (!string.IsNullOrEmpty(giverData.areaForMutation!.availableArea!) && methodForFile.CheckKArea(giverData.areaForMutation!.availableArea!))
+                        {
+                            return "दिलेले क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit दिलेले क्षेत्र (चौ.मी.)";
+                        }
+
+                        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + giverData.applicationid + @"\GIVER";
+                        // Assign Values to Model
+                        KharediNondModel kharediNondModel = new KharediNondModel();
+                        fetchData = _context.mutationDTL.Where(data => data.applicationDTL!.applicationid!.Equals(giverData.applicationid)
+                        //&& data.owner_village_code == giverData.village_code!
+                        //&& data.cts_number == giverData.ctsNo
+                        //&& data.mutation_srno == giverData.mutationSroNo
+                        //&& data.owner_number == giverData.ownerNo
+                        //&& data.isTaker == 0
+                        && data.mutation_givertaker_id == Convert.ToInt32(giverData.mutation_dtl_id!)
+                        && data.isDeleted == false).FirstOrDefault()!;
+
+                        if (fetchData != null)
+                        {
+
+                            kharediNondModel.owner_village_code = giverData.village_code;
+                            kharediNondModel.ctsNo = giverData.ctsNo;
+                            kharediNondModel.mutationSroNo = giverData.mutationSroNo;
+                            kharediNondModel.ownerNo = giverData.ownerNo;
+
+                            string nabhu = System.Text.RegularExpressions.Regex.Replace(giverData.userDetails!.nabhu!, @"\s*\(.*?\)", "").Trim();
+                            MutationCTSNoDTL mutation = _context.mutationCTSNoDTLs.FirstOrDefault(s => s.selected_city_servey_no == nabhu && s.applicationDTL!.applicationid == giverData.applicationid)!;
+                            kharediNondModel.mutation_cts_no_id = mutation.mutation_cts_no_id;
+
+                            ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == giverData.applicationid!)!;
+                            kharediNondModel.applicationDTL = applicationDTL;
+
+                            PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32("0"))!;
+                            kharediNondModel.propType = proptype;
+
+                            kharediNondModel.address_type = giverData.address!.addressType!.Trim().ToUpper();
+                            if (kharediNondModel.address_type == "INDIA")
+                            {
+                                if (string.IsNullOrEmpty(giverData.address!.indiaAddress!.plotNo))
+                                {
+                                    return "Please enter सदनिका / घर /प्लॉट नं.";
+                                }
+                                if (string.IsNullOrEmpty(giverData.address!.indiaAddress!.impSymbol))
+                                {
+                                    return "Please enter महत्त्वाची खूण";
+                                }
+                                if (string.IsNullOrEmpty(giverData.address!.indiaAddress!.pincode))
+                                {
+                                    return "Please enter पिन कोड";
+                                }
+                                if (!string.IsNullOrEmpty(giverData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(giverData.address!.indiaAddress!.pincode))
+                                {
+                                    if (string.IsNullOrEmpty(giverData.address!.indiaAddress!.postOfficeName))
+                                    {
+                                        return "Please select Post Office Name / Enter correct Pin Code.";
+                                    }
+                                    return "पिन कोड field contains special characters";
+                                }
+
+                                if (methodForFile.CheckIndianAddress(giverData.address!.indiaAddress!.plotNo))
+                                {
+                                    return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(giverData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(giverData.address!.indiaAddress!.building!))
+                                {
+                                    return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(giverData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(giverData.address!.indiaAddress!.mainRoad!))
+                                {
+                                    return "मुख्य रस्ता field contains special characters";
+                                }
+                                if (methodForFile.CheckIndianAddress(giverData.address!.indiaAddress!.impSymbol!))
+                                {
+                                    return "महत्त्वाची खूण field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(giverData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(giverData.address!.indiaAddress!.area!))
+                                {
+                                    return "महत्त्वाची खूण field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(giverData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(giverData.address!.indiaAddress!.mobile!))
+                                {
+                                    return "मोबाईल field contains special characters";
+                                }
+                                //if (methodForFile.CheckPinCode(giverData.address!.indiaAddress!.pincode!))
+                                //{
+                                //    return "पिन कोड field contains special characters";
+                                //}
+
+                                kharediNondModel.mobileno = giverData.address.indiaAddress!.mobile;
+                                kharediNondModel.mobilenoverified = giverData.address.indiaAddress.mobileOTP;
+                                kharediNondModel.emailid = "NA";
+                                kharediNondModel.emailidverified = "NA";
+
+                                kharediNondModel.address = "NA";
+                                kharediNondModel.state = giverData.address.indiaAddress.state;
+                                kharediNondModel.district = giverData.address.indiaAddress.district;
+                                kharediNondModel.taluka = giverData.address.indiaAddress.taluka;
+                                kharediNondModel.city = giverData.address.indiaAddress.city;
+                                kharediNondModel.plotno = giverData.address.indiaAddress.plotNo;
+                                kharediNondModel.building = giverData.address.indiaAddress.building;
+                                kharediNondModel.mainroad = giverData.address.indiaAddress.mainRoad;
+                                kharediNondModel.impSymbol = giverData.address.indiaAddress.impSymbol;
+                                kharediNondModel.area = giverData.address.indiaAddress.area;
+                                kharediNondModel.pincode = giverData.address.indiaAddress.pincode;
+                                kharediNondModel.post_office_name = giverData.address.indiaAddress.postOfficeName;
+                                kharediNondModel.address_proof_name = giverData.address.indiaAddress.addressProofName;
+                                kharediNondModel.address_proof_src = giverData.address.indiaAddress.addressProofSrc == "" ? "NA" : giverData.address.indiaAddress.addressProofSrc!;
+                                kharediNondModel.signature_name = giverData.address.indiaAddress.signatureName == "" ? "NA" : giverData.address.indiaAddress.signatureName;
+                                kharediNondModel.signature_src = giverData.address.indiaAddress.signatureSrc == "" ? "NA" : giverData.address.indiaAddress.signatureSrc!;
+                            }
+                            else if (kharediNondModel.address_type == "FOREIGN")
+                            {
+                                if (string.IsNullOrEmpty(giverData.address.foreignAddress!.address) || string.IsNullOrEmpty(giverData.address.foreignAddress!.email))
+                                {
+                                    return "पत्ता and ई मेल field is mandatory";
+                                }
+                                if (methodForFile.CheckForeignAddress(giverData.address.foreignAddress!.address))
+                                {
+                                    return "पत्ता field contains special characters";
+                                }
+                                if (methodForFile.CheckEmail(giverData.address.foreignAddress!.email))
+                                {
+                                    return "ई मेल field contains special characters";
+                                }
+
+                                kharediNondModel.address = giverData.address.foreignAddress!.address;
+                                kharediNondModel.mobileno = giverData.address.foreignAddress.mobile;
+                                kharediNondModel.emailid = giverData.address.foreignAddress.email;
+                                kharediNondModel.emailidverified = giverData.address.foreignAddress.emailOTP;
+                                kharediNondModel.signature_name = giverData.address.foreignAddress.signatureName;
+                                //kharediNondModel.signature_src = giverData.address.foreignAddress!.signatureSrc == "" ? null : Convert.FromBase64String(giverData.address.foreignAddress.signatureSrc!.Split(",")[1]);
+
+                                kharediNondModel.state = "NA";
+                                kharediNondModel.district = "NA";
+                                kharediNondModel.taluka = "NA";
+                                kharediNondModel.city = "NA";
+                                kharediNondModel.plotno = "NA";
+                                kharediNondModel.building = "NA";
+                                kharediNondModel.mainroad = "NA";
+                                kharediNondModel.impSymbol = "NA";
+                                kharediNondModel.area = "NA";
+                                kharediNondModel.pincode = "NA";
+                                kharediNondModel.post_office_name = "NA";
+                                kharediNondModel.address_proof_name = "NA";
+                                kharediNondModel.address_proof_src = "NA";
+                                //kharediNondModel.signature_name = giverData.address.foreignAddress.signatureName;
+                            }
+                            kharediNondModel.prefixcode_marathi = giverData.userDetails!.suffixcode;
+                            kharediNondModel.prefixcode_eng = giverData.userDetails.suffixCodeEng;
+                            kharediNondModel.prefix_in_eng = giverData.userDetails!.suffixEng;
+                            kharediNondModel.fname_in_eng = giverData.userDetails.firstNameEng;
+                            kharediNondModel.mname_in_eng = giverData.userDetails.middleNameEng;
+                            kharediNondModel.lname_in_eng = giverData.userDetails.lastNameEng;
+                            kharediNondModel.prefix_in_marathi = giverData.userDetails.suffix;
+                            kharediNondModel.fname_in_marathi = giverData.userDetails.firstName;
+                            kharediNondModel.mname_in_marathi = giverData.userDetails.middleName;
+                            kharediNondModel.lname_in_marathi = giverData.userDetails.lastName;
+                            kharediNondModel.aliceName = giverData.userDetails.aliceName;
+                            kharediNondModel.dob = giverData.userDetails.dob == "" || giverData.userDetails.dob == null ? "NA" : giverData.userDetails.dob;
+                            kharediNondModel.motherName_in_marathi = giverData.userDetails.motherName;
+                            kharediNondModel.motherName_in_eng = giverData.userDetails.motherNameEng;
+                            kharediNondModel.userName = giverData.userDetails.userName;
+                            kharediNondModel.city_servey_no = giverData.userDetails.nabhu;
+                            kharediNondModel.lr_property_id = giverData.userDetails.lrPropertyUID;
+                            kharediNondModel.milkat = giverData.userDetails.milkat;
+                            kharediNondModel.namud = giverData.userDetails.namud;
+                            kharediNondModel.sub_property_no = giverData.userDetails.subPropNo == "" ? "999999" : giverData.userDetails.subPropNo;
+                            // kharediNondModel.apk_code = (giverData.userDetails.aapak!.apk_code == "" || giverData.userDetails.aapak.apk_code == null) ? 0 : Convert.ToInt32(giverData.userDetails.aapak.apk_code);
+                            //kharediNondModel.apk_description = (giverData.userDetails.aapak!.apk_description == "" || giverData.userDetails.aapak.apk_description == null) ? "NA" : giverData.userDetails.aapak.apk_description;
+
+                            //Area for mutation
+                            kharediNondModel.isFullAreaGiven = giverData.areaForMutation!.isFullAreaGiven;
+                            kharediNondModel.actualArea = giverData.areaForMutation!.actualArea;
+                            kharediNondModel.mutationArea = giverData.areaForMutation.mutationArea;
+                            kharediNondModel.availableArea = giverData.areaForMutation.availableArea;
+
+                            //Set actual Value
+                            fetchData.mutation_cts_no_id = kharediNondModel.mutation_cts_no_id;
+                            fetchData.prop_type = kharediNondModel.propType;
+                            fetchData.mobileno = kharediNondModel.mobileno;
+                            fetchData.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                            fetchData.emailid = kharediNondModel.emailid;
+                            fetchData.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                            fetchData.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                            fetchData.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                            fetchData.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                            fetchData.fname_in_eng = kharediNondModel.fname_in_eng;
+                            fetchData.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                            fetchData.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                            fetchData.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                            fetchData.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                            fetchData.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                            fetchData.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+                            fetchData.alias_name = kharediNondModel.aliceName;
+                            fetchData.owner_status_code = kharediNondModel.owner_status_code;
+                            fetchData.owner_status_description = kharediNondModel.owner_status_description;
+                            fetchData.holder_type = kharediNondModel.holderType == "" || kharediNondModel.holderType == null ? "NA" : kharediNondModel.holderType;
+                            fetchData.dob = kharediNondModel.dob;
+                            fetchData.mother_name_in_marathi = kharediNondModel.motherName_in_marathi;
+                            fetchData.mother_name_in_eng = kharediNondModel.motherName_in_eng;
+                            fetchData.userName = kharediNondModel.userName;
+                            fetchData.city_servey_no = kharediNondModel.city_servey_no;
+                            fetchData.lr_property_id = kharediNondModel.lr_property_id;
+                            fetchData.milkat = kharediNondModel.milkat;
+                            fetchData.namud = kharediNondModel.namud;
+                            fetchData.sub_property_no = kharediNondModel.sub_property_no;
+                            fetchData.isFullAreaGiven = kharediNondModel.isFullAreaGiven;
+                            fetchData.actual_area = kharediNondModel.actualArea;
+                            fetchData.mutation_area = kharediNondModel.mutationArea;
+                            fetchData.available_area = kharediNondModel.availableArea;
+                            fetchData.address_type = kharediNondModel.address_type;
+                            fetchData.address = kharediNondModel.address;
+                            fetchData.state = kharediNondModel.state;
+                            fetchData.district = kharediNondModel.district;
+                            fetchData.taluka = kharediNondModel.taluka;
+                            fetchData.city = kharediNondModel.city;
+                            fetchData.flatno_plotno = kharediNondModel.plotno;
+                            fetchData.societyname = kharediNondModel.building;
+                            fetchData.mainstreet = kharediNondModel.mainroad;
+                            fetchData.landmark = kharediNondModel.impSymbol;
+                            fetchData.locality = kharediNondModel.area;
+                            fetchData.pincode = kharediNondModel.pincode;
+                            fetchData.post_office_name = kharediNondModel.post_office_name;
+                            //Gauri
+                            fetchData.isTaker = 0;
+                            fetchData.cts_number = kharediNondModel.ctsNo;
+                            fetchData.mutation_srno = kharediNondModel.mutationSroNo;
+                            fetchData.owner_number = kharediNondModel.ownerNo;
+                            fetchData.owner_village_code = kharediNondModel.owner_village_code;
+                            _context.mutationDTL.Attach(fetchData);
+                            _context.SaveChanges();
+
+                            //Get Saved Row ID
+                            int kharediNondID = (int)fetchData.mutation_givertaker_id!;
+                            string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                            bool checkAddressFlag = true;
+                            //bool checkSignFlag = false;
+                            if (kharediNondModel.address_type == "INDIA")
+                            {
+                                if (!string.IsNullOrEmpty(giverData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(giverData.address.indiaAddress.addressProofName))
+                                {
+                                    string[] AddressData = giverData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                    string imageName = System.IO.Path.GetFileNameWithoutExtension(giverData.address.indiaAddress.addressProofName!);
+                                    if (methodForFile.ContainsSpecialCharacters(imageName))
+                                    {
+                                        return giverData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                    }
+                                    else
+                                    {
+                                        checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], giverData.address.indiaAddress.addressProofName!, kharediNondID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                        string AddressProofExt = Path.GetExtension(giverData.address.indiaAddress.addressProofName!);
+                                        kharediNondModel.address_proof_name = "AddressProof" + kharediNondID + "_" + CurrentDateTime + AddressProofExt;
+                                        kharediNondModel.address_proof_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.address_proof_name;
+
+                                        var UpdateAddressFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                                        if (UpdateAddressFilePath != null)
+                                        {
+                                            bool isDeleted = methodForFile.PermanatlyDeleteFile(fetchData.address_proof_document_path!);
+                                            fetchData.address_proof_document_name = kharediNondModel.address_proof_name;
+                                            fetchData.address_proof_document_path = kharediNondModel.address_proof_src;
+                                            _context.Entry(fetchData).CurrentValues.SetValues(fetchData);
+                                            _context.SaveChanges();
+                                        }
+                                    }
+                                }
+                            }
+                            scope.Complete();
+                        }
+                        return "Success";
+                    }
+                    else
+                    {
+                        return "Please wait! Marathi name is not fetched!";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //_context.mutationDTL.Remove(dbTable);
+                    //_context.SaveChanges();
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public string SaveGenericNondTaker(GenericDataForTaker inoutData)
+        {
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            MutationGiverTakerDTL dbTable = new MutationGiverTakerDTL();
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inoutData.applicationid + @"\TAKER";
+                    // Assign Values to Model
+                    KharediNondModel kharediNondModel = new KharediNondModel();
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inoutData.userid!)!;
+                    kharediNondModel.userMaster = userMaster;
+
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inoutData.applicationid!)!;
+                    kharediNondModel.applicationDTL = applicationDTL;
+
+                    PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32(inoutData.isMHProperty!.propType!))!;
+                    kharediNondModel.propType = proptype;
+
+
+                    kharediNondModel.address_type = inoutData.address!.addressType!.Trim().ToUpper();
+                    if (kharediNondModel.address_type == "INDIA")
+                    {
+                        if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.plotNo))
+                        {
+                            return "Please enter सदनिका / घर /प्लॉट नं.";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.impSymbol))
+                        {
+                            return "Please enter महत्त्वाची खूण";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.pincode))
+                        {
+                            return "Please enter पिन कोड";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(inoutData.address!.indiaAddress!.pincode))
+                        {
+                            if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.postOfficeName))
+                            {
+                                return "Please select Post Office Name / Enter correct Pin Code.";
+                            }
+                            return "पिन कोड field contains special characters";
+                        }
+
+                        if (methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.plotNo))
+                        {
+                            return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.building!))
+                        {
+                            return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.mainRoad!))
+                        {
+                            return "मुख्य रस्ता field contains special characters";
+                        }
+                        if (methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.impSymbol!))
+                        {
+                            return "महत्त्वाची खूण field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.area!))
+                        {
+                            return "महत्त्वाची खूण field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(inoutData.address!.indiaAddress!.mobile!))
+                        {
+                            return "मोबाईल field contains special characters";
+                        }
+                        //if (methodForFile.CheckPinCode(inoutData.address!.indiaAddress!.pincode!))
+                        //{
+                        //    return "पिन कोड field contains special characters";
+                        //}
+
+                        kharediNondModel.mobileno = inoutData.address.indiaAddress!.mobile;
+                        kharediNondModel.mobilenoverified = inoutData.address.indiaAddress.mobileOTP;
+                        kharediNondModel.emailid = "NA";
+                        kharediNondModel.emailidverified = "NA";
+
+                        kharediNondModel.address = "NA";
+                        kharediNondModel.state = inoutData.address.indiaAddress.state;
+                        kharediNondModel.district = inoutData.address.indiaAddress.district;
+                        kharediNondModel.taluka = inoutData.address.indiaAddress.taluka;
+                        kharediNondModel.city = inoutData.address.indiaAddress.city;
+                        kharediNondModel.plotno = inoutData.address.indiaAddress.plotNo;
+                        kharediNondModel.building = inoutData.address.indiaAddress.building;
+                        kharediNondModel.mainroad = inoutData.address.indiaAddress.mainRoad;
+                        kharediNondModel.impSymbol = inoutData.address.indiaAddress.impSymbol;
+                        kharediNondModel.area = inoutData.address.indiaAddress.area;
+                        kharediNondModel.pincode = inoutData.address.indiaAddress.pincode;
+                        kharediNondModel.post_office_name = inoutData.address.indiaAddress.postOfficeName;
+                        kharediNondModel.address_proof_name = inoutData.address.indiaAddress.addressProofName;
+                        kharediNondModel.address_proof_src = inoutData.address.indiaAddress.addressProofSrc == "" ? "NA" : inoutData.address.indiaAddress.addressProofSrc!;
+                        kharediNondModel.signature_name = inoutData.address.indiaAddress.signatureName == "" ? "NA" : inoutData.address.indiaAddress.signatureName;
+                        kharediNondModel.signature_src = inoutData.address.indiaAddress.signatureSrc == "" ? "NA" : inoutData.address.indiaAddress.signatureSrc!;
+                    }
+                    else if (kharediNondModel.address_type == "FOREIGN")
+                    {
+                        if (string.IsNullOrEmpty(inoutData.address.foreignAddress!.address) || string.IsNullOrEmpty(inoutData.address.foreignAddress!.email))
+                        {
+                            return "पत्ता and ई मेल field is mandatory";
+                        }
+                        if (methodForFile.CheckForeignAddress(inoutData.address.foreignAddress!.address))
+                        {
+                            return "पत्ता field contains special characters";
+                        }
+                        if (methodForFile.CheckEmail(inoutData.address.foreignAddress!.email))
+                        {
+                            return "ई मेल field contains special characters";
+                        }
+                        kharediNondModel.address = inoutData.address.foreignAddress!.address;
+                        kharediNondModel.mobileno = inoutData.address.foreignAddress.mobile;
+                        kharediNondModel.emailid = inoutData.address.foreignAddress.email;
+                        kharediNondModel.emailidverified = inoutData.address.foreignAddress.emailOTP;
+                        kharediNondModel.signature_name = inoutData.address.foreignAddress.signatureName;
+                        //kharediNondModel.signature_src = kharediNondDataForGiver.address.foreignAddress!.signatureSrc == "" ? null : Convert.FromBase64String(kharediNondDataForGiver.address.foreignAddress.signatureSrc!.Split(",")[1]);
+
+                        kharediNondModel.state = "NA";
+                        kharediNondModel.district = "NA";
+                        kharediNondModel.taluka = "NA";
+                        kharediNondModel.city = "NA";
+                        kharediNondModel.plotno = "NA";
+                        kharediNondModel.building = "NA";
+                        kharediNondModel.mainroad = "NA";
+                        kharediNondModel.impSymbol = "NA";
+                        kharediNondModel.area = "NA";
+                        kharediNondModel.pincode = "NA";
+                        kharediNondModel.post_office_name = "NA";
+                        kharediNondModel.address_proof_name = "NA";
+                        kharediNondModel.address_proof_src = "NA";
+                        //kharediNondModel.signature_name = kharediNondDataForGiver.address.foreignAddress.signatureName;
+                    }
+
+                    kharediNondModel.usertype_code = inoutData.usertype_code;
+                    kharediNondModel.usertype = inoutData.usertype;
+
+                    if (kharediNondModel.hasProperty!.Trim().ToUpper() == "YES")
+                    {
+                        //if (kharediNondModel.propType.propertytypeid == 1 && string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.khataNo))
+                        //{
+                        //    return "When Property Type Is 7/12 Then Khate No Should Not Be Empty";
+                        //}
+                        if (kharediNondModel.propType.propertytypeid == 2 && string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.naBhu))
+                        {
+                            return "When Property Type Is Property Card Then City Servey No Should Not Be Empty";
+                        }
+                        if (kharediNondModel.propType.propertytypeid == 3 && string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.ulpin))
+                        {
+                            return "When Property Type Is ULPIN Then ULPIN Should Not Be Empty";
+                        }
+                        //kharediNondModel.khatano = string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.khataNo) ? "NA" : inoutData.isMHProperty.userDetails.khataNo;
+                        kharediNondModel.city_servey_no = string.IsNullOrEmpty(inoutData.isMHProperty.userDetails.naBhu) ? "NA" : inoutData.isMHProperty.userDetails.naBhu;
+                        kharediNondModel.ulpin = string.IsNullOrEmpty(inoutData.isMHProperty.userDetails.ulpin) ? "NA" : inoutData.isMHProperty.userDetails.ulpin;
+                        //if (kharediNondModel.propType.propertytypeid == 1)
+                        //{
+                        //    kharediNondModel.city_servey_no = "NA";
+                        //    kharediNondModel.ulpin = "NA";
+                        //}
+                        //else if (kharediNondModel.propType.propertytypeid == 2)
+                        //{
+                        //    kharediNondModel.khatano = "NA";
+                        //    kharediNondModel.ulpin = "NA";
+                        //}
+                        //else if (kharediNondModel.propType.propertytypeid == 3)
+                        //{
+                        //    kharediNondModel.khatano = "NA";
+                        //    kharediNondModel.city_servey_no = "NA";
+                        //}
+
+                    }
+                    else
+                    {
+                        kharediNondModel.khatano = "NA";
+                        //Gouri
+                        kharediNondModel.city_servey_no = "NA";
+                        kharediNondModel.ulpin = "NA";
+                    }
+
+                    //isMHproperty
+                    kharediNondModel.hasProperty = inoutData.isMHProperty!.hasProperty;
+                    //kharediNondModel.propType = inoutData.isMHProperty.propType;
+
+                    if (kharediNondModel.usertype_code == 1)
+                    {
+
+                        if (string.IsNullOrEmpty(inoutData.dharak!.userdharak!.holderType!.owner_status_description))
+                        {
+                            return "Please Select धारक प्रकार";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.dharak!.userdharak!.gender!.gender_description))
+                        {
+                            return "Please Select लिंग ";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.firstName!)
+                           || string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.middleName!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.lastName!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.firstNameEng!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.middleNameEng!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.lastNameEng!))
+                        {
+                            return "Please enter घेणाऱ्याचे नाव (मराठी मध्ये) / घेणाऱ्याचे नाव (इंग्रजी मध्ये)";
+                        }
+
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.firstName!) ||
+                            methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.middleName!) ||
+                            methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.lastName!))
+                        {
+                            return "घेणाऱ्याचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.firstNameEng!)
+                            || methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.middleNameEng!) ||
+                            methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.lastNameEng!))
+
+                        {
+                            return "घेणाऱ्याचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.dharak!.userdharak!.aliceName!))
+                        {
+                            return "घेणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
+                        }
+
+                        if (methodForFile.ContainsSpecialCharactersInName(inoutData.dharak!.userdharak!.motherNameEng!))
+                        {
+                            return "आईचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.dharak!.userdharak!.motherName!))
+                        {
+                            return "आईचे नाव (मराठी मध्ये) Field contains English Letter /special characters / Numbers!";
+                        }
+
+                        //DOB validations
+                        if (!string.IsNullOrEmpty(inoutData.dharak!.userdharak!.dob!))
+                        {
+                            DateTime dob = DateTime.Parse(inoutData.dharak!.userdharak!.dob!);
+                            DateTime compareDate = new DateTime(2024, 5, 01);
+                            if (dob > compareDate)
+                            {
+                                if (string.IsNullOrEmpty(kharediNondModel.motherName_in_marathi = inoutData.dharak.userdharak.motherName) ||
+                                    (string.IsNullOrEmpty(kharediNondModel.motherName_in_eng = inoutData.dharak.userdharak.motherNameEng)))
+                                {
+                                    return "जन्म तारीख १ मे २०२४ नंतरची असेल तर आईचे नाव टाकणे गरजेचे आहे";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "Please Select जन्म दिनांक";
+                        }
+
+
+                        // for APk validation for future use
+                        //int age = DateTime.Today.Year - dob.Year;
+                        //if (dob > DateTime.Today.AddYears(-age)) age--;
+
+                        //if (age >= 18)
+                        //{
+                        //    return "Age must be at least 18 years.";
+                        //}
+                        kharediNondModel.prefixcode_marathi = inoutData.isMHProperty.userDetails!.suffixcode;
+                        kharediNondModel.prefixcode_eng = inoutData.isMHProperty.userDetails.suffixCodeEng;
+                        kharediNondModel.prefix_in_eng = inoutData.isMHProperty!.userDetails!.suffixEng;
+                        kharediNondModel.fname_in_eng = inoutData.isMHProperty.userDetails!.firstNameEng;
+                        kharediNondModel.mname_in_eng = inoutData.isMHProperty.userDetails!.middleNameEng;
+                        kharediNondModel.lname_in_eng = inoutData.isMHProperty.userDetails!.lastNameEng;
+                        kharediNondModel.prefix_in_marathi = inoutData.isMHProperty.userDetails!.suffix;
+                        kharediNondModel.fname_in_marathi = inoutData.isMHProperty!.userDetails!.firstName;
+                        kharediNondModel.mname_in_marathi = inoutData.isMHProperty!.userDetails.middleName;
+                        kharediNondModel.lname_in_marathi = inoutData.isMHProperty!.userDetails.lastName;
+                        kharediNondModel.companyName = "NA";
+                        kharediNondModel.companyNameEng = "NA";
+                        if (kharediNondModel.hasProperty == "yes")
+                        {
+                            kharediNondModel.khatano = inoutData.isMHProperty!.userDetails!.khataNo;
+                            kharediNondModel.city_servey_no = inoutData.isMHProperty.userDetails.naBhu;
+                            kharediNondModel.ulpin = inoutData.isMHProperty.userDetails.ulpin;
+                            kharediNondModel.userName = inoutData.isMHProperty.userDetails.userName;
+                            kharediNondModel.district_code = inoutData.isMHProperty.userDetails.district!.district_code;
+                            kharediNondModel.district_name_in_marathi = inoutData.isMHProperty.userDetails.district!.district_name!;
+                            kharediNondModel.district_name_in_eng = inoutData.isMHProperty.userDetails.district!.district_english_name!;
+                            kharediNondModel.office_code = inoutData.isMHProperty.userDetails.taluka!.office_code;
+                            kharediNondModel.office_name = inoutData.isMHProperty.userDetails.taluka!.office_name;
+                            kharediNondModel.village_code = inoutData.isMHProperty.userDetails.village!.village_code;
+                            kharediNondModel.village_name = inoutData.isMHProperty.userDetails.village!.village_name;
+                        }
+                        //Dharak details
+                        kharediNondModel.aliceName = inoutData.dharak!.userdharak!.aliceName;
+                        kharediNondModel.apk_code = inoutData.dharak!.userdharak!.aapakDropdown!.apk_code;
+                        kharediNondModel.apk_description = inoutData.dharak.userdharak.aapakDropdown.apk_description;
+                        kharediNondModel.aapak = inoutData.dharak.userdharak.aapak;
+                        kharediNondModel.relation_code = Convert.ToInt32(inoutData.dharak.userdharak.aapakRelation!.relation_code);
+                        kharediNondModel.relation_name = inoutData.dharak.userdharak.aapakRelation.relation_name;
+
+
+                        kharediNondModel.gender_code = inoutData.dharak.userdharak.gender!.gender_code;
+                        kharediNondModel.gender_description = inoutData.dharak.userdharak.gender.gender_description;
+
+                        //kharediNondModel.khataType = inoutData.dharak.userdharak.khataType;
+                        //kharediNondModel.khataCode = inoutData.dharak!.userdharak!.khataType!.khataCode;
+                        //kharediNondModel.khataLabel = inoutData.dharak!.userdharak!.khataType!.khataLabel;
+                        kharediNondModel.khataCode = "NA";
+                        kharediNondModel.khataLabel = "NA";
+                        kharediNondModel.owner_status_code = inoutData.dharak.userdharak.holderType!.owner_status_code;
+                        kharediNondModel.owner_status_description = inoutData.dharak.userdharak.holderType.owner_status_description;
+                        kharediNondModel.dob = inoutData.dharak.userdharak.dob;
+                        kharediNondModel.motherName_in_marathi = inoutData.dharak.userdharak.motherName;
+                        kharediNondModel.motherName_in_eng = inoutData.dharak.userdharak.motherNameEng;
+                        kharediNondModel.landBuyArea = inoutData.dharak.userdharak!.landBuyArea;
+                    }
+                    else
+                    {
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.companyName!))
+                        {
+                            return "घेणाऱ्याचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.companyNameEng!))
+                        {
+                            return "घेणाऱ्याचे नाव (इंग्रजी मध्ये) Field contains English Letters / special characters/ Numbers!";
+                        }
+
+                        kharediNondModel.prefixcode_eng = "NA";
+                        kharediNondModel.prefixcode_marathi = "NA";
+                        kharediNondModel.sub_property_no = "999999";
+                        kharediNondModel.prefix_in_eng = "NA";
+                        kharediNondModel.fname_in_eng = "NA";
+                        kharediNondModel.mname_in_eng = "NA";
+                        kharediNondModel.lname_in_eng = "NA";
+                        kharediNondModel.prefix_in_marathi = "NA";
+                        kharediNondModel.fname_in_marathi = "NA";
+                        kharediNondModel.mname_in_marathi = "NA";
+                        kharediNondModel.lname_in_marathi = "NA";
+                        kharediNondModel.khatano = "NA";
+                        kharediNondModel.city_servey_no = "NA";
+                        kharediNondModel.ulpin = "NA";
+                        kharediNondModel.userName = "NA";
+                        kharediNondModel.district_code = "NA";
+                        kharediNondModel.district_name_in_marathi = "NA";
+                        kharediNondModel.district_name_in_eng = "NA";
+                        kharediNondModel.office_code = "NA";
+                        kharediNondModel.office_name = "NA";
+                        kharediNondModel.village_code = "NA";
+                        kharediNondModel.village_name = "NA";
+                        kharediNondModel.companyName = inoutData.isMHProperty.userDetails!.companyName;
+                        kharediNondModel.companyNameEng = inoutData.isMHProperty.userDetails!.companyNameEng;
+
+                        //Dharak details
+                        kharediNondModel.aliceName = "NA";
+                        kharediNondModel.aapak = "NA";
+                        kharediNondModel.apk_code = 1;
+                        kharediNondModel.apk_description = "स्वतः";
+                        kharediNondModel.relation_code = 0;
+                        kharediNondModel.relation_name = "NA";
+                        kharediNondModel.gender_code = "NA";
+                        kharediNondModel.gender_description = "NA";
+                        //  kharediNondModel.khataCode = inoutData.dharak!.companydharak!.khataType!.khataCode;
+                        // kharediNondModel.khataLabel = inoutData.dharak!.companydharak!.khataType!.khataLabel;
+                        kharediNondModel.owner_status_code = inoutData.dharak!.companydharak!.holderType!.owner_status_code;
+                        kharediNondModel.owner_status_description = inoutData.dharak.companydharak.holderType.owner_status_description;
+                        //kharediNondModel.apk_code = inoutData.dharak.companydharak!.aapakDropdown!.apk_code;
+                        //kharediNondModel.apk_description = inoutData.dharak.companydharak!.aapakDropdown.apk_description;
+                        //kharediNondModel.aapak = inoutData.dharak.companydharak.aapak;
+                        kharediNondModel.landBuyArea = inoutData.dharak.companydharak.landBuyArea;
+                        kharediNondModel.dob = "NA";
+                        kharediNondModel.motherName_in_marathi = "NA";
+                        kharediNondModel.motherName_in_eng = "NA";
+                    }
+
+                    //Assign Data to Table fields to insert new records
+                    //Set Default Value - Mrunal
+                    dbTable.mobileno = "NA";
+                    dbTable.mobilenoverified = "NA";
+                    dbTable.emailid = "NA";
+                    dbTable.emailidverified = "NA";
+                    dbTable.prefixcode_marathi = "0";
+                    dbTable.prefixcode_eng = "0";
+                    dbTable.sub_property_no = "999999";
+                    dbTable.prefix_in_marathi = "NA";
+                    dbTable.fname_in_marathi = "NA";
+                    dbTable.mname_in_marathi = "NA";
+                    dbTable.lname_in_marathi = "NA";
+                    dbTable.prefix_in_eng = "NA";
+                    dbTable.fname_in_eng = "NA";
+                    dbTable.mname_in_eng = "NA";
+                    dbTable.lname_in_eng = "NA";
+                    dbTable.khatano = "NA";
+                    dbTable.city_servey_no = "NA";
+                    dbTable.ulpin = "NA";
+                    dbTable.userName = "NA";
+                    dbTable.district_code = "NA";
+                    dbTable.district_name_in_marathi = "NA";
+                    dbTable.district_name_in_eng = "NA";
+                    dbTable.ofc_code = "NA";
+                    dbTable.ofc_name = "NA";
+                    dbTable.village_code = "NA";
+                    dbTable.village_name = "NA";
+                    dbTable.alias_name = "NA";
+                    dbTable.holder_type = "NA";
+                    dbTable.owner_status_code = "NA";
+                    dbTable.owner_status_description = "NA";
+                    dbTable.dob = "NA";
+                    dbTable.mother_name_in_marathi = "NA";
+                    dbTable.mother_name_in_eng = "NA";
+                    dbTable.userName = "NA";
+                    dbTable.lr_property_id = "NA";
+                    dbTable.milkat = "NA";
+                    dbTable.namud = "NA";
+
+                    dbTable.isFullAreaGiven = "NA";
+                    dbTable.actual_area = "NA";
+                    dbTable.mutation_area = "NA";
+                    dbTable.available_area = "NA";
+
+                    dbTable.address_type = "NA";
+
+                    dbTable.flatno_plotno = "NA";
+                    dbTable.societyname = "NA";
+                    dbTable.mainstreet = "NA";
+                    dbTable.landmark = "NA";
+                    dbTable.locality = "NA";
+                    dbTable.pincode = "NA";
+                    dbTable.post_office_name = "NA";
+                    dbTable.city = "NA";
+                    dbTable.taluka = "NA";
+                    dbTable.district = "NA";
+                    dbTable.state = "NA";
+                    dbTable.address_proof_document_name = "NA";
+                    dbTable.address_proof_document_path = "NA";
+
+                    dbTable.address = "NA";
+                    dbTable.signed_file_name = "NA";
+                    dbTable.signed_file_path = "NA";
+
+                    dbTable.user_type = "NA";
+                    dbTable.profile_pic_file_name = "NA";
+                    dbTable.profile_pic_file_path = "NA";
+                    dbTable.has_property = "NA";
+                    //dbTable.prop_type = "NA";
+                    //   dbTable.khata_type = "NA";
+                    dbTable.company_name_in_marathi = "NA";
+                    dbTable.company_name_in_eng = "NA";
+                    dbTable.aapak = "NA";
+                    dbTable.land_buy_area = "NA";
+                    //dbTable.gift_area = "NA";
+                    dbTable.apk_code = 1;
+                    dbTable.apk_description = "स्वतः";
+                    dbTable.relation_code = 0;
+                    dbTable.relation_name = "NA";
+                    dbTable.khata_type_code = "NA";
+                    dbTable.khata_type_name = "NA";
+                    dbTable.cts_number = "NA";
+                    dbTable.mutation_srno = "NA";
+                    dbTable.owner_number = "NA";
+                    dbTable.sellerid = "NA";
+                    dbTable.buyerid = "NA";
+                    dbTable.owner_status_code = "NA";
+                    dbTable.owner_status_description = "NA";
+                    dbTable.account_type_code = 0;
+                    dbTable.account_type_description = "NA";
+                    dbTable.varas_relation_code = 0;
+                    dbTable.varas_relation_name = "NA";
+                    dbTable.relation_code = 0;
+                    dbTable.relation_name = "NA";
+                    dbTable.holder_type = "NA";
+                    dbTable.gender_code = "NA";
+                    dbTable.gender_description = "NA";
+                    //dbTable.aapak_name = "NA";
+                    //dbTable.relation = "NA";
+                    //dbTable.is_address_same = false;
+                    string city_servey_no = string.Empty, sub_property_no = string.Empty;
+                    if (inoutData.giver != null)
+                    {
+                        for (int i = 0; i < inoutData.giver.Count; i++)
+                        {
+                            if (i == 0)
+                            {
+                                city_servey_no = inoutData.giver[i].nabhu!;
+                                sub_property_no = inoutData.giver[i].subPropNo!;
+                            }
+                            else
+                            {
+                                city_servey_no = city_servey_no + "," + inoutData.giver[i].nabhu!;
+                                sub_property_no = sub_property_no + "," + inoutData.giver[i].subPropNo!;
+                            }
+                        }
+                    }
+
+                    kharediNondModel.city_servey_no = city_servey_no;
+                    kharediNondModel.sub_property_no = sub_property_no;
+                    //Set actual Value
+
+                    dbTable.userMaster = kharediNondModel.userMaster;
+                    dbTable.applicationDTL = kharediNondModel.applicationDTL;
+                    dbTable.user_type = kharediNondModel.usertype;
+                    dbTable.user_type_code = kharediNondModel.usertype_code;
+                    dbTable.mobileno = kharediNondModel.mobileno;
+                    dbTable.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                    dbTable.emailid = kharediNondModel.emailid;
+                    dbTable.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                    dbTable.has_property = kharediNondModel.hasProperty;
+                    dbTable.prop_type = kharediNondModel.propType;
+                    dbTable.khatano = kharediNondModel.khatano;
+                    dbTable.city_servey_no = kharediNondModel.city_servey_no;
+                    dbTable.sub_property_no = kharediNondModel.sub_property_no;
+                    dbTable.ulpin = kharediNondModel.ulpin;
+                    dbTable.userName = kharediNondModel.userName;
+                    dbTable.district_code = kharediNondModel.district_code;
+                    dbTable.district_name_in_marathi = kharediNondModel.district_name_in_marathi;
+                    dbTable.district_name_in_eng = kharediNondModel.district_name_in_eng;
+                    dbTable.ofc_code = kharediNondModel.office_code;
+                    dbTable.ofc_name = kharediNondModel.office_name;
+                    dbTable.village_code = kharediNondModel.village_code;
+                    dbTable.village_name = kharediNondModel.village_name;
+                    dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                    dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                    dbTable.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                    dbTable.fname_in_eng = kharediNondModel.fname_in_eng;
+                    dbTable.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                    dbTable.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                    dbTable.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                    dbTable.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                    dbTable.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                    dbTable.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+
+                    //
+                    dbTable.alias_name = kharediNondModel.aliceName;
+                    dbTable.gender_code = kharediNondModel.gender_code;
+                    dbTable.gender_description = kharediNondModel.gender_description;
+                    //dbTable.khata_type_code = kharediNondModel.khataCode;
+                    //dbTable.khata_type_name = kharediNondModel.khataLabel;
+                    dbTable.owner_status_code = kharediNondModel.owner_status_code;
+                    dbTable.owner_status_description = kharediNondModel.owner_status_description;
+                    dbTable.dob = kharediNondModel.dob;
+                    dbTable.mother_name_in_marathi = kharediNondModel.motherName_in_marathi;
+                    dbTable.mother_name_in_eng = kharediNondModel.motherName_in_eng;
+                    //Company
+                    dbTable.company_name_in_marathi = kharediNondModel.companyName;
+                    dbTable.company_name_in_eng = kharediNondModel.companyNameEng;
+                    dbTable.apk_code = kharediNondModel.apk_code == null ? 1 : kharediNondModel.apk_code;
+                    dbTable.apk_description = kharediNondModel.apk_description == null ? "स्वतः" : kharediNondModel.apk_description;
+                    dbTable.aapak = kharediNondModel.aapak;
+                    dbTable.relation_code = kharediNondModel.relation_code == null ? 0 : kharediNondModel.relation_code;
+                    dbTable.relation_name = kharediNondModel.relation_name == null || kharediNondModel.relation_name == "" ? "NA" : kharediNondModel.relation_name;
+                    dbTable.land_buy_area = kharediNondModel.landBuyArea;
+
+                    dbTable.address_type = kharediNondModel.address_type;
+                    dbTable.address = kharediNondModel.address;
+                    dbTable.state = kharediNondModel.state;
+                    dbTable.district = kharediNondModel.district;
+                    dbTable.taluka = kharediNondModel.taluka;
+                    dbTable.city = kharediNondModel.city;
+                    dbTable.flatno_plotno = kharediNondModel.plotno;
+                    dbTable.societyname = kharediNondModel.building;
+                    dbTable.mainstreet = kharediNondModel.mainroad;
+                    dbTable.landmark = kharediNondModel.impSymbol;
+                    dbTable.locality = kharediNondModel.area;
+                    dbTable.pincode = kharediNondModel.pincode;
+                    dbTable.post_office_name = kharediNondModel.post_office_name;
+                    //Gauri
+                    dbTable.isTaker = 1;
+                    /*dbTable.alias_name = "NA";
+                    dbTable.gender = "NA";
+                    dbTable.khata_type = "NA";
+                    dbTable.holder_type = "NA";
+                    dbTable.dob = "NA";
+                    dbTable.mother_name_in_marathi = "NA";
+                    dbTable.mother_name_in_eng = "NA";
+                    dbTable.aapakDropdown = "NA";
+                    dbTable.aapak = "NA";
+                    dbTable.landBuyArea = "NA";
+                    dbTable.power_of_attorney_code = GeneratePowerOfAttorneyCode(kharediNondDataForGiver.applicationid, false);*/
+                    _context.mutationDTL.Add(dbTable);
+                    _context.SaveChanges();
+
+
+
+                    //Get Saved Row ID
+                    int kharediNondID = (int)dbTable.mutation_givertaker_id!;
+
+                    string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                    bool checkAddressFlag = true;
+                    //bool checkSignFlag = false;
+                    //bool checkpassportFlag = true;
+
+                    //Save passport Photo Details
+                    //string[] passportData = inoutData.photo!.passportSrc!.Split(",");
+                    //checkpassportFlag = methodForFile.SaveImageForApplicant(passportData[1], inoutData.photo.passportName!, kharediNondID.ToString(), "PassportPhoto", FolderPath + @"\", CurrentDateTime);
+                    //string passportProofExt = Path.GetExtension(inoutData.photo.passportName!);
+                    //kharediNondModel.passport_name = "PassportPhoto" + kharediNondID + "_" + CurrentDateTime + passportProofExt;
+                    //kharediNondModel.passport_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.passport_name;
+
+                    //var UpdatePassportFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                    //if (UpdatePassportFilePath != null)
+                    //{
+                    //    dbTable.profile_pic_file_name = kharediNondModel.passport_name;
+                    //    dbTable.profile_pic_file_path = kharediNondModel.passport_src;
+                    //    _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                    //    _context.SaveChanges();
+                    //}
+
+                    if (kharediNondModel.address_type == "INDIA")
+                    {
+                        if (!string.IsNullOrEmpty(inoutData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(inoutData.address.indiaAddress!.addressProofName))
+                        {
+                            string imageName = System.IO.Path.GetFileNameWithoutExtension(inoutData.address.indiaAddress.addressProofName!);
+                            if (methodForFile.ContainsSpecialCharacters(imageName))
+                            {
+                                return inoutData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                            }
+                            else
+                            {
+                                string[] AddressData = inoutData.address.indiaAddress!.addressProofSrc!.Split(",");
+                                checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], inoutData.address.indiaAddress.addressProofName!, kharediNondID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                string AddressProofExt = Path.GetExtension(inoutData.address.indiaAddress.addressProofName!);
+                                kharediNondModel.address_proof_name = "AddressProof" + kharediNondID + "_" + CurrentDateTime + AddressProofExt;
+                                kharediNondModel.address_proof_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.address_proof_name;
+
+                                var UpdateAddressFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                                if (UpdateAddressFilePath != null)
+                                {
+                                    dbTable.address_proof_document_name = kharediNondModel.address_proof_name;
+                                    dbTable.address_proof_document_path = kharediNondModel.address_proof_src;
+                                    _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                    _context.SaveChanges();
+                                }
+                            }
+
+                        }
+
+                        //if (inoutData.address.indiaAddress.signatureSrc != "")
+                        //{
+                        //    string[] signData = inoutData.address.indiaAddress.signatureSrc!.Split(",");
+                        //    checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], inoutData.address.indiaAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+                        //    string SignatureExt = Path.GetExtension(inoutData.address.indiaAddress.signatureName!);
+                        //    kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                        //    kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+
+                        //    var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                        //    if (UpdateSignFilePath != null)
+                        //    {
+                        //        dbTable.signed_file_name = kharediNondModel.signature_name;
+                        //        dbTable.signed_file_path = kharediNondModel.signature_src;
+                        //        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                        //        _context.SaveChanges();
+                        //    }
+                        //}
+                    }
+                    //if (kharediNondModel.address_type == "FOREIGN")
+                    //{
+                    //    if (inoutData.address.foreignAddress!.signatureSrc != "")
+                    //    {
+                    //        string[] signData = inoutData.address.foreignAddress!.signatureSrc!.Split(",");
+                    //        checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], inoutData.address.foreignAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+
+                    //        string SignatureExt = Path.GetExtension(inoutData.address.foreignAddress.signatureName!);
+                    //        kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                    //        kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+                    //        var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                    //        if (UpdateSignFilePath != null)
+                    //        {
+                    //            dbTable.signed_file_name = kharediNondModel.signature_name;
+                    //            dbTable.signed_file_path = kharediNondModel.signature_src;
+                    //            _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                    //            _context.SaveChanges();
+                    //        }
+                    //    }
+                    //}
+                    /*if (checkAddressFlag || checkSignFlag)
+                    {*/
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inoutData.applicationid)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.mutationtakerIDs) && !applicationDTLdata.mutationtakerIDs.Contains(kharediNondID.ToString()))
+                        {
+                            applicationDTLdata.mutationtakerIDs = applicationDTLdata.mutationtakerIDs + "," + kharediNondID.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.mutationtakerIDs = kharediNondID.ToString();
+                        }
+                        applicationDTLdata.status = 5;
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                    /* }
+                     if (!checkAddressFlag)
+                     {
+                         _context.mutationDTL.Remove(dbTable);
+                         _context.SaveChanges();
+                         return "Address Proof File Is Not Uploaded";
+                     }
+                     if (!checkSignFlag)
+                     {
+                         _context.mutationDTL.Remove(dbTable);
+                         _context.SaveChanges();
+                         return "Signature File Is Not Uploaded";
+                     }
+                     else
+                     {
+                         _context.mutationDTL.Remove(dbTable);
+                         _context.SaveChanges();
+                         return "Some Files Are Not Uploaded";
+                     }*/
+                }
+                catch (Exception ex)
+                {
+                    //_context.mutationDTL.Remove(dbTable);
+                    //_context.SaveChanges();
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchGenericNondDataForTaker FetchGenericNondInformationDataForTaker(int mutationdtlid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
+                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Include(prop => prop.prop_type).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchGenericNondDataForTaker fetchData = new FetchGenericNondDataForTaker();
+                fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;
+                fetchData.userid = KharedinondInformation.userMaster!.userid;
+                fetchData.applicationid = KharedinondInformation.applicationDTL!.applicationid;
+                fetchData.usertype_code = KharedinondInformation.user_type_code;
+                fetchData.userType = KharedinondInformation.user_type;
+
+                fetchData.mobileNo = KharedinondInformation.mobileno;
+
+                //Photo Details
+                photoDetailsForGenericTaker photo = new photoDetailsForGenericTaker();
+                photo.passportName = KharedinondInformation.profile_pic_file_name;
+                photo.passportSrc = KharedinondInformation.profile_pic_file_path;
+                //string PhotoProofExt = Path.GetExtension(KharedinondInformation.profile_pic_file_path)!;
+                //string PhotoProof = methodForFile.ConvertImageToBase64(KharedinondInformation.profile_pic_file_path!);
+                //KharedinondInformation.profile_pic_file_path = string.IsNullOrEmpty(PhotoProof) ? "NA" : "data:image/" + PhotoProofExt.Replace(".", "") + ";base64," + PhotoProof;
+                //photo.passportSrc = KharedinondInformation.profile_pic_file_path;
+                fetchData.photo = photo;
+
+                //isMHDetails
+                isMHPropertyForGenericTaker isMHproperty = new isMHPropertyForGenericTaker();
+                isMHproperty.hasProperty = KharedinondInformation.has_property;
+                // PropertyTypeMaster proptype = new PropertyTypeMaster();
+
+                isMHproperty.propType = KharedinondInformation.prop_type!.propertytype;
+
+
+                TakeruserDetailsForGenericTaker takeruserDetails = new TakeruserDetailsForGenericTaker();
+                takeruserDetails.suffixcode = KharedinondInformation.prefixcode_marathi;
+                takeruserDetails!.suffix = KharedinondInformation.prefix_in_marathi;
+                takeruserDetails.firstName = KharedinondInformation.fname_in_marathi;
+                takeruserDetails.middleName = KharedinondInformation.mname_in_marathi;
+                takeruserDetails.lastName = KharedinondInformation.lname_in_marathi;
+                takeruserDetails.suffixCodeEng = KharedinondInformation.prefixcode_marathi;
+                takeruserDetails.suffixEng = KharedinondInformation.prefix_in_eng;
+                takeruserDetails.firstNameEng = KharedinondInformation.fname_in_eng;
+                takeruserDetails.middleNameEng = KharedinondInformation.mname_in_eng;
+                takeruserDetails.lastNameEng = KharedinondInformation.lname_in_eng;
+                takeruserDetails.companyName = KharedinondInformation.company_name_in_marathi!;
+                takeruserDetails.companyNameEng = KharedinondInformation.company_name_in_eng!;
+                takeruserDetails.khataNo = KharedinondInformation.khatano;
+                takeruserDetails.naBhu = KharedinondInformation.city_servey_no;
+                takeruserDetails.ulpin = KharedinondInformation.ulpin;
+                takeruserDetails.userName = KharedinondInformation.userName;
+
+
+                DistrictForGenericeTaker district = new DistrictForGenericeTaker();
+                district.district_code = KharedinondInformation.district_code;
+                district.district_name = KharedinondInformation.district_name_in_marathi;
+                district.district_english_name = KharedinondInformation.district_name_in_eng;
+                takeruserDetails.district = district;
+
+                TalukaForGenericeTaker taluka = new TalukaForGenericeTaker();
+                taluka.office_code = KharedinondInformation.ofc_code;
+                taluka.office_name = KharedinondInformation.ofc_name;
+                takeruserDetails.taluka = taluka;
+
+                VillageForGenericeTaker village = new VillageForGenericeTaker();
+                village.village_code = KharedinondInformation.village_code;
+                village.village_name = KharedinondInformation.village_name;
+                takeruserDetails.village = village;
+
+                isMHproperty.userDetails = takeruserDetails;
+                fetchData.isMHProperty = isMHproperty;
+
+                //Dharak Details
+                dharakDetailsyForGenericTaker dharak = new dharakDetailsyForGenericTaker();
+                if (KharedinondInformation.user_type_code == 1)
+                {
+                    //fetchData.fullNameInMarathi = KharedinondInformation.fname_in_marathi!.Trim() + " " + KharedinondInformation.mname_in_marathi!.Trim() + " " + KharedinondInformation.lname_in_marathi!.Trim();
+                    //fetchData.fullNameInEng = KharedinondInformation.fname_in_eng!.Trim() + " " + KharedinondInformation.mname_in_eng!.Trim() + " " + KharedinondInformation.lname_in_eng!.Trim();
+                    fetchData.fullNameInMarathi = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_marathi!.Trim());
+                    fetchData.fullNameInEng = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_eng!.Trim());
+                    userdharakDetailsForGenericeTaker userdharak = new userdharakDetailsForGenericeTaker();
+                    userdharak!.aliceName = KharedinondInformation.alias_name;
+                    GenderForGenericeTaker gender = new GenderForGenericeTaker();
+                    gender.gender_code = KharedinondInformation.gender_code;
+                    gender.gender_description = KharedinondInformation.gender_description;
+                    userdharak.gender = gender;
+                    aapakDropdownForGenericeTaker aapakdropdown = new aapakDropdownForGenericeTaker();
+                    aapakdropdown.apk_code = KharedinondInformation.apk_code;
+                    aapakdropdown.apk_description = KharedinondInformation.apk_description;
+                    userdharak.aapakDropdown = aapakdropdown;
+                    userdharak.aapak = KharedinondInformation.aapak;
+                    aapakRelationForGenericeTaker aapakrelation = new aapakRelationForGenericeTaker();
+                    aapakrelation.relation_code = KharedinondInformation.relation_code.ToString();
+                    aapakrelation.relation_name = KharedinondInformation.relation_name;
+                    userdharak.aapakRelation = aapakrelation;
+
+                    //userdharak.khataType = KharedinondInformation.khata_type;
+                    //InputDataModel.KhataType khatatype = new KhataType();
+                    //khatatype.khataCode = KharedinondInformation.khata_type_code;
+                    //khatatype.khataLabel = KharedinondInformation.khata_type_name;
+                    //userdharak.khataType = khatatype;
+
+                    //userdharak.holderType = KharedinondInformation.holder_type;
+                    userdharak.dob = KharedinondInformation.dob;
+                    userdharak.motherName = KharedinondInformation.mother_name_in_marathi;
+                    userdharak.motherNameEng = KharedinondInformation.mother_name_in_eng;
+                    HoldertypeForGenericeTaker holdertype = new HoldertypeForGenericeTaker();
+                    holdertype.owner_status_code = KharedinondInformation.owner_status_code;
+                    holdertype.owner_status_description = KharedinondInformation.owner_status_description;
+                    userdharak.holderType = holdertype;
+                    userdharak.landBuyArea = KharedinondInformation.land_buy_area;
+                    dharak.userdharak = userdharak;
+                }
+                else
+                {
+                    fetchData.fullNameInMarathi = KharedinondInformation.company_name_in_marathi;
+                    fetchData.fullNameInEng = KharedinondInformation.company_name_in_eng;
+                    companydharakDetailsForGenericeTaker companydharak = new companydharakDetailsForGenericeTaker();
+                    companydharak.landBuyArea = KharedinondInformation.land_buy_area;
+                    HoldertypeForGenericeTaker holdertype = new HoldertypeForGenericeTaker();
+                    holdertype.owner_status_code = KharedinondInformation.owner_status_code;
+                    holdertype.owner_status_description = KharedinondInformation.owner_status_description;
+                    companydharak.holderType = holdertype;
+                    aapakDropdownForGenericeTaker aapak = new aapakDropdownForGenericeTaker();
+                    aapak.apk_code = KharedinondInformation.apk_code;
+                    aapak.apk_description = KharedinondInformation.apk_description;
+                    dharak.companydharak = companydharak;
+                }
+
+                fetchData.dharak = dharak;
+
+                //Address Details
+                AddressDTLForGenericGiver addressData = new AddressDTLForGenericGiver();
+                addressData.addressType = KharedinondInformation.address_type;
+                if (KharedinondInformation.address_type == "INDIA")
+                {
+                    IndiaAddressForGenericGiver addressForIndia = new IndiaAddressForGenericGiver();
+                    addressForIndia.state = KharedinondInformation.state;
+                    addressForIndia.district = KharedinondInformation.district;
+                    addressForIndia.city = KharedinondInformation.city;
+                    addressForIndia.taluka = KharedinondInformation.taluka;
+                    addressForIndia.plotNo = KharedinondInformation.flatno_plotno;
+                    addressForIndia.building = KharedinondInformation.societyname;
+                    addressForIndia.mainRoad = KharedinondInformation.mainstreet;
+                    addressForIndia.impSymbol = KharedinondInformation.landmark;
+                    addressForIndia.area = KharedinondInformation.locality;
+                    addressForIndia.pincode = KharedinondInformation.pincode;
+                    addressForIndia.postOfficeName = KharedinondInformation.post_office_name;
+                    addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                    addressForIndia.mobile = KharedinondInformation.mobileno;
+                    addressForIndia.mobileOTP = KharedinondInformation.mobilenoverified;
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+
+                    if (KharedinondInformation.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(KharedinondInformation.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(KharedinondInformation.address_proof_document_path!);
+                        KharedinondInformation.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    //if (KharedinondInformation.signed_file_path != "NA")
+                    //{
+                    //    string SignatureExt = Path.GetExtension(KharedinondInformation.signed_file_path)!;
+                    //    string Signature = methodForFile.ConvertImageToBase64(KharedinondInformation.signed_file_path!);
+                    //    KharedinondInformation.signed_file_path = string.IsNullOrEmpty(Signature) ? "NA" : "data:image/" + SignatureExt.Replace(".", "") + ";base64," + Signature;
+                    //    addressForIndia.signatureSrc = KharedinondInformation.signed_file_path;
+                    //}
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+                    addressForIndia.signatureSrc = KharedinondInformation.signed_file_path!;
+                    addressData.indiaAddress = addressForIndia;
+                }
+                else if (KharedinondInformation.address_type == "FOREIGN")
+                {
+                    AddressForForeignForGenericGiver addressForForeign = new AddressForForeignForGenericGiver();
+                    addressForForeign.address = KharedinondInformation.address;
+                    addressForForeign.mobile = KharedinondInformation.mobileno;
+                    addressForForeign.email = KharedinondInformation.emailid;
+                    addressForForeign.emailOTP = KharedinondInformation.emailidverified;
+                    addressForForeign.signatureName = KharedinondInformation.signed_file_name;
+                    addressForForeign.signatureSrc = KharedinondInformation.signed_file_path;
+                    //string SignatureExt = Path.GetExtension(KharedinondInformation.signed_file_path)!;
+                    //string Signature = methodForFile.ConvertImageToBase64(KharedinondInformation.signed_file_path!);
+                    //KharedinondInformation.signed_file_path = string.IsNullOrEmpty(Signature) ? "NA" : "data:image/" + SignatureExt.Replace(".", "") + ";base64," + Signature;
+                    //addressForForeign.signatureSrc = KharedinondInformation.signed_file_path;
+                    addressData.foreignAddress = addressForForeign;
+                }
+                fetchData.address = addressData;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string SaveErrorCorrectionDTL(ErrorCorrectionData errorCorrectionData)
+        {
+            ErrorCorrectionInformation dbTable = new ErrorCorrectionInformation();
+            ErrorCorrectionInformation fetchData = new ErrorCorrectionInformation();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(errorCorrectionData.userDetails!.nabhu))
+                    {
+                        return "Please select अर्जामधील न.भू.क्र.";
+                    }
+                    string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + errorCorrectionData.applicationid + @"\ERRORCORRECTIONDOC";
+                    // Assign Values to Model
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == errorCorrectionData.userid!)!;
+
+                    fetchData = _context.errorCorrectionInformation.Include(app => app.applicationDTL).Where(data => data.applicationDTL!.applicationid!.Equals(errorCorrectionData.applicationid)
+                    && data.village_code == errorCorrectionData.village_code!
+                    && data.city_servey_no == errorCorrectionData.userDetails.nabhu
+                    && data.lr_property_id == errorCorrectionData.userDetails.lrPropertyUID
+                    && data.milkat == errorCorrectionData.userDetails.milkat
+                    && data.namud == errorCorrectionData.userDetails.namud
+                    && data.sub_property_no == errorCorrectionData.userDetails.subPropNo).FirstOrDefault()!;
+
+                    if (fetchData != null)
+                    {
+                        string nabhu = System.Text.RegularExpressions.Regex.Replace(errorCorrectionData.userDetails!.nabhu!, @"\s*\(.*?\)", "").Trim();
+
+                        ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == errorCorrectionData.applicationid!)!;
+                        if (errorCorrectionData.address!.addressType!.Trim().ToUpper() == "INDIA")
+                        {
+                            if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.plotNo))
+                            {
+                                return "Please enter सदनिका / घर /प्लॉट नं.";
+                            }
+                            if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.impSymbol))
+                            {
+                                return "Please enter महत्त्वाची खूण";
+                            }
+                            if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.pincode))
+                            {
+                                return "Please enter पिन कोड";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(errorCorrectionData.address!.indiaAddress!.pincode))
+                            {
+                                if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.postOfficeName))
+                                {
+                                    return "Please select Post Office Name / Enter correct Pin Code.";
+                                }
+                                return "पिन कोड field contains special characters";
+                            }
+
+                            if (methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.plotNo))
+                            {
+                                return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.building!))
+                            {
+                                return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.mainRoad!))
+                            {
+                                return "मुख्य रस्ता field contains special characters";
+                            }
+                            if (methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.impSymbol!))
+                            {
+                                return "महत्त्वाची खूण field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.area!))
+                            {
+                                return "महत्त्वाची खूण field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(errorCorrectionData.address!.indiaAddress!.mobile!))
+                            {
+                                return "मोबाईल field contains special characters";
+                            }
+
+                        }
+                        else if (errorCorrectionData.address!.addressType!.Trim().ToUpper() == "FOREIGN")
+                        {
+                            if (string.IsNullOrEmpty(errorCorrectionData.address.foreignAddress!.address) || string.IsNullOrEmpty(errorCorrectionData.address.foreignAddress!.email))
+                            {
+                                return "पत्ता and ई मेल field is mandatory";
+                            }
+                            if (methodForFile.CheckForeignAddress(errorCorrectionData.address.foreignAddress!.address))
+                            {
+                                return "पत्ता field contains special characters";
+                            }
+                            if (methodForFile.CheckEmail(errorCorrectionData.address.foreignAddress!.email))
+                            {
+                                return "ई मेल field contains special characters";
+                            }
+                        }
+                        //Set actual Value
+                        fetchData.userMaster = userMaster;
+                        fetchData.applicationDTL = applicationDTL;
+                        fetchData.village_code = errorCorrectionData.village_code;
+                        fetchData.sub_property_no = errorCorrectionData.userDetails.subPropNo;
+                        fetchData.city_servey_no = errorCorrectionData.userDetails.nabhu;
+                        fetchData.lr_property_id = errorCorrectionData.userDetails.lrPropertyUID;
+                        fetchData.milkat = errorCorrectionData.userDetails.milkat;
+                        fetchData.namud = errorCorrectionData.userDetails.namud;
+                        //Selected Mutation data
+                        //fetchData.var_village_code = errorCorrectionData.userDetails!.selectedMutation!.var_village_code;
+                        //fetchData.var_cts_number = errorCorrectionData.userDetails.selectedMutation.var_cts_number;
+                        //fetchData.var_cts_puid = errorCorrectionData.userDetails.selectedMutation.var_cts_puid;
+                        //fetchData.var_mutation_srno = errorCorrectionData.userDetails.selectedMutation.var_mutation_srno;
+                        //fetchData.var_entry_date = errorCorrectionData.userDetails.selectedMutation.var_entry_date;
+                        //fetchData.var_mutation_number = errorCorrectionData.userDetails.selectedMutation.var_mutation_number;
+                        //fetchData.var_mutation_date = errorCorrectionData.userDetails.selectedMutation.var_mutation_date;
+                        //fetchData.var_sro_office_name_marathi = errorCorrectionData.userDetails.selectedMutation.var_sro_office_name_marathi;
+                        //fetchData.var_sro_office_name_english = errorCorrectionData.userDetails.selectedMutation.var_sro_office_name_english;
+                        //fetchData.var_document_number = errorCorrectionData.userDetails.selectedMutation.var_document_number;
+                        //fetchData.var_document_year = errorCorrectionData.userDetails.selectedMutation.var_document_year;
+                        //fetchData.var_document_date = errorCorrectionData.userDetails.selectedMutation.var_document_date;
+                        //fetchData.var_entry_details = errorCorrectionData.userDetails.selectedMutation.var_entry_details;
+                        //fetchData.var_owner_details = errorCorrectionData.userDetails.selectedMutation.var_owner_details;
+
+                        fetchData.reason = errorCorrectionData.userDetails.reason;
+
+                        fetchData.address_type = errorCorrectionData.address.addressType.Trim().ToUpper();
+                        fetchData.address = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? "NA" : errorCorrectionData.address!.foreignAddress!.address;
+                        fetchData.state = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.state : "NA";
+                        fetchData.district = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.district : "NA";
+                        fetchData.taluka = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.taluka : "NA";
+                        fetchData.city = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.city : "NA";
+                        fetchData.flatno_plotno = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.plotNo : "NA";
+                        fetchData.societyname = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.building : "NA";
+                        fetchData.mainstreet = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.mainRoad : "NA.";
+                        fetchData.landmark = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.impSymbol : "NA";
+                        fetchData.locality = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.area : "NA";
+                        fetchData.pincode = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.pincode : "NA";
+                        fetchData.post_office_name = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.postOfficeName : "NA";
+                        fetchData.address_proof_document_name = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address.indiaAddress!.addressProofName! : "NA";
+                        fetchData.address_proof_document_path = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? (errorCorrectionData.address.indiaAddress!.addressProofSrc! == "" ? "NA" : errorCorrectionData.address.indiaAddress!.addressProofSrc!) : "NA";
+
+                        fetchData.mobileno = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address.indiaAddress!.mobile : errorCorrectionData.address!.foreignAddress!.mobile;
+                        fetchData.mobilenoverified = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.mobileOTP!.ToUpper() : "NO";
+                        fetchData.city_servey_no = errorCorrectionData.userDetails.nabhu;
+                        fetchData.lr_property_id = errorCorrectionData.userDetails.lrPropertyUID;
+                        fetchData.milkat = errorCorrectionData.userDetails.milkat;
+                        fetchData.namud = errorCorrectionData.userDetails.namud;
+                        fetchData.sub_property_no = errorCorrectionData.userDetails.subPropNo;
+                        _context.errorCorrectionInformation.Attach(fetchData);
+                        _context.SaveChanges();
+
+                        //Get Saved Row ID
+                        int errorCorrectionID = (int)fetchData.error_correction_id!;
+                        string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                        bool checkAddressFlag = true;
+                        //bool checkSignFlag = false;
+                        if (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA")
+                        {
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(errorCorrectionData.address.indiaAddress.addressProofName))
+                            {
+                                string[] AddressData = errorCorrectionData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                string imageName = System.IO.Path.GetFileNameWithoutExtension(errorCorrectionData.address.indiaAddress.addressProofName!);
+                                if (methodForFile.ContainsSpecialCharacters(imageName))
+                                {
+                                    return errorCorrectionData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                }
+                                else
+                                {
+                                    checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], errorCorrectionData.address.indiaAddress.addressProofName!, errorCorrectionID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                    string AddressProofExt = Path.GetExtension(errorCorrectionData.address.indiaAddress.addressProofName!);
+                                    errorCorrectionData.address.indiaAddress.addressProofName = "AddressProof" + errorCorrectionID + "_" + CurrentDateTime + AddressProofExt;
+                                    errorCorrectionData.address.indiaAddress.addressProofSrc = FolderPath + @"\" + errorCorrectionID + @"\" + errorCorrectionData.address.indiaAddress.addressProofName;
+
+                                    var UpdateAddressFilePath = _context.errorCorrectionInformation.Where(w => w.error_correction_id == errorCorrectionID).FirstOrDefault();
+                                    if (UpdateAddressFilePath != null)
+                                    {
+                                        bool isDeleted = methodForFile.PermanatlyDeleteFile(fetchData.address_proof_document_path!);
+                                        fetchData.address_proof_document_name = errorCorrectionData.address.indiaAddress.addressProofName;
+                                        fetchData.address_proof_document_path = errorCorrectionData.address.indiaAddress.addressProofSrc;
+                                        _context.Entry(fetchData).CurrentValues.SetValues(fetchData);
+                                        _context.SaveChanges();
+                                    }
+                                }
+                            }
+                        }
+                        scope.Complete();
+                        //return "Success";
+                        return "Update";
+                    }
+                    else
+                    {
+                        ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == errorCorrectionData.applicationid!)!;
+                        if (errorCorrectionData.address!.addressType!.Trim().ToUpper() == "INDIA")
+                        {
+                            if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.plotNo))
+                            {
+                                return "Please enter सदनिका / घर /प्लॉट नं.";
+                            }
+                            if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.impSymbol))
+                            {
+                                return "Please enter महत्त्वाची खूण";
+                            }
+                            if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.pincode))
+                            {
+                                return "Please enter पिन कोड";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(errorCorrectionData.address!.indiaAddress!.pincode))
+                            {
+                                if (string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.postOfficeName))
+                                {
+                                    return "Please select Post Office Name / Enter correct Pin Code.";
+                                }
+                                return "पिन कोड field contains special characters";
+                            }
+
+                            if (methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.plotNo))
+                            {
+                                return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.building!))
+                            {
+                                return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.mainRoad!))
+                            {
+                                return "मुख्य रस्ता field contains special characters";
+                            }
+                            if (methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.impSymbol!))
+                            {
+                                return "महत्त्वाची खूण field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(errorCorrectionData.address!.indiaAddress!.area!))
+                            {
+                                return "महत्त्वाची खूण field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(errorCorrectionData.address!.indiaAddress!.mobile!))
+                            {
+                                return "मोबाईल field contains special characters";
+                            }
+
+                        }
+                        else if (errorCorrectionData.address!.addressType!.Trim().ToUpper() == "FOREIGN")
+                        {
+                            if (string.IsNullOrEmpty(errorCorrectionData.address.foreignAddress!.address) || string.IsNullOrEmpty(errorCorrectionData.address.foreignAddress!.email))
+                            {
+                                return "पत्ता and ई मेल field is mandatory";
+                            }
+                            if (methodForFile.CheckForeignAddress(errorCorrectionData.address.foreignAddress!.address))
+                            {
+                                return "पत्ता field contains special characters";
+                            }
+                            if (methodForFile.CheckEmail(errorCorrectionData.address.foreignAddress!.email))
+                            {
+                                return "ई मेल field contains special characters";
+                            }
+                        }
+
+                        dbTable.userMaster = userMaster;
+                        dbTable.applicationDTL = applicationDTL;
+                        dbTable.village_code = errorCorrectionData.village_code;
+                        dbTable.sub_property_no = errorCorrectionData.userDetails.subPropNo;
+                        dbTable.city_servey_no = errorCorrectionData.userDetails.nabhu;
+                        dbTable.lr_property_id = errorCorrectionData.userDetails.lrPropertyUID;
+                        dbTable.milkat = errorCorrectionData.userDetails.milkat;
+                        dbTable.namud = errorCorrectionData.userDetails.namud;
+                        //Selected Mutation Data
+                        //dbTable.var_village_code = errorCorrectionData.userDetails!.selectedMutation!.var_village_code;
+                        //dbTable.var_cts_number = errorCorrectionData.userDetails.selectedMutation.var_cts_number;
+                        //dbTable.var_cts_puid = errorCorrectionData.userDetails.selectedMutation.var_cts_puid;
+                        //dbTable.var_mutation_srno = errorCorrectionData.userDetails.selectedMutation.var_mutation_srno;
+                        //dbTable.var_entry_date = errorCorrectionData.userDetails.selectedMutation.var_entry_date;
+                        //dbTable.var_mutation_number = errorCorrectionData.userDetails.selectedMutation.var_mutation_number;
+                        //dbTable.var_mutation_date = errorCorrectionData.userDetails.selectedMutation.var_mutation_date;
+                        //dbTable.var_sro_office_name_marathi = errorCorrectionData.userDetails.selectedMutation.var_sro_office_name_marathi;
+                        //dbTable.var_sro_office_name_english = errorCorrectionData.userDetails.selectedMutation.var_sro_office_name_english;
+                        //dbTable.var_document_number = errorCorrectionData.userDetails.selectedMutation.var_document_number;
+                        //dbTable.var_document_year = errorCorrectionData.userDetails.selectedMutation.var_document_year;
+                        //dbTable.var_document_date = errorCorrectionData.userDetails.selectedMutation.var_document_date;
+                        //dbTable.var_entry_details = errorCorrectionData.userDetails.selectedMutation.var_entry_details;
+                        //dbTable.var_owner_details = errorCorrectionData.userDetails.selectedMutation.var_owner_details;
+
+                        dbTable.reason = errorCorrectionData.userDetails.reason;
+
+                        dbTable.address_type = errorCorrectionData.address.addressType.Trim().ToUpper();
+                        dbTable.address = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? "NA" : errorCorrectionData.address!.foreignAddress!.address;
+                        dbTable.state = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.state : "NA";
+                        dbTable.district = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.district : "NA";
+                        dbTable.taluka = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.taluka : "NA";
+                        dbTable.city = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.city : "NA";
+                        dbTable.flatno_plotno = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.plotNo : "NA";
+                        dbTable.societyname = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.building : "NA";
+                        dbTable.mainstreet = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.mainRoad : "NA.";
+                        dbTable.landmark = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.impSymbol : "NA";
+                        dbTable.locality = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.area : "NA";
+                        dbTable.pincode = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.pincode : "NA";
+                        dbTable.post_office_name = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.postOfficeName : "NA";
+                        dbTable.address_proof_document_name = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address.indiaAddress!.addressProofName! : "NA";
+                        dbTable.address_proof_document_path = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? (errorCorrectionData.address.indiaAddress!.addressProofSrc! == "" ? "NA" : errorCorrectionData.address.indiaAddress!.addressProofSrc!) : "NA";
+
+                        dbTable.mobileno = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address.indiaAddress!.mobile : errorCorrectionData.address!.foreignAddress!.mobile;
+                        dbTable.mobilenoverified = (errorCorrectionData.address.addressType.Trim().ToUpper() == "INDIA") ? errorCorrectionData.address!.indiaAddress!.mobileOTP!.ToUpper() : "NO";
+                        dbTable.city_servey_no = errorCorrectionData.userDetails!.nabhu;
+                        dbTable.lr_property_id = errorCorrectionData.userDetails!.lrPropertyUID;
+                        dbTable.milkat = errorCorrectionData.userDetails.milkat;
+                        dbTable.namud = errorCorrectionData.userDetails!.namud;
+                        dbTable.sub_property_no = errorCorrectionData.userDetails.subPropNo;
+                        _context.errorCorrectionInformation.Attach(dbTable);
+                        _context.SaveChanges();
+
+                        //Get Saved Row ID
+                        int errorCorrectionID = (int)dbTable.error_correction_id!;
+
+                        string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                        bool checkAddressFlag = true;
+                        //bool checkSignFlag = false;
+                        if (errorCorrectionData.address!.addressType.Trim().ToUpper() == "INDIA")
+                        {
+                            if (!string.IsNullOrEmpty(errorCorrectionData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(errorCorrectionData.address.indiaAddress.addressProofName))
+                            {
+                                string[] AddressData = errorCorrectionData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                string imageName = System.IO.Path.GetFileNameWithoutExtension(errorCorrectionData.address.indiaAddress.addressProofName!);
+                                if (methodForFile.ContainsSpecialCharacters(imageName))
+                                {
+                                    return errorCorrectionData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                }
+                                else
+                                {
+                                    checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], errorCorrectionData.address.indiaAddress.addressProofName!, errorCorrectionID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                    string AddressProofExt = Path.GetExtension(errorCorrectionData.address.indiaAddress.addressProofName!);
+                                    errorCorrectionData.address.indiaAddress!.addressProofName = "AddressProof" + errorCorrectionID + "_" + CurrentDateTime + AddressProofExt;
+                                    errorCorrectionData.address.indiaAddress!.addressProofSrc = FolderPath + @"\" + errorCorrectionID + @"\" + errorCorrectionData.address.indiaAddress!.addressProofName;
+
+                                    var UpdateAddressFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == errorCorrectionID).FirstOrDefault();
+                                    if (UpdateAddressFilePath != null)
+                                    {
+                                        dbTable.address_proof_document_name = errorCorrectionData.address.indiaAddress!.addressProofName;
+                                        dbTable.address_proof_document_path = errorCorrectionData.address.indiaAddress!.addressProofSrc;
+                                        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                        _context.SaveChanges();
+                                    }
+                                }
+                            }
+
+                            //if (!string.IsNullOrEmpty(kharediNondDataForGiver.address.indiaAddress.signatureSrc))
+                            //{
+                            //    string[] signData = kharediNondDataForGiver.address.indiaAddress.signatureSrc!.Split(",");
+                            //    checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], kharediNondDataForGiver.address.indiaAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+                            //    string SignatureExt = Path.GetExtension(kharediNondDataForGiver.address.indiaAddress.signatureName!);
+                            //    kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                            //    kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+
+                            //    var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                            //    if (UpdateSignFilePath != null)
+                            //    {
+                            //        dbTable.signed_file_name = kharediNondModel.signature_name;
+                            //        dbTable.signed_file_path = kharediNondModel.signature_src;
+                            //        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                            //        _context.SaveChanges();
+                            //    }
+                            //}
+                        }
+                        //if (kharediNondModel.address_type == "FOREIGN")
+                        //{
+                        //    if (!string.IsNullOrEmpty(kharediNondDataForGiver.address.foreignAddress!.signatureSrc))
+                        //    {
+                        //        string[] signData = kharediNondDataForGiver.address.foreignAddress!.signatureSrc!.Split(",");
+                        //        checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], kharediNondDataForGiver.address.foreignAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+
+                        //        string SignatureExt = Path.GetExtension(kharediNondDataForGiver.address.foreignAddress.signatureName!);
+                        //        kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                        //        kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+                        //        var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                        //        if (UpdateSignFilePath != null)
+                        //        {
+                        //            dbTable.signed_file_name = kharediNondModel.signature_name;
+                        //            dbTable.signed_file_path = kharediNondModel.signature_src;
+                        //            _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                        //            _context.SaveChanges();
+                        //        }
+                        //    }
+                        //}
+                        /*if (checkAddressFlag || checkSignFlag)
+                        {*/
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(errorCorrectionData.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            if (!string.IsNullOrEmpty(applicationDTLdata.errorcorrectionids) && !applicationDTLdata.errorcorrectionids.Contains(errorCorrectionID.ToString()))
+                            {
+                                applicationDTLdata.errorcorrectionids = applicationDTLdata.errorcorrectionids + "," + errorCorrectionID.ToString();
+                            }
+                            else
+                            {
+                                applicationDTLdata.errorcorrectionids = errorCorrectionID.ToString();
+                            }
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                        }
+                        scope.Complete();
+                        return "Success";
+                        /* }
+                         if (!checkAddressFlag)
+                         {
+                             _context.mutationDTL.Remove(dbTable);
+                             _context.SaveChanges();
+                             return "Address Proof File Is Not Uploaded";
+                         }
+                         if (!checkSignFlag)
+                         {
+                             _context.mutationDTL.Remove(dbTable);
+                             _context.SaveChanges();
+                             return "Signature File Is Not Uploaded";
+                         }
+                         else
+                         {
+                             _context.mutationDTL.Remove(dbTable);
+                             _context.SaveChanges();
+                             return "Some Files Are Not Uploaded";
+                         }*/
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //_context.mutationDTL.Remove(dbTable);
+                    //_context.SaveChanges();
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchErrorCorrectionData FetchErrorCorrectionData(int errorcorrectionid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                ErrorCorrectionInformation errorCorrectionData = new ErrorCorrectionInformation();
+                errorCorrectionData = _context.errorCorrectionInformation.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.error_correction_id.Equals(errorcorrectionid)).FirstOrDefault()!;
+
+                FetchErrorCorrectionData fetchData = new FetchErrorCorrectionData();
+                fetchData.error_correction_id = errorCorrectionData.error_correction_id;
+                fetchData.userid = errorCorrectionData.userMaster!.userid;
+                fetchData.applicationid = errorCorrectionData.applicationDTL!.applicationid;
+                fetchData.village_code = errorCorrectionData.village_code;
+
+                UserDetailsForErrorCorrection userDetails = new UserDetailsForErrorCorrection();
+                userDetails.nabhu = errorCorrectionData.city_servey_no;
+                userDetails.lrPropertyUID = errorCorrectionData.lr_property_id;
+                userDetails.milkat = errorCorrectionData.milkat;
+                userDetails.namud = errorCorrectionData.namud;
+                userDetails.subPropNo = errorCorrectionData.sub_property_no;
+                userDetails.reason = errorCorrectionData.reason;
+
+                //Selected Mutation Data
+                //selectedMutationDataForErrorCorrection selectedMutation = new selectedMutationDataForErrorCorrection();
+                //selectedMutation.var_village_code = errorCorrectionData.var_village_code;
+                //selectedMutation.var_cts_number = errorCorrectionData.var_cts_number;
+                //selectedMutation.var_cts_puid = errorCorrectionData.var_cts_puid;
+                //selectedMutation.var_mutation_srno = errorCorrectionData.var_mutation_srno;
+                //selectedMutation.var_entry_date = errorCorrectionData.var_entry_date;
+                //selectedMutation.var_mutation_number = errorCorrectionData.var_mutation_number;
+                //selectedMutation.var_mutation_date = errorCorrectionData.var_mutation_date;
+                //selectedMutation.var_sro_office_name_marathi = errorCorrectionData.var_sro_office_name_marathi;
+                //selectedMutation.var_sro_office_name_english = errorCorrectionData.var_sro_office_name_english;
+                //selectedMutation.var_document_number = errorCorrectionData.var_document_number;
+                //selectedMutation.var_document_year = errorCorrectionData.var_document_year;
+                //selectedMutation.var_document_date = errorCorrectionData.var_document_date;
+                //selectedMutation.var_entry_details = errorCorrectionData.var_entry_details;
+                //selectedMutation.var_owner_details = errorCorrectionData.var_owner_details;
+
+                //userDetails.selectedMutation = selectedMutation;
+                fetchData.userDetails = userDetails;
+
+                AddressDTLForErrorCorrection address = new AddressDTLForErrorCorrection();
+                address.addressType = errorCorrectionData.address_type;
+                if (errorCorrectionData.address_type == "INDIA")
+                {
+                    IndiaAddressForErrorCorrection addressForIndia = new IndiaAddressForErrorCorrection();
+                    addressForIndia.state = errorCorrectionData.state;
+                    addressForIndia.district = errorCorrectionData.district;
+                    addressForIndia.city = errorCorrectionData.city;
+                    addressForIndia.taluka = errorCorrectionData.taluka;
+                    addressForIndia.plotNo = errorCorrectionData.flatno_plotno;
+                    addressForIndia.building = errorCorrectionData.societyname;
+                    addressForIndia.mainRoad = errorCorrectionData.mainstreet;
+                    addressForIndia.impSymbol = errorCorrectionData.landmark;
+                    addressForIndia.area = errorCorrectionData.locality;
+                    addressForIndia.pincode = errorCorrectionData.pincode;
+                    addressForIndia.postOfficeName = errorCorrectionData.post_office_name;
+                    addressForIndia.addressProofName = errorCorrectionData.address_proof_document_name;
+                    addressForIndia.mobile = errorCorrectionData.mobileno;
+                    addressForIndia.mobileOTP = errorCorrectionData.mobilenoverified;
+                    if (errorCorrectionData.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(errorCorrectionData.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(errorCorrectionData.address_proof_document_path!);
+                        errorCorrectionData.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = errorCorrectionData.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = errorCorrectionData.address_proof_document_name;
+                        addressForIndia.addressProofSrc = errorCorrectionData.address_proof_document_path;
+                    }
+                    address.indiaAddress = addressForIndia;
+                }
+                else if (errorCorrectionData.address_type == "FOREIGN")
+                {
+                    ForeignAddressForErrorCorrection addressForForeign = new ForeignAddressForErrorCorrection();
+                    addressForForeign.address = errorCorrectionData.address;
+                    addressForForeign.mobile = errorCorrectionData.mobileno;
+                    addressForForeign.email = errorCorrectionData.emailid;
+                    address.foreignAddress = addressForForeign;
+                }
+                fetchData.address = address;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteErrorCorrectionData(DeleteErrrorCorrectionData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
+                    var entity = _context.errorCorrectionInformation.FirstOrDefault(s => s.error_correction_id == deleteMutation.ErrorCorrectionId! && s.isDeleted == false)!;
+                    if (entity != null)
+                    {
+
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string errorCorrectionIds = applicationDTLdata.errorcorrectionids!;
+                            string[] mutationids = errorCorrectionIds.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.ErrorCorrectionId.ToString());
+                            entity.isDeleted = true;
+                            entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                            _context.errorCorrectionInformation.Attach(entity);
+                            _context.SaveChanges();
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.errorcorrectionids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                        }
+
+                        scope.Complete();
+                        methodForFileUpload.PermanatlyDeleteFile(entity.address_proof_document_path!);
+                        var path =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\ERRORCORRECTIONDOC\" + deleteMutation.ErrorCorrectionId;
+                        bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public string SaveNameChangeData(NameChangeData inputData)
+        {
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            NameChangeDTL dbTable = new NameChangeDTL();
+            NameChangeDTL fetchData = new NameChangeDTL();
+            string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inputData.applicationid + @"\NAMECHANGEDOCS";
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(inputData.userDetails!.nabhu))
+                    {
+                        return "Please select अर्जामधील न.भू.क्र.";
+                    }
+                    if (inputData.updatedUserDetails!.userType == 1)
+                    {
+                        if (string.IsNullOrEmpty(inputData.updatedUserDetails!.details!.firstNameEng))
+                        {
+                            return "Please Enter First Name in नावातील बदल नाव (इंग्रजी मध्ये)";
+                        }
+                        if (string.IsNullOrEmpty(inputData.updatedUserDetails!.details!.firstName))
+                        {
+                            return "Please Enter First Name in नावातील बदल नाव (मराठी मध्ये)";
+                        }
+                    }
+                    else if (inputData.updatedUserDetails!.userType == 11)
+                    {
+                        if (string.IsNullOrEmpty(inputData.updatedUserDetails!.details!.companyNameEng))
+                        {
+                            return "Please Enter Company Name in नावातील बदल नाव (इंग्रजी मध्ये)";
+                        }
+                        if (string.IsNullOrEmpty(inputData.updatedUserDetails!.details!.companyName))
+                        {
+                            return "Please Enter Company Name in नावातील बदल नाव (मराठी मध्ये)";
+                        }
+                    }
+                    if (inputData.address!.addressType!.Trim().ToUpper() == "INDIA")
+                    {
+                        if (string.IsNullOrEmpty(inputData.address!.indiaAddress!.plotNo))
+                        {
+                            return "Please Enter Flat / Plot No";
+                        }
+                        if (string.IsNullOrEmpty(inputData.address.indiaAddress.impSymbol))
+                        {
+                            return "Please Enter Landmark";
+                        }
+                        if (string.IsNullOrEmpty(inputData.address.indiaAddress.pincode))
+                        {
+                            return "Please Enter Pincode";
+                        }
+                    }
+
+                    fetchData = _context.nameChangeDTLs.Include(app => app.applicationDTL).Where(data => data.applicationDTL!.applicationid!.Equals(inputData.applicationid)
+                       && data.village_code == inputData.village_code!
+                       //&& data.selected_cts_number == inputData.selectedUserDetails!.cts_number
+                       //&& data.selected_mutation_srno == inputData.selectedUserDetails!.mutation_srno
+                       //&& data.selected_owner_number == inputData.selectedUserDetails!.owner_number
+                       && data.isDeleted == false).FirstOrDefault()!;
+                    if (fetchData != null)
+                    {
+                        fetchData.village_code = inputData.village_code;
+                        fetchData.subPropNo = inputData.userDetails!.subPropNo;
+                        fetchData.nabhu = inputData.userDetails.nabhu;
+                        fetchData.lrPropertyUID = inputData.userDetails.lrPropertyUID;
+                        fetchData.milkat = inputData.userDetails.milkat;
+                        fetchData.namud = inputData.userDetails.namud;
+                        fetchData.name_change_by_code = inputData.nameChange!.reason!.name_change_by_code;
+                        fetchData.name_change_by_description = inputData.nameChange.reason.name_change_by_description;
+                        fetchData.name_change_no = inputData.nameChange.no;
+                        fetchData.name_change_date = inputData.nameChange.date;
+                        // selectedMutation -> data from EPCIS
+                        fetchData.selected_village_code = inputData.selectedUserDetails![0].village_code;
+                        fetchData.selected_cts_number = inputData.selectedUserDetails![0].cts_number;
+                        fetchData.selected_mutation_srno = inputData.selectedUserDetails![0].mutation_srno;
+                        fetchData.selected_entry_date = inputData.selectedUserDetails![0].entry_date;
+                        fetchData.selected_entry_bracketed = inputData.selectedUserDetails![0].entry_bracketed;
+                        fetchData.selected_owner_number = inputData.selectedUserDetails![0].owner_number;
+                        fetchData.selected_owner_name = inputData.selectedUserDetails![0].owner_name;
+                        fetchData.selected_first_name = inputData.selectedUserDetails![0].first_name;
+                        fetchData.selected_middle_name = inputData.selectedUserDetails![0].middle_name;
+                        fetchData.selected_last_name = inputData.selectedUserDetails![0].last_name;
+                        fetchData.selected_nick_name = inputData.selectedUserDetails![0].nick_name;
+                        fetchData.selected_owner_bracketed = inputData.selectedUserDetails![0].owner_bracketed;
+                        fetchData.selected_area_bracketed = inputData.selectedUserDetails![0].area_bracketed;
+                        fetchData.selected_email_id = inputData.selectedUserDetails![0].email_id;
+                        fetchData.selected_owner_cell_number = inputData.selectedUserDetails![0].owner_cell_number;
+                        fetchData.selected_pincode = inputData.selectedUserDetails![0].pincode;
+                        fetchData.selected_owner_type = inputData.selectedUserDetails![0].owner_type;
+                        fetchData.selected_apk_code = inputData.selectedUserDetails![0].apk_code;
+                        fetchData.selected_apk_name = inputData.selectedUserDetails![0].apk_name;
+                        fetchData.selected_flat_or_house_number = inputData.selectedUserDetails![0].flat_or_house_number;
+                        fetchData.selected_building_number = inputData.selectedUserDetails![0].building_number;
+                        fetchData.selected_road = inputData.selectedUserDetails![0].road;
+                        fetchData.selected_city_or_village = inputData.selectedUserDetails![0].city_or_village;
+                        fetchData.selected_taluka_name = inputData.selectedUserDetails![0].taluka_name;
+                        fetchData.selected_district_name = inputData.selectedUserDetails![0].district_name;
+                        fetchData.selected_state_name = inputData.selectedUserDetails![0].state_name;
+                        fetchData.selected_gender_code = inputData.selectedUserDetails![0].gender_code;
+                        fetchData.selected_date_of_birth = inputData.selectedUserDetails![0].date_of_birth;
+                        fetchData.selected_owner_area = inputData.selectedUserDetails![0].owner_area;
+                        fetchData.selected_owner_area_bracketed = inputData.selectedUserDetails![0].owner_area_bracketed;
+                        // Updated Details
+                        if (inputData.updatedUserDetails!.userType == 1)
+                        {
+                            fetchData.updated_userType = inputData.updatedUserDetails!.userType;
+                            fetchData.updated_userTypeLabel = inputData.updatedUserDetails!.userTypeLabel;
+                            fetchData.updated_prefixcode_marathi = inputData.updatedUserDetails!.details!.suffixcode;
+                            fetchData.updated_prefix_in_marathi = inputData.updatedUserDetails!.details!.suffix;
+                            fetchData.updated_fname_in_marathi = inputData.updatedUserDetails!.details!.firstName;
+                            fetchData.updated_mname_in_marathi = inputData.updatedUserDetails!.details!.middleName;
+                            fetchData.updated_lname_in_marathi = inputData.updatedUserDetails!.details!.lastName;
+                            fetchData.updated_prefixcode_eng = inputData.updatedUserDetails!.details!.suffixCodeEng;
+                            fetchData.updated_prefix_in_eng = inputData.updatedUserDetails!.details!.suffixEng;
+                            fetchData.updated_fname_in_eng = inputData.updatedUserDetails!.details!.firstNameEng;
+                            fetchData.updated_mname_in_eng = inputData.updatedUserDetails!.details!.middleNameEng;
+                            fetchData.updated_lname_in_eng = inputData.updatedUserDetails!.details!.lastNameEng;
+                            fetchData.company_name_in_marathi = "NA";
+                            fetchData.company_name_in_eng = "NA";
+                        }
+                        else if (inputData.updatedUserDetails!.userType == 11)
+                        {
+                            fetchData.updated_userType = inputData.updatedUserDetails!.userType;
+                            fetchData.updated_userTypeLabel = "NA";
+                            fetchData.updated_prefixcode_marathi = "NA";
+                            fetchData.updated_prefix_in_marathi = "NA";
+                            fetchData.updated_fname_in_marathi = "NA";
+                            fetchData.updated_mname_in_marathi = "NA";
+                            fetchData.updated_lname_in_marathi = "NA";
+                            fetchData.updated_prefixcode_eng = "NA";
+                            fetchData.updated_prefix_in_eng = "NA";
+                            fetchData.updated_fname_in_eng = "NA";
+                            fetchData.updated_mname_in_eng = "NA";
+                            fetchData.updated_lname_in_eng = "NA";
+                            fetchData.company_name_in_marathi = inputData.updatedUserDetails!.details!.companyName!;
+                            fetchData.company_name_in_eng = inputData.updatedUserDetails!.details!.companyNameEng!;
+                        }
+
+                        // Address Fields
+                        fetchData.address_type = inputData.address.addressType.ToUpper().Trim();
+                        if (inputData.address.addressType.ToUpper().Trim() == "INDIA")
+                        {
+                            fetchData.address = "NA";
+                            fetchData.state = inputData.address!.indiaAddress!.state;
+                            fetchData.district = inputData.address!.indiaAddress!.district;
+                            fetchData.taluka = inputData.address!.indiaAddress!.taluka;
+                            fetchData.city = inputData.address!.indiaAddress!.city;
+                            fetchData.flatno_plotno = inputData.address!.indiaAddress!.plotNo;
+                            fetchData.societyname = inputData.address!.indiaAddress!.building;
+                            fetchData.mainstreet = inputData.address!.indiaAddress!.mainRoad;
+                            fetchData.landmark = inputData.address!.indiaAddress!.impSymbol;
+                            fetchData.locality = inputData.address!.indiaAddress!.area;
+                            fetchData.pincode = inputData.address!.indiaAddress!.pincode;
+                            fetchData.postofficename = inputData.address!.indiaAddress!.postOfficeName;
+                            //fetchData.address_proof_document_name = ;
+                            //fetchData.address_proof_document_path =;
+                        }
+                        if (inputData.address.addressType.Trim().ToUpper() == "FOREIGN")
+                        {
+                            fetchData.address = inputData.address!.foreignAddress!.address!;
+                            fetchData.state = "NA";
+                            fetchData.district = "NA";
+                            fetchData.taluka = "NA";
+                            fetchData.city = "NA";
+                            fetchData.flatno_plotno = "NA";
+                            fetchData.societyname = "NA";
+                            fetchData.mainstreet = "NA";
+                            fetchData.landmark = "NA";
+                            fetchData.locality = "NA";
+                            fetchData.pincode = "NA";
+                            fetchData.postofficename = "NA";
+                            fetchData.address_proof_document_name = "NA";
+                            fetchData.address_proof_document_path = "NA";
+                        }
+                        fetchData.mobileno = (inputData.address.addressType.Trim().ToUpper() == "INDIA") ? inputData.address.indiaAddress!.mobile : inputData.address!.foreignAddress!.mobile;
+                        fetchData.mobilenoverified = (inputData.address.addressType.Trim().ToUpper() == "INDIA") ? inputData.address!.indiaAddress!.mobileOTP!.ToUpper() : "NO";
+                        fetchData.emailid = (inputData.address.addressType.Trim().ToUpper() == "INDIA") ? "NA" : inputData.address!.foreignAddress!.email;
+                        _context.nameChangeDTLs.Attach(fetchData);
+                        _context.SaveChanges();
+
+                        int nameChangeID = fetchData.name_change_id;
+                        string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                        bool checkAddressFlag = true;
+                        //bool checkSignFlag = false;
+                        if (inputData.address.addressType.ToUpper().Trim() == "INDIA")
+                        {
+                            if (!string.IsNullOrEmpty(inputData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(inputData.address.indiaAddress.addressProofName))
+                            {
+                                string[] AddressData = inputData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                string imageName = System.IO.Path.GetFileNameWithoutExtension(inputData.address.indiaAddress.addressProofName!);
+                                if (methodForFile.ContainsSpecialCharacters(imageName))
+                                {
+                                    return inputData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                }
+                                else
+                                {
+                                    checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], inputData.address.indiaAddress.addressProofName!, nameChangeID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                    string AddressProofExt = Path.GetExtension(inputData.address.indiaAddress.addressProofName!);
+                                    string address_proof_document_name = "AddressProof" + nameChangeID + "_" + CurrentDateTime + AddressProofExt;
+                                    string address_proof_document_path = FolderPath + @"\" + nameChangeID + @"\" + address_proof_document_name;
+                                    var UpdateAddressFilePath = _context.nameChangeDTLs.Where(w => w.name_change_id == nameChangeID).FirstOrDefault();
+                                    if (UpdateAddressFilePath != null)
+                                    {
+                                        bool isDeleted = methodForFile.PermanatlyDeleteFile(fetchData.address_proof_document_path!);
+                                        fetchData.address_proof_document_name = address_proof_document_name;
+                                        fetchData.address_proof_document_path = address_proof_document_path;
+                                        _context.Entry(fetchData).CurrentValues.SetValues(fetchData);
+                                        _context.SaveChanges();
+                                    }
+                                }
+                            }
+                        }
+                        scope.Complete();
+                        return "Update";
+                    }
+                    else
+                    {
+                        ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inputData.applicationid)!;
+                        dbTable.applicationDTL = applicationDTL;
+
+                        UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inputData.userid)!;
+                        dbTable.userMaster = userMaster;
+
+                        dbTable.village_code = inputData.village_code;
+                        dbTable.subPropNo = inputData.userDetails!.subPropNo;
+                        dbTable.nabhu = inputData.userDetails.nabhu;
+                        dbTable.lrPropertyUID = inputData.userDetails.lrPropertyUID;
+                        dbTable.milkat = inputData.userDetails.milkat;
+                        dbTable.namud = inputData.userDetails.namud;
+                        dbTable.name_change_by_code = inputData.nameChange!.reason!.name_change_by_code;
+                        dbTable.name_change_by_description = inputData.nameChange.reason.name_change_by_description;
+                        dbTable.name_change_no = inputData.nameChange.no;
+                        dbTable.name_change_date = inputData.nameChange.date;
+
+                        // selectedMutation -> data from EPCIS
+                        dbTable.selected_village_code = inputData.selectedUserDetails![0].village_code;
+                        dbTable.selected_cts_number = inputData.selectedUserDetails![0].cts_number;
+                        dbTable.selected_mutation_srno = inputData.selectedUserDetails![0].mutation_srno;
+                        dbTable.selected_entry_date = inputData.selectedUserDetails![0].entry_date;
+                        dbTable.selected_entry_bracketed = inputData.selectedUserDetails![0].entry_bracketed;
+                        dbTable.selected_owner_number = inputData.selectedUserDetails![0].owner_number;
+                        dbTable.selected_owner_name = inputData.selectedUserDetails![0].owner_name;
+                        dbTable.selected_first_name = inputData.selectedUserDetails![0].first_name;
+                        dbTable.selected_middle_name = inputData.selectedUserDetails![0].middle_name;
+                        dbTable.selected_last_name = inputData.selectedUserDetails![0].last_name;
+                        dbTable.selected_nick_name = inputData.selectedUserDetails![0].nick_name;
+                        dbTable.selected_owner_bracketed = inputData.selectedUserDetails![0].owner_bracketed;
+                        dbTable.selected_area_bracketed = inputData.selectedUserDetails![0].area_bracketed;
+                        dbTable.selected_email_id = inputData.selectedUserDetails![0].email_id;
+                        dbTable.selected_owner_cell_number = inputData.selectedUserDetails![0].owner_cell_number;
+                        dbTable.selected_pincode = inputData.selectedUserDetails![0].pincode;
+                        dbTable.selected_owner_type = inputData.selectedUserDetails![0].owner_type;
+                        dbTable.selected_apk_code = inputData.selectedUserDetails![0].apk_code;
+                        dbTable.selected_apk_name = inputData.selectedUserDetails![0].apk_name;
+                        dbTable.selected_flat_or_house_number = inputData.selectedUserDetails![0].flat_or_house_number;
+                        dbTable.selected_building_number = inputData.selectedUserDetails![0].building_number;
+                        dbTable.selected_road = inputData.selectedUserDetails![0].road;
+                        dbTable.selected_city_or_village = inputData.selectedUserDetails![0].city_or_village;
+                        dbTable.selected_taluka_name = inputData.selectedUserDetails![0].taluka_name;
+                        dbTable.selected_district_name = inputData.selectedUserDetails![0].district_name;
+                        dbTable.selected_state_name = inputData.selectedUserDetails![0].state_name;
+                        dbTable.selected_gender_code = inputData.selectedUserDetails![0].gender_code;
+                        dbTable.selected_date_of_birth = inputData.selectedUserDetails![0].date_of_birth;
+                        dbTable.selected_owner_area = inputData.selectedUserDetails![0].owner_area;
+                        dbTable.selected_owner_area_bracketed = inputData.selectedUserDetails![0].owner_area_bracketed;
+                        // Updated Details
+                        if (inputData.updatedUserDetails!.userType == 1)
+                        {
+                            dbTable.updated_userType = inputData.updatedUserDetails!.userType;
+                            dbTable.updated_userTypeLabel = inputData.updatedUserDetails!.userTypeLabel;
+                            dbTable.updated_prefixcode_marathi = inputData.updatedUserDetails!.details!.suffixcode;
+                            dbTable.updated_prefix_in_marathi = inputData.updatedUserDetails!.details!.suffix;
+                            dbTable.updated_fname_in_marathi = inputData.updatedUserDetails!.details!.firstName;
+                            dbTable.updated_mname_in_marathi = inputData.updatedUserDetails!.details!.middleName;
+                            dbTable.updated_lname_in_marathi = inputData.updatedUserDetails!.details!.lastName;
+                            dbTable.updated_prefixcode_eng = inputData.updatedUserDetails!.details!.suffixCodeEng;
+                            dbTable.updated_prefix_in_eng = inputData.updatedUserDetails!.details!.suffixEng;
+                            dbTable.updated_fname_in_eng = inputData.updatedUserDetails!.details!.firstNameEng;
+                            dbTable.updated_mname_in_eng = inputData.updatedUserDetails!.details!.middleNameEng;
+                            dbTable.updated_lname_in_eng = inputData.updatedUserDetails!.details!.lastNameEng;
+                            dbTable.company_name_in_marathi = "NA";
+                            dbTable.company_name_in_eng = "NA";
+                        }
+                        else if (inputData.updatedUserDetails!.userType == 11)
+                        {
+                            dbTable.updated_userType = inputData.updatedUserDetails!.userType;
+                            dbTable.updated_userTypeLabel = "NA";
+                            dbTable.updated_prefixcode_marathi = "NA";
+                            dbTable.updated_prefix_in_marathi = "NA";
+                            dbTable.updated_fname_in_marathi = "NA";
+                            dbTable.updated_mname_in_marathi = "NA";
+                            dbTable.updated_lname_in_marathi = "NA";
+                            dbTable.updated_prefixcode_eng = "NA";
+                            dbTable.updated_prefix_in_eng = "NA";
+                            dbTable.updated_fname_in_eng = "NA";
+                            dbTable.updated_mname_in_eng = "NA";
+                            dbTable.updated_lname_in_eng = "NA";
+                            dbTable.company_name_in_marathi = inputData.updatedUserDetails!.details!.companyName!;
+                            dbTable.company_name_in_eng = inputData.updatedUserDetails!.details!.companyNameEng!;
+                        }
+
+                        // Address Fields
+                        dbTable.address_type = inputData.address.addressType.ToUpper().Trim();
+                        if (inputData.address.addressType.ToUpper().Trim() == "INDIA")
+                        {
+                            dbTable.address = "NA";
+                            dbTable.state = inputData.address!.indiaAddress!.state;
+                            dbTable.district = inputData.address!.indiaAddress!.district;
+                            dbTable.taluka = inputData.address!.indiaAddress!.taluka;
+                            dbTable.city = inputData.address!.indiaAddress!.city;
+                            dbTable.flatno_plotno = inputData.address!.indiaAddress!.plotNo;
+                            dbTable.societyname = inputData.address!.indiaAddress!.building;
+                            dbTable.mainstreet = inputData.address!.indiaAddress!.mainRoad;
+                            dbTable.landmark = inputData.address!.indiaAddress!.impSymbol;
+                            dbTable.locality = inputData.address!.indiaAddress!.area;
+                            dbTable.pincode = inputData.address!.indiaAddress!.pincode;
+                            dbTable.postofficename = inputData.address!.indiaAddress!.postOfficeName;
+                            //dbTable.address_proof_document_name = ;
+                            //dbTable.address_proof_document_path =;
+                        }
+                        if (inputData.address.addressType.Trim().ToUpper() == "FOREIGN")
+                        {
+                            dbTable.address = inputData.address!.foreignAddress!.address!;
+                            dbTable.state = "NA";
+                            dbTable.district = "NA";
+                            dbTable.taluka = "NA";
+                            dbTable.city = "NA";
+                            dbTable.flatno_plotno = "NA";
+                            dbTable.societyname = "NA";
+                            dbTable.mainstreet = "NA";
+                            dbTable.landmark = "NA";
+                            dbTable.locality = "NA";
+                            dbTable.pincode = "NA";
+                            dbTable.postofficename = "NA";
+                            dbTable.address_proof_document_name = "NA";
+                            dbTable.address_proof_document_path = "NA";
+                        }
+                        dbTable.mobileno = (inputData.address.addressType.Trim().ToUpper() == "INDIA") ? inputData.address.indiaAddress!.mobile : inputData.address!.foreignAddress!.mobile;
+                        dbTable.mobilenoverified = (inputData.address.addressType.Trim().ToUpper() == "INDIA") ? inputData.address!.indiaAddress!.mobileOTP!.ToUpper() : "NO";
+                        dbTable.emailid = (inputData.address.addressType.Trim().ToUpper() == "INDIA") ? "NA" : inputData.address!.foreignAddress!.email;
+                        _context.nameChangeDTLs.Add(dbTable);
+                        _context.SaveChanges();
+
+                        //Get Saved Row ID
+                        int nameChangeID = dbTable.name_change_id;
+                        string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                        bool checkAddressFlag = true;
+                        //bool checkSignFlag = false;
+                        if (inputData.address.addressType.ToUpper().Trim() == "INDIA")
+                        {
+                            if (!string.IsNullOrEmpty(inputData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(inputData.address.indiaAddress.addressProofName))
+                            {
+                                string[] AddressData = inputData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                string imageName = System.IO.Path.GetFileNameWithoutExtension(inputData.address.indiaAddress.addressProofName!);
+                                if (methodForFile.ContainsSpecialCharacters(imageName))
+                                {
+                                    return inputData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                }
+                                else
+                                {
+                                    checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], inputData.address.indiaAddress.addressProofName!, nameChangeID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                    string AddressProofExt = Path.GetExtension(inputData.address.indiaAddress.addressProofName!);
+                                    string address_proof_document_name = "AddressProof" + nameChangeID + "_" + CurrentDateTime + AddressProofExt;
+                                    string address_proof_document_path = FolderPath + @"\" + nameChangeID + @"\" + address_proof_document_name;
+                                    var UpdateAddressFilePath = _context.nameChangeDTLs.Where(w => w.name_change_id == nameChangeID).FirstOrDefault();
+                                    if (UpdateAddressFilePath != null)
+                                    {
+                                        dbTable.address_proof_document_name = address_proof_document_name;
+                                        dbTable.address_proof_document_path = address_proof_document_path;
+                                        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                        _context.SaveChanges();
+                                    }
+                                    //var UpdateAddressFilePath = _context.nameChangeDTLs.Where(w => w.name_change_id == nameChangeID).FirstOrDefault();
+                                    //if (UpdateAddressFilePath != null)
+                                    //{
+                                    //    dbTable.address_proof_document_name = kharediNondModel.address_proof_name;
+                                    //    dbTable.address_proof_document_path = kharediNondModel.address_proof_src;
+                                    //    _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                    //    _context.SaveChanges();
+                                    //}
+                                }
+                            }
+                        }
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inputData.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            if (!string.IsNullOrEmpty(applicationDTLdata.namechangeids) && !applicationDTLdata.namechangeids.Contains(nameChangeID.ToString()))
+                            {
+                                applicationDTLdata.namechangeids = applicationDTLdata.namechangeids + "," + nameChangeID.ToString();
+                            }
+                            else
+                            {
+                                applicationDTLdata.namechangeids = nameChangeID.ToString();
+                            }
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                        }
+                        scope.Complete();
+                        return "Success";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchNavatBadalData FetchNavatBadalData(int name_change_id)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                NameChangeDTL nameChangeDTL = new NameChangeDTL();
+                nameChangeDTL = _context.nameChangeDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.name_change_id.Equals(name_change_id)).FirstOrDefault()!;
+
+                FetchNavatBadalData fetchData = new FetchNavatBadalData();
+                fetchData.name_change_id = nameChangeDTL.name_change_id;
+                fetchData.userid = nameChangeDTL.userMaster!.userid;
+                fetchData.applicationid = nameChangeDTL.applicationDTL!.applicationid;
+                fetchData.village_code = nameChangeDTL.village_code;
+
+                UserDetailsForNameChange userDetails = new UserDetailsForNameChange();
+
+                userDetails.subPropNo = nameChangeDTL.subPropNo;
+                userDetails.nabhu = nameChangeDTL.nabhu;
+                userDetails.lrPropertyUID = nameChangeDTL.lrPropertyUID;
+                userDetails.milkat = nameChangeDTL.milkat;
+                userDetails.namud = nameChangeDTL.namud;
+                fetchData.userDetails = userDetails;
+
+                NameChangeDetails nameChange = new NameChangeDetails();
+                ReasonDataForNameChange reason = new ReasonDataForNameChange();
+                reason.name_change_by_code = nameChangeDTL.name_change_by_code;
+                reason.name_change_by_description = nameChangeDTL.name_change_by_description;
+                nameChange.reason = reason;
+                nameChange.no = nameChangeDTL.name_change_no;
+                nameChange.date = nameChangeDTL.name_change_date;
+                fetchData.nameChange = nameChange;
+
+                List<SelectedUserDTLsForNameChange> selectedUserDetails = new List<SelectedUserDTLsForNameChange>();
+                SelectedUserDTLsForNameChange userDTLsForNameChange = new SelectedUserDTLsForNameChange();
+                userDTLsForNameChange.village_code = nameChangeDTL.selected_village_code;
+                userDTLsForNameChange.cts_number = nameChangeDTL.selected_cts_number;
+                userDTLsForNameChange.mutation_srno = nameChangeDTL.selected_mutation_srno;
+                userDTLsForNameChange.entry_date = nameChangeDTL.selected_entry_date;
+                userDTLsForNameChange.entry_bracketed = nameChangeDTL.selected_entry_bracketed;
+                userDTLsForNameChange.owner_number = nameChangeDTL.selected_owner_number;
+                userDTLsForNameChange.owner_name = nameChangeDTL.selected_owner_name;
+                userDTLsForNameChange.first_name = nameChangeDTL.selected_first_name;
+                userDTLsForNameChange.middle_name = nameChangeDTL.selected_middle_name;
+                userDTLsForNameChange.last_name = nameChangeDTL.selected_last_name;
+                userDTLsForNameChange.nick_name = nameChangeDTL.selected_nick_name;
+                userDTLsForNameChange.owner_bracketed = nameChangeDTL.selected_owner_bracketed;
+                userDTLsForNameChange.area_bracketed = nameChangeDTL.selected_area_bracketed;
+                userDTLsForNameChange.email_id = nameChangeDTL.selected_email_id;
+                userDTLsForNameChange.owner_cell_number = nameChangeDTL.selected_owner_cell_number;
+                userDTLsForNameChange.pincode = nameChangeDTL.selected_pincode;
+                userDTLsForNameChange.owner_type = nameChangeDTL.selected_owner_type;
+                userDTLsForNameChange.apk_code = nameChangeDTL.selected_apk_code;
+                userDTLsForNameChange.apk_name = nameChangeDTL.selected_apk_name;
+                userDTLsForNameChange.flat_or_house_number = nameChangeDTL.selected_flat_or_house_number;
+                userDTLsForNameChange.building_number = nameChangeDTL.selected_building_number;
+                userDTLsForNameChange.road = nameChangeDTL.selected_road;
+                userDTLsForNameChange.city_or_village = nameChangeDTL.selected_city_or_village;
+                userDTLsForNameChange.taluka_name = nameChangeDTL.selected_taluka_name;
+                userDTLsForNameChange.district_name = nameChangeDTL.selected_district_name;
+                userDTLsForNameChange.state_name = nameChangeDTL.selected_state_name;
+                userDTLsForNameChange.gender_code = nameChangeDTL.selected_gender_code;
+                userDTLsForNameChange.date_of_birth = nameChangeDTL.selected_date_of_birth;
+                userDTLsForNameChange.owner_area = nameChangeDTL.selected_owner_area;
+                userDTLsForNameChange.owner_area_bracketed = nameChangeDTL.selected_owner_area_bracketed;
+                selectedUserDetails.Add(userDTLsForNameChange);
+                fetchData.selectedUserDetails = selectedUserDetails;
+
+                UpdatedUserDetailsForNameChange updatedUserDetails = new UpdatedUserDetailsForNameChange();
+                updatedUserDetails.userType = nameChangeDTL.updated_userType;
+                updatedUserDetails.userTypeLabel = nameChangeDTL.updated_userTypeLabel;
+                NameDetailsForNameChange? details = new NameDetailsForNameChange();
+                details.suffix = nameChangeDTL.updated_prefix_in_marathi;
+                details.suffixEng = nameChangeDTL.updated_prefix_in_eng;
+                details.suffixcode = nameChangeDTL.updated_prefixcode_marathi;
+                details.suffixCodeEng = nameChangeDTL.updated_prefixcode_eng;
+                details.firstName = nameChangeDTL.updated_fname_in_marathi;
+                details.middleName = nameChangeDTL.updated_mname_in_marathi;
+                details.lastName = nameChangeDTL.updated_lname_in_marathi;
+                details.firstNameEng = nameChangeDTL.updated_fname_in_eng;
+                details.middleNameEng = nameChangeDTL.updated_mname_in_eng;
+                details.lastNameEng = nameChangeDTL.updated_lname_in_eng;
+                details.companyName = nameChangeDTL.company_name_in_marathi;
+                details.companyNameEng = nameChangeDTL.company_name_in_eng;
+                updatedUserDetails.details = details;
+                fetchData.updatedUserDetails = updatedUserDetails;
+
+                AddressDTLForNameChange address = new AddressDTLForNameChange();
+                address.addressType = nameChangeDTL.address_type;
+                if (nameChangeDTL.address_type == "INDIA")
+                {
+                    IndiaAddressForNameChange addressForIndia = new IndiaAddressForNameChange();
+                    addressForIndia.state = nameChangeDTL.state;
+                    addressForIndia.district = nameChangeDTL.district;
+                    addressForIndia.city = nameChangeDTL.city;
+                    addressForIndia.taluka = nameChangeDTL.taluka;
+                    addressForIndia.plotNo = nameChangeDTL.flatno_plotno;
+                    addressForIndia.building = nameChangeDTL.societyname;
+                    addressForIndia.mainRoad = nameChangeDTL.mainstreet;
+                    addressForIndia.impSymbol = nameChangeDTL.landmark;
+                    addressForIndia.area = nameChangeDTL.locality;
+                    addressForIndia.pincode = nameChangeDTL.pincode;
+                    addressForIndia.postOfficeName = nameChangeDTL.postofficename;
+                    addressForIndia.addressProofName = nameChangeDTL.address_proof_document_name;
+                    addressForIndia.mobile = nameChangeDTL.mobileno;
+                    addressForIndia.mobileOTP = nameChangeDTL.mobilenoverified;
+                    if (nameChangeDTL.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(nameChangeDTL.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(nameChangeDTL.address_proof_document_path!);
+                        nameChangeDTL.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = nameChangeDTL.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = nameChangeDTL.address_proof_document_name;
+                        addressForIndia.addressProofSrc = nameChangeDTL.address_proof_document_path;
+                    }
+                    address.indiaAddress = addressForIndia;
+                }
+                else if (nameChangeDTL.address_type == "FOREIGN")
+                {
+                    AddressForForeignForNameChange addressForForeign = new AddressForForeignForNameChange();
+                    addressForForeign.address = nameChangeDTL.address;
+                    addressForForeign.mobile = nameChangeDTL.mobileno;
+                    addressForForeign.email = nameChangeDTL.emailid;
+                    address.foreignAddress = addressForForeign;
+                }
+                fetchData.address = address;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteNavatBadalData(DeleteNavatBadalData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
+                    var entity = _context.nameChangeDTLs.FirstOrDefault(s => s.name_change_id == deleteMutation.NameChangeId! && s.isDeleted == false)!;
+                    if (entity != null)
+                    {
+
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string namechangeIds = applicationDTLdata.namechangeids!;
+                            string[] mutationids = namechangeIds.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.NameChangeId.ToString());
+                            entity.isDeleted = true;
+                            entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                            _context.nameChangeDTLs.Attach(entity);
+                            _context.SaveChanges();
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.namechangeids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                        }
+
+                        scope.Complete();
+                        methodForFileUpload.PermanatlyDeleteFile(entity.address_proof_document_path!);
+                        var path =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\NAMECHANGEDOCS\" + deleteMutation.NameChangeId;
+                        bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        // Hibanama Witness Info
+        public string SaveHibanamaWitnessData(HibanamaWitnessInfoInputModel hibanamaWTData)
+        {
+            WitnessDTL dbTable = new WitnessDTL();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    if (hibanamaWTData.witnessDetails != null && !string.IsNullOrEmpty(hibanamaWTData.witnessDetails.firstName))
+                    {
+                        if (string.IsNullOrEmpty(hibanamaWTData.witnessDetails!.firstNameEng!))
+                        {
+                            return "Please Enter First Name in साक्षीदार (इंग्रजी मध्ये)";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(hibanamaWTData.witnessDetails!.aliceName!))
+                        {
+                            return "देणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
+                        }
+                        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + hibanamaWTData.applicationid + @"\WITNESSDOC";
+                        // Assign Values to Model
+                        KharediNondModel kharediNondModel = new KharediNondModel();
+                        UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == hibanamaWTData.userid!)!;
+                        kharediNondModel.userMaster = userMaster;
+
+                        ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == hibanamaWTData.applicationid!)!;
+                        kharediNondModel.applicationDTL = applicationDTL;
+
+                        PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32("0"))!;
+                        kharediNondModel.propType = proptype;
+
+                        kharediNondModel.address_type = hibanamaWTData.address!.addressType!.Trim().ToUpper();
+                        if (kharediNondModel.address_type == "INDIA")
+                        {
+                            if (string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.plotNo))
+                            {
+                                return "Please enter सदनिका / घर /प्लॉट नं.";
+                            }
+                            if (string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.impSymbol))
+                            {
+                                return "Please enter महत्त्वाची खूण";
+                            }
+                            if (string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.pincode))
+                            {
+                                return "Please enter पिन कोड";
+                            }
+                            if (!string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(hibanamaWTData.address!.indiaAddress!.pincode))
+                            {
+                                if (string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.postOfficeName))
+                                {
+                                    return "Please select Post Office Name / Enter correct Pin Code.";
+                                }
+                                return "पिन कोड field contains special characters";
+                            }
+
+                            if (methodForFile.CheckIndianAddress(hibanamaWTData.address!.indiaAddress!.plotNo))
+                            {
+                                return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(hibanamaWTData.address!.indiaAddress!.building!))
+                            {
+                                return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(hibanamaWTData.address!.indiaAddress!.mainRoad!))
+                            {
+                                return "मुख्य रस्ता field contains special characters";
+                            }
+                            if (methodForFile.CheckIndianAddress(hibanamaWTData.address!.indiaAddress!.impSymbol!))
+                            {
+                                return "महत्त्वाची खूण field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(hibanamaWTData.address!.indiaAddress!.area!))
+                            {
+                                return "महत्त्वाची खूण field contains special characters";
+                            }
+                            if (!string.IsNullOrEmpty(hibanamaWTData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(hibanamaWTData.address!.indiaAddress!.mobile!))
+                            {
+                                return "मोबाईल field contains special characters";
+                            }
+
+                            kharediNondModel.mobileno = hibanamaWTData.address.indiaAddress!.mobile;
+                            kharediNondModel.mobilenoverified = hibanamaWTData.address.indiaAddress.mobileOTP;
+                            kharediNondModel.emailid = "NA";
+                            kharediNondModel.emailidverified = "NA";
+
+                            kharediNondModel.address = "NA";
+                            kharediNondModel.state = hibanamaWTData.address.indiaAddress.state;
+                            kharediNondModel.district = hibanamaWTData.address.indiaAddress.district;
+                            kharediNondModel.taluka = hibanamaWTData.address.indiaAddress.taluka;
+                            kharediNondModel.city = hibanamaWTData.address.indiaAddress.city;
+                            kharediNondModel.plotno = hibanamaWTData.address.indiaAddress.plotNo;
+                            kharediNondModel.building = hibanamaWTData.address.indiaAddress.building;
+                            kharediNondModel.mainroad = hibanamaWTData.address.indiaAddress.mainRoad;
+                            kharediNondModel.impSymbol = hibanamaWTData.address.indiaAddress.impSymbol;
+                            kharediNondModel.area = hibanamaWTData.address.indiaAddress.area;
+                            kharediNondModel.pincode = hibanamaWTData.address.indiaAddress.pincode;
+                            kharediNondModel.post_office_name = hibanamaWTData.address.indiaAddress.postOfficeName;
+                            kharediNondModel.address_proof_name = hibanamaWTData.address.indiaAddress.addressProofName;
+                            kharediNondModel.address_proof_src = hibanamaWTData.address.indiaAddress.addressProofSrc == "" ? "NA" : hibanamaWTData.address.indiaAddress.addressProofSrc!;
+                        }
+                        else if (kharediNondModel.address_type == "FOREIGN")
+                        {
+                            if (string.IsNullOrEmpty(hibanamaWTData.address.foreignAddress!.address) || string.IsNullOrEmpty(hibanamaWTData.address.foreignAddress!.email))
+                            {
+                                return "पत्ता and ई मेल field is mandatory";
+                            }
+                            if (methodForFile.CheckForeignAddress(hibanamaWTData.address.foreignAddress!.address))
+                            {
+                                return "पत्ता field contains special characters";
+                            }
+                            if (methodForFile.CheckEmail(hibanamaWTData.address.foreignAddress!.email))
+                            {
+                                return "ई मेल field contains special characters";
+                            }
+
+                            kharediNondModel.address = hibanamaWTData.address.foreignAddress!.address;
+                            kharediNondModel.mobileno = hibanamaWTData.address.foreignAddress.mobile;
+                            kharediNondModel.emailid = hibanamaWTData.address.foreignAddress.email;
+                            kharediNondModel.emailidverified = hibanamaWTData.address.foreignAddress.emailOTP;
+
+                            kharediNondModel.state = "NA";
+                            kharediNondModel.district = "NA";
+                            kharediNondModel.taluka = "NA";
+                            kharediNondModel.city = "NA";
+                            kharediNondModel.plotno = "NA";
+                            kharediNondModel.building = "NA";
+                            kharediNondModel.mainroad = "NA";
+                            kharediNondModel.impSymbol = "NA";
+                            kharediNondModel.area = "NA";
+                            kharediNondModel.pincode = "NA";
+                            kharediNondModel.post_office_name = "NA";
+                            kharediNondModel.address_proof_name = "NA";
+                            kharediNondModel.address_proof_src = "NA";
+                        }
+                        kharediNondModel.prefixcode_marathi = hibanamaWTData.witnessDetails!.suffixcode;
+                        kharediNondModel.prefixcode_eng = hibanamaWTData.witnessDetails.suffixCodeEng;
+                        kharediNondModel.prefix_in_eng = hibanamaWTData.witnessDetails!.suffixEng;
+                        kharediNondModel.fname_in_eng = hibanamaWTData.witnessDetails.firstNameEng;
+                        kharediNondModel.mname_in_eng = hibanamaWTData.witnessDetails.middleNameEng;
+                        kharediNondModel.lname_in_eng = hibanamaWTData.witnessDetails.lastNameEng;
+                        kharediNondModel.prefix_in_marathi = hibanamaWTData.witnessDetails.suffix;
+                        kharediNondModel.fname_in_marathi = hibanamaWTData.witnessDetails.firstName;
+                        kharediNondModel.mname_in_marathi = hibanamaWTData.witnessDetails.middleName;
+                        kharediNondModel.lname_in_marathi = hibanamaWTData.witnessDetails.lastName;
+                        kharediNondModel.aliceName = hibanamaWTData.witnessDetails.aliceName;
+
+                        //Assign Data to Table fields to insert new records
+                        //Set Default Value - Mrunal
+                        dbTable.mobileno = "NA";
+                        dbTable.mobilenoverified = "NA";
+                        dbTable.emailid = "NA";
+                        dbTable.emailidverified = "NA";
+                        dbTable.prefixcode_eng = "0";
+                        dbTable.prefixcode_marathi = "0";
+                        dbTable.prefix_in_marathi = "NA";
+                        dbTable.fname_in_marathi = "NA";
+                        dbTable.mname_in_marathi = "NA";
+                        dbTable.lname_in_marathi = "NA";
+                        dbTable.prefix_in_eng = "NA";
+                        dbTable.fname_in_eng = "NA";
+                        dbTable.mname_in_eng = "NA";
+                        dbTable.lname_in_eng = "NA";
+                        dbTable.alias_name = "NA";
+                        dbTable.address_type = "NA";
+
+                        dbTable.flatno_plotno = "NA";
+                        dbTable.societyname = "NA";
+                        dbTable.mainstreet = "NA";
+                        dbTable.landmark = "NA";
+                        dbTable.locality = "NA";
+                        dbTable.pincode = "NA";
+                        dbTable.post_office_name = "NA";
+                        dbTable.city = "NA";
+                        dbTable.taluka = "NA";
+                        dbTable.district = "NA";
+                        dbTable.state = "NA";
+                        dbTable.address_proof_document_name = "NA";
+                        dbTable.address_proof_document_path = "NA";
+
+                        dbTable.address = "NA";
+                        //Set actual Value
+                        dbTable.userMaster = kharediNondModel.userMaster;
+                        dbTable.applicationDTL = kharediNondModel.applicationDTL;
+                        dbTable.mobileno = kharediNondModel.mobileno;
+                        dbTable.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                        dbTable.emailid = kharediNondModel.emailid;
+                        dbTable.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                        dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                        dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                        dbTable.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                        dbTable.fname_in_eng = kharediNondModel.fname_in_eng;
+                        dbTable.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                        dbTable.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                        dbTable.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                        dbTable.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                        dbTable.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                        dbTable.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+                        dbTable.alias_name = kharediNondModel.aliceName;
+                        dbTable.address_type = kharediNondModel.address_type;
+                        dbTable.address = kharediNondModel.address;
+                        dbTable.state = kharediNondModel.state;
+                        dbTable.district = kharediNondModel.district;
+                        dbTable.taluka = kharediNondModel.taluka;
+                        dbTable.city = kharediNondModel.city;
+                        dbTable.flatno_plotno = kharediNondModel.plotno;
+                        dbTable.societyname = kharediNondModel.building;
+                        dbTable.mainstreet = kharediNondModel.mainroad;
+                        dbTable.landmark = kharediNondModel.impSymbol;
+                        dbTable.locality = kharediNondModel.area;
+                        dbTable.pincode = kharediNondModel.pincode;
+                        dbTable.post_office_name = kharediNondModel.post_office_name;
+
+                        //Gauri
+                        dbTable.permission_no = hibanamaWTData.permissionNo;
+                        dbTable.permission_date = hibanamaWTData.permissionDate;
+                        _context.witnessDTLs.Add(dbTable);
+                        _context.SaveChanges();
+
+                        //Get Saved Row ID
+                        int kharediNondID = (int)dbTable.witness_info_id!;
+
+                        string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                        bool checkAddressFlag = true;
+                        //bool checkSignFlag = false;
+                        if (kharediNondModel.address_type == "INDIA")
+                        {
+                            if (!string.IsNullOrEmpty(hibanamaWTData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(hibanamaWTData.address.indiaAddress.addressProofName))
+                            {
+                                string[] AddressData = hibanamaWTData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                string imageName = System.IO.Path.GetFileNameWithoutExtension(hibanamaWTData.address.indiaAddress.addressProofName!);
+                                if (methodForFile.ContainsSpecialCharacters(imageName))
+                                {
+                                    return hibanamaWTData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                }
+                                else
+                                {
+                                    checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], hibanamaWTData.address.indiaAddress.addressProofName!, kharediNondID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                    string AddressProofExt = Path.GetExtension(hibanamaWTData.address.indiaAddress.addressProofName!);
+                                    kharediNondModel.address_proof_name = "AddressProof" + kharediNondID + "_" + CurrentDateTime + AddressProofExt;
+                                    kharediNondModel.address_proof_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.address_proof_name;
+
+                                    var UpdateAddressFilePath = _context.witnessDTLs.Where(w => w.witness_info_id == kharediNondID).FirstOrDefault();
+                                    if (UpdateAddressFilePath != null)
+                                    {
+                                        dbTable.address_proof_document_name = kharediNondModel.address_proof_name;
+                                        dbTable.address_proof_document_path = kharediNondModel.address_proof_src;
+                                        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                        _context.SaveChanges();
+                                    }
+                                }
+                            }
+
+                            //if (!string.IsNullOrEmpty(hibanamaWTData.address.indiaAddress.signatureSrc))
+                            //{
+                            //    string[] signData = hibanamaWTData.address.indiaAddress.signatureSrc!.Split(",");
+                            //    checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], hibanamaWTData.address.indiaAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+                            //    string SignatureExt = Path.GetExtension(hibanamaWTData.address.indiaAddress.signatureName!);
+                            //    kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                            //    kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+
+                            //    var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                            //    if (UpdateSignFilePath != null)
+                            //    {
+                            //        dbTable.signed_file_name = kharediNondModel.signature_name;
+                            //        dbTable.signed_file_path = kharediNondModel.signature_src;
+                            //        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                            //        _context.SaveChanges();
+                            //    }
+                            //}
+                        }
+                        //if (kharediNondModel.address_type == "FOREIGN")
+                        //{
+                        //    if (!string.IsNullOrEmpty(hibanamaWTData.address.foreignAddress!.signatureSrc))
+                        //    {
+                        //        string[] signData = hibanamaWTData.address.foreignAddress!.signatureSrc!.Split(",");
+                        //        checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], hibanamaWTData.address.foreignAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+
+                        //        string SignatureExt = Path.GetExtension(hibanamaWTData.address.foreignAddress.signatureName!);
+                        //        kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                        //        kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+                        //        var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                        //        if (UpdateSignFilePath != null)
+                        //        {
+                        //            dbTable.signed_file_name = kharediNondModel.signature_name;
+                        //            dbTable.signed_file_path = kharediNondModel.signature_src;
+                        //            _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                        //            _context.SaveChanges();
+                        //        }
+                        //    }
+                        //}
+                        /*if (checkAddressFlag || checkSignFlag)
+                        {*/
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(hibanamaWTData.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            if (!string.IsNullOrEmpty(applicationDTLdata.witnessids) && !applicationDTLdata.witnessids.Contains(kharediNondID.ToString()))
+                            {
+                                applicationDTLdata.witnessids = applicationDTLdata.witnessids + "," + kharediNondID.ToString();
+                            }
+                            else
+                            {
+                                applicationDTLdata.witnessids = kharediNondID.ToString();
+                            }
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                        }
+                        scope.Complete();
+                        return "Success";
+                        /* }
+                         if (!checkAddressFlag)
+                         {
+                             _context.mutationDTL.Remove(dbTable);
+                             _context.SaveChanges();
+                             return "Address Proof File Is Not Uploaded";
+                         }
+                         if (!checkSignFlag)
+                         {
+                             _context.mutationDTL.Remove(dbTable);
+                             _context.SaveChanges();
+                             return "Signature File Is Not Uploaded";
+                         }
+                         else
+                         {
+                             _context.mutationDTL.Remove(dbTable);
+                             _context.SaveChanges();
+                             return "Some Files Are Not Uploaded";
+                         }*/
+                    }
+                    else
+                    {
+                        return "Please wait! Marathi name is not fetched!";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //_context.mutationDTL.Remove(dbTable);
+                    //_context.SaveChanges();
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchHibanamaWitnessInfoData FetchHibanamaWitnessData(int witnessid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                WitnessDTL witnessData = new WitnessDTL();
+                witnessData = _context.witnessDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.witness_info_id.Equals(witnessid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchHibanamaWitnessInfoData fetchData = new FetchHibanamaWitnessInfoData();
+                fetchData.witness_info_id = witnessData.witness_info_id;
+                fetchData.userid = witnessData.userMaster!.userid;
+                fetchData.applicationid = witnessData.applicationDTL!.applicationid;
+                fetchData.permissionNo = witnessData.permission_no;
+                fetchData.permissionDate = witnessData.permission_date;
+
+                fetchData.fullNameInMarathi = commonFunctions.ReplaceNA(witnessData.fname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(witnessData.mname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(witnessData.lname_in_marathi!.Trim());
+                fetchData.fullNameInEng = commonFunctions.ReplaceNA(witnessData.fname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(witnessData.mname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(witnessData.lname_in_eng!.Trim());
+
+                InputDataModel.HibanamaWitnessDetails userDetails = new InputDataModel.HibanamaWitnessDetails();
+                userDetails.suffixcode = witnessData.prefixcode_marathi;
+                userDetails.suffixCodeEng = witnessData.prefixcode_eng;
+                userDetails.suffix = witnessData.prefix_in_marathi;
+                userDetails.firstName = witnessData.fname_in_marathi;
+                userDetails.middleName = witnessData.mname_in_marathi;
+                userDetails.lastName = witnessData.lname_in_marathi;
+                userDetails.suffixEng = witnessData.prefix_in_eng;
+                userDetails.firstNameEng = witnessData.fname_in_eng;
+                userDetails.middleNameEng = witnessData.mname_in_eng;
+                userDetails.lastNameEng = witnessData.lname_in_eng;
+                userDetails.aliceName = witnessData.alias_name;
+
+                fetchData.witnessDetails = userDetails;
+
+                InputDataModel.AddressForHibanamaWitness addressData = new InputDataModel.AddressForHibanamaWitness();
+                addressData.addressType = witnessData.address_type;
+                if (witnessData.address_type == "INDIA")
+                {
+                    InputDataModel.IndianAddressForHibanamaWitness addressForIndia = new InputDataModel.IndianAddressForHibanamaWitness();
+                    addressForIndia.state = witnessData.state;
+                    addressForIndia.district = witnessData.district;
+                    addressForIndia.city = witnessData.city;
+                    addressForIndia.taluka = witnessData.taluka;
+                    addressForIndia.plotNo = witnessData.flatno_plotno;
+                    addressForIndia.building = witnessData.societyname;
+                    addressForIndia.mainRoad = witnessData.mainstreet;
+                    addressForIndia.impSymbol = witnessData.landmark;
+                    addressForIndia.area = witnessData.locality;
+                    addressForIndia.pincode = witnessData.pincode;
+                    addressForIndia.postOfficeName = witnessData.post_office_name;
+                    addressForIndia.addressProofName = witnessData.address_proof_document_name;
+                    addressForIndia.mobile = witnessData.mobileno;
+                    addressForIndia.mobileOTP = witnessData.mobilenoverified;
+                    if (witnessData.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(witnessData.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(witnessData.address_proof_document_path!);
+                        witnessData.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = witnessData.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = witnessData.address_proof_document_name;
+                        addressForIndia.addressProofSrc = witnessData.address_proof_document_path;
+                    }
+                    addressData.indiaAddress = addressForIndia;
+                }
+                else if (witnessData.address_type == "FOREIGN")
+                {
+                    InputDataModel.ForeignAddressForHibanamaWitness addressForForeign = new InputDataModel.ForeignAddressForHibanamaWitness();
+                    addressForForeign.address = witnessData.address;
+                    addressForForeign.mobile = witnessData.mobileno;
+                    addressForForeign.email = witnessData.emailid;
+                    addressForForeign.emailOTP = witnessData.emailidverified;
+                    addressData.foreignAddress = addressForForeign;
+                }
+                fetchData.address = addressData;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string DeleteHibanamaWitnessData(DeleteHibanamaWitnessData deleteMutation)
+        {
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    MethodForFileUpload methodForFileUpload = new MethodForFileUpload();
+                    var entity = _context.witnessDTLs.FirstOrDefault(s => s.witness_info_id == deleteMutation.WitnessInfoId! && s.isDeleted == false)!;
+                    if (entity != null)
+                    {
+
+                        var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(deleteMutation.applicationid)).FirstOrDefault();
+                        if (applicationDTLdata != null)
+                        {
+                            string witnessIds = applicationDTLdata.witnessids!;
+                            string[] mutationids = witnessIds.Split(',');
+                            var updatedIds = mutationids.Where(id => id != deleteMutation.WitnessInfoId.ToString());
+                            entity.isDeleted = true;
+                            entity.deleteddate = DateOnly.FromDateTime(DateTime.Now);
+                            _context.witnessDTLs.Attach(entity);
+                            _context.SaveChanges();
+                            // Join the remaining IDs back into a string
+                            string result = string.Join(",", updatedIds);
+                            applicationDTLdata.witnessids = result;
+                            _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                            _context.SaveChanges();
+                        }
+
+                        scope.Complete();
+                        methodForFileUpload.PermanatlyDeleteFile(entity.address_proof_document_path!);
+                        var path =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\WITNESSDOC\" + deleteMutation.WitnessInfoId;
+                        bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
+                        return "Success";
+                    }
+                    else { return "False"; }
+                }
+                catch (Exception ex)
+                {
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        //Vatani Patra
+        public string SaveVataniPatraGiver(VataniPatraDataForGiver vataniPatraData)
+        {
+            MutationGiverTakerDTL dbTable = new MutationGiverTakerDTL();
+            MutationGiverTakerDTL fetchData = new MutationGiverTakerDTL();
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    if (vataniPatraData.userDetails != null && !string.IsNullOrEmpty(vataniPatraData.userDetails.firstName))
+                    {
+                        if (string.IsNullOrEmpty(vataniPatraData.userDetails.nabhu))
+                        {
+                            return "Please select अर्जामधील न.भू.क्र.";
+                        }
+
+                        if (string.IsNullOrEmpty(vataniPatraData.userDetails!.firstNameEng!))
+                        {
+                            return "Please Enter First Name in वाटणीपत्र  धारक (इंग्रजी मध्ये)";
+                        }
+                        if (string.IsNullOrEmpty(vataniPatraData.areaForMutation!.actualArea!))
+                        {
+                            return "Please wait, मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) is not fetched.";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(vataniPatraData.userDetails!.aliceName!))
+                        {
+                            return "देणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInName(vataniPatraData.userDetails!.motherNameEng!))
+                        {
+                            return "आईचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(vataniPatraData.userDetails!.motherName!))
+                        {
+                            return "आईचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        }
+                        //if (methodForFile.CheckKArea(vataniPatraData.areaForMutation!.actualArea!))
+                        //{
+                        //    return "मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit मिळकत पत्रिके प्रमाणे क्षेत्र (चौ.मी.)";
+                        //}
+                        if (!string.IsNullOrEmpty(vataniPatraData.areaForMutation!.mutationArea!) && methodForFile.CheckKArea(vataniPatraData.areaForMutation!.mutationArea!))
+                        {
+                            return " वाटणीपत्र देणाऱ्याच्या नावे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit ";
+                        }
+
+                        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + vataniPatraData.applicationid + @"\GIVER";
+                        // Assign Values to Model
+                        KharediNondModel kharediNondModel = new KharediNondModel();
+                        UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == vataniPatraData.userid!)!;
+                        kharediNondModel.userMaster = userMaster;
+
+                        fetchData = _context.mutationDTL.Include(app => app.applicationDTL).Where(data => data.applicationDTL!.applicationid!.Equals(vataniPatraData.applicationid)
+                        && data.owner_village_code == vataniPatraData.village_code!
+                        && data.cts_number == vataniPatraData.ctsNo
+                        && data.mutation_srno == vataniPatraData.mutationSroNo
+                        && data.owner_number == vataniPatraData.ownerNo
+                        && data.isTaker == 0
+                        && data.isDeleted == false).FirstOrDefault()!;
+
+
+                        if (fetchData != null)
+                        {
+
+                            kharediNondModel.owner_village_code = vataniPatraData.village_code;
+                            kharediNondModel.ctsNo = vataniPatraData.ctsNo;
+                            kharediNondModel.mutationSroNo = vataniPatraData.mutationSroNo;
+                            kharediNondModel.ownerNo = vataniPatraData.ownerNo;
+
+
+                            string nabhu = System.Text.RegularExpressions.Regex.Replace(vataniPatraData.userDetails!.nabhu!, @"\s*\(.*?\)", "").Trim();
+                            MutationCTSNoDTL mutation = _context.mutationCTSNoDTLs.FirstOrDefault(s => s.selected_city_servey_no == nabhu && s.applicationDTL!.applicationid == vataniPatraData.applicationid)!;
+                            kharediNondModel.mutation_cts_no_id = mutation.mutation_cts_no_id;
+
+                            ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == vataniPatraData.applicationid!)!;
+                            kharediNondModel.applicationDTL = applicationDTL;
+
+                            PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32("0"))!;
+                            kharediNondModel.propType = proptype;
+
+                            kharediNondModel.address_type = vataniPatraData.address!.addressType!.Trim().ToUpper();
+                            if (kharediNondModel.address_type == "INDIA")
+                            {
+                                if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.plotNo))
+                                {
+                                    return "Please enter सदनिका / घर /प्लॉट नं.";
+                                }
+                                if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.impSymbol))
+                                {
+                                    return "Please enter महत्त्वाची खूण";
+                                }
+                                if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.pincode))
+                                {
+                                    return "Please enter पिन कोड";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(vataniPatraData.address!.indiaAddress!.pincode))
+                                {
+                                    if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.postOfficeName))
+                                    {
+                                        return "Please select Post Office Name / Enter correct Pin Code.";
+                                    }
+                                    return "पिन कोड field contains special characters";
+                                }
+
+                                if (methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.plotNo))
+                                {
+                                    return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.building!))
+                                {
+                                    return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.mainRoad!))
+                                {
+                                    return "मुख्य रस्ता field contains special characters";
+                                }
+                                if (methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.impSymbol!))
+                                {
+                                    return "महत्त्वाची खूण field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.area!))
+                                {
+                                    return "महत्त्वाची खूण field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(vataniPatraData.address!.indiaAddress!.mobile!))
+                                {
+                                    return "मोबाईल field contains special characters";
+                                }
+                                //if (methodForFile.CheckPinCode(vataniPatraData.address!.indiaAddress!.pincode!))
+                                //{
+                                //    return "पिन कोड field contains special characters";
+                                //}
+
+                                kharediNondModel.mobileno = vataniPatraData.address.indiaAddress!.mobile;
+                                kharediNondModel.mobilenoverified = vataniPatraData.address.indiaAddress.mobileOTP;
+                                kharediNondModel.emailid = "NA";
+                                kharediNondModel.emailidverified = "NA";
+
+                                kharediNondModel.address = "NA";
+                                kharediNondModel.state = vataniPatraData.address.indiaAddress.state;
+                                kharediNondModel.district = vataniPatraData.address.indiaAddress.district;
+                                kharediNondModel.taluka = vataniPatraData.address.indiaAddress.taluka;
+                                kharediNondModel.city = vataniPatraData.address.indiaAddress.city;
+                                kharediNondModel.plotno = vataniPatraData.address.indiaAddress.plotNo;
+                                kharediNondModel.building = vataniPatraData.address.indiaAddress.building;
+                                kharediNondModel.mainroad = vataniPatraData.address.indiaAddress.mainRoad;
+                                kharediNondModel.impSymbol = vataniPatraData.address.indiaAddress.impSymbol;
+                                kharediNondModel.area = vataniPatraData.address.indiaAddress.area;
+                                kharediNondModel.pincode = vataniPatraData.address.indiaAddress.pincode;
+                                kharediNondModel.post_office_name = vataniPatraData.address.indiaAddress.postOfficeName;
+                                kharediNondModel.address_proof_name = vataniPatraData.address.indiaAddress.addressProofName;
+                                kharediNondModel.address_proof_src = vataniPatraData.address.indiaAddress.addressProofSrc == "" ? "NA" : vataniPatraData.address.indiaAddress.addressProofSrc!;
+                                kharediNondModel.signature_name = vataniPatraData.address.indiaAddress.signatureName == "" ? "NA" : vataniPatraData.address.indiaAddress.signatureName;
+                                kharediNondModel.signature_src = vataniPatraData.address.indiaAddress.signatureSrc == "" ? "NA" : vataniPatraData.address.indiaAddress.signatureSrc!;
+                            }
+                            else if (kharediNondModel.address_type == "FOREIGN")
+                            {
+                                if (string.IsNullOrEmpty(vataniPatraData.address.foreignAddress!.address) || string.IsNullOrEmpty(vataniPatraData.address.foreignAddress!.email))
+                                {
+                                    return "पत्ता and ई मेल field is mandatory";
+                                }
+                                if (methodForFile.CheckForeignAddress(vataniPatraData.address.foreignAddress!.address))
+                                {
+                                    return "पत्ता field contains special characters";
+                                }
+                                if (methodForFile.CheckEmail(vataniPatraData.address.foreignAddress!.email))
+                                {
+                                    return "ई मेल field contains special characters";
+                                }
+
+                                kharediNondModel.address = vataniPatraData.address.foreignAddress!.address;
+                                kharediNondModel.mobileno = vataniPatraData.address.foreignAddress.mobile;
+                                kharediNondModel.emailid = vataniPatraData.address.foreignAddress.email;
+                                kharediNondModel.emailidverified = vataniPatraData.address.foreignAddress.emailOTP;
+                                kharediNondModel.signature_name = vataniPatraData.address.foreignAddress.signatureName;
+                                //kharediNondModel.signature_src = vataniPatraData.address.foreignAddress!.signatureSrc == "" ? null : Convert.FromBase64String(vataniPatraData.address.foreignAddress.signatureSrc!.Split(",")[1]);
+
+                                kharediNondModel.state = "NA";
+                                kharediNondModel.district = "NA";
+                                kharediNondModel.taluka = "NA";
+                                kharediNondModel.city = "NA";
+                                kharediNondModel.plotno = "NA";
+                                kharediNondModel.building = "NA";
+                                kharediNondModel.mainroad = "NA";
+                                kharediNondModel.impSymbol = "NA";
+                                kharediNondModel.area = "NA";
+                                kharediNondModel.pincode = "NA";
+                                kharediNondModel.post_office_name = "NA";
+                                kharediNondModel.address_proof_name = "NA";
+                                kharediNondModel.address_proof_src = "NA";
+                                //kharediNondModel.signature_name = vataniPatraData.address.foreignAddress.signatureName;
+                            }
+                            kharediNondModel.prefixcode_marathi = vataniPatraData.userDetails!.suffixcode;
+                            kharediNondModel.prefixcode_eng = vataniPatraData.userDetails.suffixCodeEng;
+                            kharediNondModel.prefix_in_eng = vataniPatraData.userDetails!.suffixEng;
+                            kharediNondModel.fname_in_eng = vataniPatraData.userDetails.firstNameEng;
+                            kharediNondModel.mname_in_eng = vataniPatraData.userDetails.middleNameEng;
+                            kharediNondModel.lname_in_eng = vataniPatraData.userDetails.lastNameEng;
+                            kharediNondModel.prefix_in_marathi = vataniPatraData.userDetails.suffix;
+                            kharediNondModel.fname_in_marathi = vataniPatraData.userDetails.firstName;
+                            kharediNondModel.mname_in_marathi = vataniPatraData.userDetails.middleName;
+                            kharediNondModel.lname_in_marathi = vataniPatraData.userDetails.lastName;
+                            kharediNondModel.aliceName = vataniPatraData.userDetails.aliceName;
+                            kharediNondModel.dob = vataniPatraData.userDetails.dob == "" || vataniPatraData.userDetails.dob == null ? "NA" : vataniPatraData.userDetails.dob;
+                            kharediNondModel.motherName_in_marathi = vataniPatraData.userDetails.motherName;
+                            kharediNondModel.motherName_in_eng = vataniPatraData.userDetails.motherNameEng;
+                            kharediNondModel.userName = vataniPatraData.userDetails.userName;
+                            kharediNondModel.city_servey_no = vataniPatraData.userDetails.nabhu;
+                            kharediNondModel.lr_property_id = vataniPatraData.userDetails.lrPropertyUID;
+                            kharediNondModel.milkat = vataniPatraData.userDetails.milkat;
+                            kharediNondModel.namud = vataniPatraData.userDetails.namud;
+                            kharediNondModel.sub_property_no = vataniPatraData.userDetails.subPropNo == "" ? "999999" : vataniPatraData.userDetails.subPropNo;
+
+                            //Area for mutation
+                            kharediNondModel.isFullAreaGiven = vataniPatraData.areaForMutation!.isFullAreaGiven;
+                            kharediNondModel.actualArea = vataniPatraData.areaForMutation!.actualArea;
+                            kharediNondModel.mutationArea = vataniPatraData.areaForMutation.mutationArea;
+                            kharediNondModel.availableArea = vataniPatraData.areaForMutation.availableArea;
+
+                            //Set actual Value
+                            fetchData.userMaster = kharediNondModel.userMaster;
+                            fetchData.applicationDTL = kharediNondModel.applicationDTL;
+                            fetchData.mutation_cts_no_id = kharediNondModel.mutation_cts_no_id;
+                            fetchData.prop_type = kharediNondModel.propType;
+                            fetchData.mobileno = kharediNondModel.mobileno;
+                            fetchData.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                            fetchData.emailid = kharediNondModel.emailid;
+                            fetchData.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                            fetchData.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                            fetchData.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                            fetchData.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                            fetchData.fname_in_eng = kharediNondModel.fname_in_eng;
+                            fetchData.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                            fetchData.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                            fetchData.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                            fetchData.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                            fetchData.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                            fetchData.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+                            fetchData.alias_name = kharediNondModel.aliceName;
+                            fetchData.owner_status_code = kharediNondModel.owner_status_code;
+                            fetchData.owner_status_description = kharediNondModel.owner_status_description;
+                            fetchData.holder_type = kharediNondModel.holderType == "" || kharediNondModel.holderType == null ? "NA" : kharediNondModel.holderType;
+                            fetchData.dob = kharediNondModel.dob;
+                            fetchData.mother_name_in_marathi = kharediNondModel.motherName_in_marathi;
+                            fetchData.mother_name_in_eng = kharediNondModel.motherName_in_eng;
+                            fetchData.userName = kharediNondModel.userName;
+                            fetchData.city_servey_no = kharediNondModel.city_servey_no;
+                            fetchData.lr_property_id = kharediNondModel.lr_property_id;
+                            fetchData.milkat = kharediNondModel.milkat;
+                            fetchData.namud = kharediNondModel.namud;
+                            fetchData.sub_property_no = kharediNondModel.sub_property_no;
+                            fetchData.isFullAreaGiven = kharediNondModel.isFullAreaGiven;
+                            fetchData.actual_area = kharediNondModel.actualArea;
+                            fetchData.mutation_area = kharediNondModel.mutationArea;
+                            fetchData.available_area = kharediNondModel.availableArea;
+                            fetchData.address_type = kharediNondModel.address_type;
+                            fetchData.address = kharediNondModel.address;
+                            fetchData.state = kharediNondModel.state;
+                            fetchData.district = kharediNondModel.district;
+                            fetchData.taluka = kharediNondModel.taluka;
+                            fetchData.city = kharediNondModel.city;
+                            fetchData.flatno_plotno = kharediNondModel.plotno;
+                            fetchData.societyname = kharediNondModel.building;
+                            fetchData.mainstreet = kharediNondModel.mainroad;
+                            fetchData.landmark = kharediNondModel.impSymbol;
+                            fetchData.locality = kharediNondModel.area;
+                            fetchData.pincode = kharediNondModel.pincode;
+                            fetchData.post_office_name = kharediNondModel.post_office_name;
+                            //Gauri
+                            fetchData.isTaker = 0;
+                            fetchData.cts_number = kharediNondModel.ctsNo;
+                            fetchData.mutation_srno = kharediNondModel.mutationSroNo;
+                            fetchData.owner_number = kharediNondModel.ownerNo;
+                            fetchData.owner_village_code = kharediNondModel.owner_village_code;
+                            _context.mutationDTL.Attach(fetchData);
+                            _context.SaveChanges();
+
+                            //Get Saved Row ID
+                            int kharediNondID = (int)fetchData.mutation_givertaker_id!;
+                            string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                            bool checkAddressFlag = true;
+                            //bool checkSignFlag = false;
+                            if (kharediNondModel.address_type == "INDIA")
+                            {
+                                if (!string.IsNullOrEmpty(vataniPatraData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(vataniPatraData.address.indiaAddress.addressProofName))
+                                {
+                                    string[] AddressData = vataniPatraData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                    string imageName = System.IO.Path.GetFileNameWithoutExtension(vataniPatraData.address.indiaAddress.addressProofName!);
+                                    if (methodForFile.ContainsSpecialCharacters(imageName))
+                                    {
+                                        return vataniPatraData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                    }
+                                    else
+                                    {
+                                        checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], vataniPatraData.address.indiaAddress.addressProofName!, kharediNondID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                        string AddressProofExt = Path.GetExtension(vataniPatraData.address.indiaAddress.addressProofName!);
+                                        kharediNondModel.address_proof_name = "AddressProof" + kharediNondID + "_" + CurrentDateTime + AddressProofExt;
+                                        kharediNondModel.address_proof_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.address_proof_name;
+
+                                        var UpdateAddressFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                                        if (UpdateAddressFilePath != null)
+                                        {
+                                            bool isDeleted = methodForFile.PermanatlyDeleteFile(fetchData.address_proof_document_path!);
+                                            fetchData.address_proof_document_name = kharediNondModel.address_proof_name;
+                                            fetchData.address_proof_document_path = kharediNondModel.address_proof_src;
+                                            _context.Entry(fetchData).CurrentValues.SetValues(fetchData);
+                                            _context.SaveChanges();
+                                        }
+                                    }
+                                }
+                            }
+                            scope.Complete();
+                            //return "Success";
+                            return "Update";
+                        }
+                        else
+                        {
+                            kharediNondModel.owner_village_code = vataniPatraData.village_code;
+                            kharediNondModel.ctsNo = vataniPatraData.ctsNo;
+                            kharediNondModel.mutationSroNo = vataniPatraData.mutationSroNo;
+                            kharediNondModel.ownerNo = vataniPatraData.ownerNo;
+
+                            string nabhu = System.Text.RegularExpressions.Regex.Replace(vataniPatraData.userDetails!.nabhu!, @"\s*\(.*?\)", "").Trim();
+                            MutationCTSNoDTL mutation = _context.mutationCTSNoDTLs.FirstOrDefault(s => s.selected_city_servey_no == nabhu && s.applicationDTL!.applicationid == vataniPatraData.applicationid)!;
+                            kharediNondModel.mutation_cts_no_id = mutation.mutation_cts_no_id;
+
+                            ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == vataniPatraData.applicationid!)!;
+                            kharediNondModel.applicationDTL = applicationDTL;
+
+                            PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32("0"))!;
+                            kharediNondModel.propType = proptype;
+
+                            kharediNondModel.address_type = vataniPatraData.address!.addressType!.Trim().ToUpper();
+                            if (kharediNondModel.address_type == "INDIA")
+                            {
+                                if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.plotNo))
+                                {
+                                    return "Please enter सदनिका / घर /प्लॉट नं.";
+                                }
+                                if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.impSymbol))
+                                {
+                                    return "Please enter महत्त्वाची खूण";
+                                }
+                                if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.pincode))
+                                {
+                                    return "Please enter पिन कोड";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(vataniPatraData.address!.indiaAddress!.pincode))
+                                {
+                                    if (string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.postOfficeName))
+                                    {
+                                        return "Please select Post Office Name / Enter correct Pin Code.";
+                                    }
+                                    return "पिन कोड field contains special characters";
+                                }
+
+                                if (methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.plotNo))
+                                {
+                                    return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.building!))
+                                {
+                                    return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.mainRoad!))
+                                {
+                                    return "मुख्य रस्ता field contains special characters";
+                                }
+                                if (methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.impSymbol!))
+                                {
+                                    return "महत्त्वाची खूण field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(vataniPatraData.address!.indiaAddress!.area!))
+                                {
+                                    return "महत्त्वाची खूण field contains special characters";
+                                }
+                                if (!string.IsNullOrEmpty(vataniPatraData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(vataniPatraData.address!.indiaAddress!.mobile!))
+                                {
+                                    return "मोबाईल field contains special characters";
+                                }
+
+                                kharediNondModel.mobileno = vataniPatraData.address.indiaAddress!.mobile;
+                                kharediNondModel.mobilenoverified = vataniPatraData.address.indiaAddress.mobileOTP;
+                                kharediNondModel.emailid = "NA";
+                                kharediNondModel.emailidverified = "NA";
+
+                                kharediNondModel.address = "NA";
+                                kharediNondModel.state = vataniPatraData.address.indiaAddress.state;
+                                kharediNondModel.district = vataniPatraData.address.indiaAddress.district;
+                                kharediNondModel.taluka = vataniPatraData.address.indiaAddress.taluka;
+                                kharediNondModel.city = vataniPatraData.address.indiaAddress.city;
+                                kharediNondModel.plotno = vataniPatraData.address.indiaAddress.plotNo;
+                                kharediNondModel.building = vataniPatraData.address.indiaAddress.building;
+                                kharediNondModel.mainroad = vataniPatraData.address.indiaAddress.mainRoad;
+                                kharediNondModel.impSymbol = vataniPatraData.address.indiaAddress.impSymbol;
+                                kharediNondModel.area = vataniPatraData.address.indiaAddress.area;
+                                kharediNondModel.pincode = vataniPatraData.address.indiaAddress.pincode;
+                                kharediNondModel.post_office_name = vataniPatraData.address.indiaAddress.postOfficeName;
+                                kharediNondModel.address_proof_name = vataniPatraData.address.indiaAddress.addressProofName;
+                                kharediNondModel.address_proof_src = vataniPatraData.address.indiaAddress.addressProofSrc == "" ? "NA" : vataniPatraData.address.indiaAddress.addressProofSrc!;
+                                kharediNondModel.signature_name = vataniPatraData.address.indiaAddress.signatureName == "" ? "NA" : vataniPatraData.address.indiaAddress.signatureName;
+                                kharediNondModel.signature_src = vataniPatraData.address.indiaAddress.signatureSrc == "" ? "NA" : vataniPatraData.address.indiaAddress.signatureSrc!;
+                            }
+                            else if (kharediNondModel.address_type == "FOREIGN")
+                            {
+                                if (string.IsNullOrEmpty(vataniPatraData.address.foreignAddress!.address) || string.IsNullOrEmpty(vataniPatraData.address.foreignAddress!.email))
+                                {
+                                    return "पत्ता and ई मेल field is mandatory";
+                                }
+                                if (methodForFile.CheckForeignAddress(vataniPatraData.address.foreignAddress!.address))
+                                {
+                                    return "पत्ता field contains special characters";
+                                }
+                                if (methodForFile.CheckEmail(vataniPatraData.address.foreignAddress!.email))
+                                {
+                                    return "ई मेल field contains special characters";
+                                }
+
+                                kharediNondModel.address = vataniPatraData.address.foreignAddress!.address;
+                                kharediNondModel.mobileno = vataniPatraData.address.foreignAddress.mobile;
+                                kharediNondModel.emailid = vataniPatraData.address.foreignAddress.email;
+                                kharediNondModel.emailidverified = vataniPatraData.address.foreignAddress.emailOTP;
+                                kharediNondModel.signature_name = vataniPatraData.address.foreignAddress.signatureName;
+                                //kharediNondModel.signature_src = vataniPatraData.address.foreignAddress!.signatureSrc == "" ? null : Convert.FromBase64String(vataniPatraData.address.foreignAddress.signatureSrc!.Split(",")[1]);
+
+                                kharediNondModel.state = "NA";
+                                kharediNondModel.district = "NA";
+                                kharediNondModel.taluka = "NA";
+                                kharediNondModel.city = "NA";
+                                kharediNondModel.plotno = "NA";
+                                kharediNondModel.building = "NA";
+                                kharediNondModel.mainroad = "NA";
+                                kharediNondModel.impSymbol = "NA";
+                                kharediNondModel.area = "NA";
+                                kharediNondModel.pincode = "NA";
+                                kharediNondModel.post_office_name = "NA";
+                                kharediNondModel.address_proof_name = "NA";
+                                kharediNondModel.address_proof_src = "NA";
+                                //kharediNondModel.signature_name = vataniPatraData.address.foreignAddress.signatureName;
+                            }
+                            kharediNondModel.prefixcode_marathi = vataniPatraData.userDetails!.suffixcode;
+                            kharediNondModel.prefixcode_eng = vataniPatraData.userDetails.suffixCodeEng;
+                            kharediNondModel.prefix_in_eng = vataniPatraData.userDetails!.suffixEng;
+                            kharediNondModel.fname_in_eng = vataniPatraData.userDetails.firstNameEng;
+                            kharediNondModel.mname_in_eng = vataniPatraData.userDetails.middleNameEng;
+                            kharediNondModel.lname_in_eng = vataniPatraData.userDetails.lastNameEng;
+                            kharediNondModel.prefix_in_marathi = vataniPatraData.userDetails.suffix;
+                            kharediNondModel.fname_in_marathi = vataniPatraData.userDetails.firstName;
+                            kharediNondModel.mname_in_marathi = vataniPatraData.userDetails.middleName;
+                            kharediNondModel.lname_in_marathi = vataniPatraData.userDetails.lastName;
+                            kharediNondModel.aliceName = vataniPatraData.userDetails.aliceName;
+                            kharediNondModel.dob = vataniPatraData.userDetails.dob == "" || vataniPatraData.userDetails.dob == null ? "NA" : vataniPatraData.userDetails.dob;
+                            kharediNondModel.motherName_in_marathi = vataniPatraData.userDetails.motherName;
+                            kharediNondModel.motherName_in_eng = vataniPatraData.userDetails.motherNameEng;
+                            kharediNondModel.userName = vataniPatraData.userDetails.userName;
+                            kharediNondModel.city_servey_no = vataniPatraData.userDetails.nabhu;
+                            kharediNondModel.lr_property_id = vataniPatraData.userDetails.lrPropertyUID;
+                            kharediNondModel.milkat = vataniPatraData.userDetails.milkat;
+                            kharediNondModel.namud = vataniPatraData.userDetails.namud;
+                            kharediNondModel.sub_property_no = vataniPatraData.userDetails.subPropNo == "" ? "999999" : vataniPatraData.userDetails.subPropNo;
+
+                            //Area for mutation
+                            kharediNondModel.isFullAreaGiven = vataniPatraData.areaForMutation!.isFullAreaGiven;
+                            kharediNondModel.actualArea = vataniPatraData.areaForMutation!.actualArea;
+                            kharediNondModel.mutationArea = vataniPatraData.areaForMutation.mutationArea;
+                            kharediNondModel.availableArea = vataniPatraData.areaForMutation.availableArea;
+
+                            //Assign Data to Table fields to insert new records
+                            //Set Default Value - Mrunal
+                            dbTable.mobileno = "NA";
+                            dbTable.mobilenoverified = "NA";
+                            dbTable.emailid = "NA";
+                            dbTable.emailidverified = "NA";
+                            dbTable.prefixcode_eng = "0";
+                            dbTable.prefixcode_marathi = "0";
+                            dbTable.prefix_in_marathi = "NA";
+                            dbTable.fname_in_marathi = "NA";
+                            dbTable.mname_in_marathi = "NA";
+                            dbTable.lname_in_marathi = "NA";
+                            dbTable.prefix_in_eng = "NA";
+                            dbTable.fname_in_eng = "NA";
+                            dbTable.mname_in_eng = "NA";
+                            dbTable.lname_in_eng = "NA";
+                            dbTable.alias_name = "NA";
+                            dbTable.holder_type = "NA";
+                            dbTable.owner_status_code = "NA";
+                            dbTable.owner_status_description = "NA";
+                            dbTable.dob = "NA";
+                            dbTable.mother_name_in_marathi = "NA";
+                            dbTable.mother_name_in_eng = "NA";
+                            dbTable.userName = "NA";
+                            dbTable.city_servey_no = "NA";
+                            dbTable.lr_property_id = "NA";
+                            dbTable.milkat = "NA";
+                            dbTable.namud = "NA";
+                            dbTable.sub_property_no = "999999";
+                            dbTable.khatano = "NA";
+                            dbTable.ulpin = "NA";
+                            dbTable.district_code = "NA";
+                            dbTable.district_name_in_eng = "NA";
+                            dbTable.district_name_in_marathi = "NA";
+                            dbTable.ofc_code = "NA";
+                            dbTable.ofc_name = "NA";
+                            dbTable.village_code = "NA";
+                            dbTable.village_name = "NA";
+                            dbTable.khata_type_code = "NA";
+                            dbTable.khata_type_name = "NA";
+                            dbTable.owner_status_code = "NA";
+                            dbTable.owner_status_code = "NA";
+
+                            dbTable.isFullAreaGiven = "NA";
+                            dbTable.actual_area = "NA";
+                            dbTable.mutation_area = "NA";
+                            dbTable.available_area = "NA";
+
+                            dbTable.address_type = "NA";
+
+                            dbTable.flatno_plotno = "NA";
+                            dbTable.societyname = "NA";
+                            dbTable.mainstreet = "NA";
+                            dbTable.landmark = "NA";
+                            dbTable.locality = "NA";
+                            dbTable.pincode = "NA";
+                            dbTable.post_office_name = "NA";
+                            dbTable.city = "NA";
+                            dbTable.taluka = "NA";
+                            dbTable.district = "NA";
+                            dbTable.state = "NA";
+                            dbTable.address_proof_document_name = "NA";
+                            dbTable.address_proof_document_path = "NA";
+
+                            dbTable.address = "NA";
+                            dbTable.signed_file_name = "NA";
+                            dbTable.signed_file_path = "NA";
+
+                            dbTable.user_type = "NA";
+                            dbTable.profile_pic_file_name = "NA";
+                            dbTable.profile_pic_file_path = "NA";
+                            dbTable.has_property = "NA";
+                            //dbTable.prop_type = 0;
+                            // dbTable.khata_type = "NA";
+                            dbTable.company_name_in_marathi = "NA";
+                            dbTable.company_name_in_eng = "NA";
+                            dbTable.aapak = "NA";
+                            dbTable.land_buy_area = "NA";
+                            //dbTable.gift_area = "NA";
+                            dbTable.relation_code = 0;
+                            dbTable.relation_name = "NA";
+                            dbTable.cts_number = "NA";
+                            dbTable.mutation_srno = "NA";
+                            dbTable.owner_number = "NA";
+                            dbTable.sellerid = "NA";
+                            dbTable.buyerid = "NA";
+
+                            dbTable.owner_status_code = "NA";
+                            dbTable.owner_status_description = "NA";
+                            dbTable.account_type_code = 0;
+                            dbTable.account_type_description = "NA";
+                            dbTable.varas_relation_code = 0;
+                            dbTable.varas_relation_name = "NA";
+                            dbTable.relation_code = 0;
+                            dbTable.relation_name = "NA";
+                            dbTable.holder_type = "NA";
+                            dbTable.gender_code = "NA";
+                            dbTable.gender_description = "NA";
+                            dbTable.mutation_cts_no_id = 0;
+                            dbTable.apk_code = 0;
+                            dbTable.apk_description = "NA";
+                            //dbTable.aapak_name = "NA";
+                            //dbTable.relation = "NA";
+                            //dbTable.is_address_same = false;
+                            //Set actual Value
+                            dbTable.userMaster = kharediNondModel.userMaster;
+                            dbTable.applicationDTL = kharediNondModel.applicationDTL;
+                            dbTable.mutation_cts_no_id = kharediNondModel.mutation_cts_no_id;
+                            dbTable.prop_type = kharediNondModel.propType;
+                            dbTable.mobileno = kharediNondModel.mobileno;
+                            dbTable.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                            dbTable.emailid = kharediNondModel.emailid;
+                            dbTable.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                            dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                            dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                            //dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi!;
+                            //dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng;
+                            dbTable.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                            dbTable.fname_in_eng = kharediNondModel.fname_in_eng;
+                            dbTable.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                            dbTable.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                            dbTable.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                            dbTable.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                            dbTable.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                            dbTable.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+                            dbTable.alias_name = kharediNondModel.aliceName;
+                            dbTable.owner_status_code = kharediNondModel.owner_status_code;
+                            dbTable.owner_status_description = kharediNondModel.owner_status_description;
+                            dbTable.holder_type = kharediNondModel.holderType == "" || kharediNondModel.holderType == null ? "NA" : kharediNondModel.holderType;
+                            dbTable.dob = kharediNondModel.dob;
+                            dbTable.mother_name_in_marathi = kharediNondModel.motherName_in_marathi;
+                            dbTable.mother_name_in_eng = kharediNondModel.motherName_in_eng;
+                            dbTable.userName = kharediNondModel.userName;
+                            dbTable.city_servey_no = kharediNondModel.city_servey_no;
+                            dbTable.lr_property_id = kharediNondModel.lr_property_id;
+                            dbTable.milkat = kharediNondModel.milkat;
+                            dbTable.namud = kharediNondModel.namud;
+                            dbTable.sub_property_no = kharediNondModel.sub_property_no;
+                            dbTable.isFullAreaGiven = kharediNondModel.isFullAreaGiven;
+                            dbTable.actual_area = kharediNondModel.actualArea;
+                            dbTable.mutation_area = kharediNondModel.mutationArea;
+                            dbTable.available_area = kharediNondModel.availableArea;
+                            dbTable.address_type = kharediNondModel.address_type;
+                            dbTable.address = kharediNondModel.address;
+                            dbTable.state = kharediNondModel.state;
+                            dbTable.district = kharediNondModel.district;
+                            dbTable.taluka = kharediNondModel.taluka;
+                            dbTable.city = kharediNondModel.city;
+                            dbTable.flatno_plotno = kharediNondModel.plotno;
+                            dbTable.societyname = kharediNondModel.building;
+                            dbTable.mainstreet = kharediNondModel.mainroad;
+                            dbTable.landmark = kharediNondModel.impSymbol;
+                            dbTable.locality = kharediNondModel.area;
+                            dbTable.pincode = kharediNondModel.pincode;
+                            dbTable.post_office_name = kharediNondModel.post_office_name;
+                            //dbTable.address_proof_document_name = kharediNondModel.address_proof_name;
+                            //dbTable.address_proof_document_path = kharediNondModel.address_proof_src;
+                            //dbTable.signed_file_name = kharediNondModel.signature_name;
+                            //dbTable.signed_file_path = kharediNondModel.signature_src;
+
+                            //Gauri
+                            dbTable.isTaker = 0;
+                            dbTable.cts_number = kharediNondModel.ctsNo;
+                            dbTable.mutation_srno = kharediNondModel.mutationSroNo;
+                            dbTable.owner_number = kharediNondModel.ownerNo;
+                            dbTable.owner_village_code = kharediNondModel.owner_village_code;
+                            /*dbTable.alias_name = "NA";
+                            dbTable.gender = "NA";
+                            dbTable.khata_type = "NA";
+                            dbTable.holder_type = "NA";
+                            dbTable.dob = "NA";
+                            dbTable.mother_name_in_marathi = "NA";
+                            dbTable.mother_name_in_eng = "NA";
+                            dbTable.aapakDropdown = "NA";
+                            dbTable.aapak = "NA";
+                            dbTable.landBuyArea = "NA";
+                            dbTable.power_of_attorney_code = GeneratePowerOfAttorneyCode(vataniPatraData.applicationid, false);*/
+                            _context.mutationDTL.Add(dbTable);
+                            _context.SaveChanges();
+
+                            //Get Saved Row ID
+                            int kharediNondID = (int)dbTable.mutation_givertaker_id!;
+
+                            string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                            bool checkAddressFlag = true;
+                            //bool checkSignFlag = false;
+                            if (kharediNondModel.address_type == "INDIA")
+                            {
+                                if (!string.IsNullOrEmpty(vataniPatraData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(vataniPatraData.address.indiaAddress.addressProofName))
+                                {
+                                    string[] AddressData = vataniPatraData.address.indiaAddress!.addressProofSrc!.Split(",");
+
+                                    string imageName = System.IO.Path.GetFileNameWithoutExtension(vataniPatraData.address.indiaAddress.addressProofName!);
+                                    if (methodForFile.ContainsSpecialCharacters(imageName))
+                                    {
+                                        return vataniPatraData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                                    }
+                                    else
+                                    {
+                                        checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], vataniPatraData.address.indiaAddress.addressProofName!, kharediNondID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                        string AddressProofExt = Path.GetExtension(vataniPatraData.address.indiaAddress.addressProofName!);
+                                        kharediNondModel.address_proof_name = "AddressProof" + kharediNondID + "_" + CurrentDateTime + AddressProofExt;
+                                        kharediNondModel.address_proof_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.address_proof_name;
+
+                                        var UpdateAddressFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                                        if (UpdateAddressFilePath != null)
+                                        {
+                                            dbTable.address_proof_document_name = kharediNondModel.address_proof_name;
+                                            dbTable.address_proof_document_path = kharediNondModel.address_proof_src;
+                                            _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                            _context.SaveChanges();
+                                        }
+                                    }
+                                }
+
+                                //if (!string.IsNullOrEmpty(vataniPatraData.address.indiaAddress.signatureSrc))
+                                //{
+                                //    string[] signData = vataniPatraData.address.indiaAddress.signatureSrc!.Split(",");
+                                //    checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], vataniPatraData.address.indiaAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+                                //    string SignatureExt = Path.GetExtension(vataniPatraData.address.indiaAddress.signatureName!);
+                                //    kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                                //    kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+
+                                //    var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                                //    if (UpdateSignFilePath != null)
+                                //    {
+                                //        dbTable.signed_file_name = kharediNondModel.signature_name;
+                                //        dbTable.signed_file_path = kharediNondModel.signature_src;
+                                //        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                //        _context.SaveChanges();
+                                //    }
+                                //}
+                            }
+                            //if (kharediNondModel.address_type == "FOREIGN")
+                            //{
+                            //    if (!string.IsNullOrEmpty(vataniPatraData.address.foreignAddress!.signatureSrc))
+                            //    {
+                            //        string[] signData = vataniPatraData.address.foreignAddress!.signatureSrc!.Split(",");
+                            //        checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], vataniPatraData.address.foreignAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+
+                            //        string SignatureExt = Path.GetExtension(vataniPatraData.address.foreignAddress.signatureName!);
+                            //        kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                            //        kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+                            //        var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                            //        if (UpdateSignFilePath != null)
+                            //        {
+                            //            dbTable.signed_file_name = kharediNondModel.signature_name;
+                            //            dbTable.signed_file_path = kharediNondModel.signature_src;
+                            //            _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                            //            _context.SaveChanges();
+                            //        }
+                            //    }
+                            //}
+                            /*if (checkAddressFlag || checkSignFlag)
+                            {*/
+                            var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(vataniPatraData.applicationid)).FirstOrDefault();
+                            if (applicationDTLdata != null)
+                            {
+                                if (!string.IsNullOrEmpty(applicationDTLdata.mutationgiverIDs) && !applicationDTLdata.mutationgiverIDs.Contains(kharediNondID.ToString()))
+                                {
+                                    applicationDTLdata.mutationgiverIDs = applicationDTLdata.mutationgiverIDs + "," + kharediNondID.ToString();
+                                }
+                                else
+                                {
+                                    applicationDTLdata.mutationgiverIDs = kharediNondID.ToString();
+                                }
+                                _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                                _context.SaveChanges();
+                            }
+                            scope.Complete();
+                            return "Success";
+                            /* }
+                             if (!checkAddressFlag)
+                             {
+                                 _context.mutationDTL.Remove(dbTable);
+                                 _context.SaveChanges();
+                                 return "Address Proof File Is Not Uploaded";
+                             }
+                             if (!checkSignFlag)
+                             {
+                                 _context.mutationDTL.Remove(dbTable);
+                                 _context.SaveChanges();
+                                 return "Signature File Is Not Uploaded";
+                             }
+                             else
+                             {
+                                 _context.mutationDTL.Remove(dbTable);
+                                 _context.SaveChanges();
+                                 return "Some Files Are Not Uploaded";
+                             }*/
+                        }
+                    }
+                    else
+                    {
+                        return "Please wait! Marathi name is not fetched!";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //_context.mutationDTL.Remove(dbTable);
+                    //_context.SaveChanges();
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchVataniPatraNondDataForGiver FetchVataniPatraDataForGiver(int mutationdtlid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
+                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchVataniPatraNondDataForGiver fetchData = new FetchVataniPatraNondDataForGiver();
+                fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;
+                fetchData.userid = KharedinondInformation.userMaster!.userid;
+                fetchData.applicationid = KharedinondInformation.applicationDTL!.applicationid;
+                fetchData.ActualctsNo = KharedinondInformation.cts_number;
+                fetchData.mutationSroNo = KharedinondInformation.mutation_srno;
+                fetchData.ownerNo = KharedinondInformation.owner_number;
+
+                fetchData.fullNameInMarathi = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_marathi!.Trim());
+                fetchData.fullNameInEng = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_eng!.Trim());
+                fetchData.mobileNo = KharedinondInformation.mobileno;
+
+                InputDataModel.UserDTLForVataniPatra userDetails = new InputDataModel.UserDTLForVataniPatra();
+                userDetails.suffixcode = KharedinondInformation.prefixcode_marathi;
+                userDetails.suffixCodeEng = KharedinondInformation.prefixcode_eng;
+                userDetails.suffix = KharedinondInformation.prefix_in_marathi;
+                userDetails.firstName = KharedinondInformation.fname_in_marathi;
+                userDetails.middleName = KharedinondInformation.mname_in_marathi;
+                userDetails.lastName = KharedinondInformation.lname_in_marathi;
+                userDetails.suffixEng = KharedinondInformation.prefix_in_eng;
+                userDetails.firstNameEng = KharedinondInformation.fname_in_eng;
+                userDetails.middleNameEng = KharedinondInformation.mname_in_eng;
+                userDetails.lastNameEng = KharedinondInformation.lname_in_eng;
+                userDetails.aliceName = KharedinondInformation.alias_name;
+                userDetails.dob = KharedinondInformation.dob;
+                userDetails.motherName = KharedinondInformation.mother_name_in_marathi;
+                userDetails.motherNameEng = KharedinondInformation.mother_name_in_eng;
+                userDetails.nabhu = KharedinondInformation.city_servey_no;
+                userDetails.userName = KharedinondInformation.userName;
+                userDetails.lrPropertyUID = KharedinondInformation.lr_property_id;
+                userDetails.milkat = KharedinondInformation.milkat;
+                userDetails.namud = KharedinondInformation.namud;
+                userDetails.subPropNo = KharedinondInformation.sub_property_no;
+                fetchData.userDetails = userDetails;
+
+
+                InputDataModel.areaForMutationDTLForVataniPatra areamutation = new areaForMutationDTLForVataniPatra();
+                areamutation.isFullAreaGiven = KharedinondInformation.isFullAreaGiven;
+                areamutation.actualArea = KharedinondInformation.actual_area;
+                areamutation.mutationArea = KharedinondInformation.mutation_area;
+                areamutation.availableArea = KharedinondInformation.available_area;
+                fetchData.areaForMutation = areamutation;
+
+                InputDataModel.AddressDTLForVataniPatra addressData = new InputDataModel.AddressDTLForVataniPatra();
+                addressData.addressType = KharedinondInformation.address_type;
+                if (KharedinondInformation.address_type == "INDIA")
+                {
+                    InputDataModel.IndiaAddressForVataniPatra addressForIndia = new InputDataModel.IndiaAddressForVataniPatra();
+                    addressForIndia.state = KharedinondInformation.state;
+                    addressForIndia.district = KharedinondInformation.district;
+                    addressForIndia.city = KharedinondInformation.city;
+                    addressForIndia.taluka = KharedinondInformation.taluka;
+                    addressForIndia.plotNo = KharedinondInformation.flatno_plotno;
+                    addressForIndia.building = KharedinondInformation.societyname;
+                    addressForIndia.mainRoad = KharedinondInformation.mainstreet;
+                    addressForIndia.impSymbol = KharedinondInformation.landmark;
+                    addressForIndia.area = KharedinondInformation.locality;
+                    addressForIndia.pincode = KharedinondInformation.pincode;
+                    addressForIndia.postOfficeName = KharedinondInformation.post_office_name;
+                    addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                    addressForIndia.mobile = KharedinondInformation.mobileno;
+                    addressForIndia.mobileOTP = KharedinondInformation.mobilenoverified;
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+                    if (KharedinondInformation.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(KharedinondInformation.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(KharedinondInformation.address_proof_document_path!);
+                        KharedinondInformation.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+                    addressForIndia.signatureSrc = KharedinondInformation.signed_file_path!;
+                    addressData.indiaAddress = addressForIndia;
+                }
+                else if (KharedinondInformation.address_type == "FOREIGN")
+                {
+                    InputDataModel.AddressForeignForVataniPatra addressForForeign = new InputDataModel.AddressForeignForVataniPatra();
+                    addressForForeign.address = KharedinondInformation.address;
+                    addressForForeign.mobile = KharedinondInformation.mobileno;
+                    addressForForeign.email = KharedinondInformation.emailid;
+                    addressForForeign.emailOTP = KharedinondInformation.emailidverified;
+                    addressForForeign.signatureName = KharedinondInformation.signed_file_name;
+                    addressForForeign.signatureSrc = KharedinondInformation.signed_file_path;
+                    addressData.foreignAddress = addressForForeign;
+                }
+                fetchData.address = addressData;
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public string SaveVataniPatraTaker(VataniPatraDataForTaker inoutData)
+        {
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+            MethodForFileUpload methodForFile = new MethodForFileUpload();
+            MutationGiverTakerDTL dbTable = new MutationGiverTakerDTL();
+            using (var scope = new TransactionScope())
+            {
+                try
+                {
+                    string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inoutData.applicationid + @"\TAKER";
+                    // Assign Values to Model
+                    KharediNondModel kharediNondModel = new KharediNondModel();
+                    UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inoutData.userid!)!;
+                    kharediNondModel.userMaster = userMaster;
+
+                    ApplicationDTL applicationDTL = _context.applicationDTL.FirstOrDefault(s => s.applicationid == inoutData.applicationid!)!;
+                    kharediNondModel.applicationDTL = applicationDTL;
+
+                    PropertyTypeMaster proptype = _context.propertyTypes.FirstOrDefault(s => s.propertytypeid == Convert.ToInt32(inoutData.isMHProperty!.propType!))!;
+                    kharediNondModel.propType = proptype;
+
+
+                    kharediNondModel.address_type = inoutData.address!.addressType!.Trim().ToUpper();
+                    if (kharediNondModel.address_type == "INDIA")
+                    {
+                        if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.plotNo))
+                        {
+                            return "Please enter सदनिका / घर /प्लॉट नं.";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.impSymbol))
+                        {
+                            return "Please enter महत्त्वाची खूण";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.pincode))
+                        {
+                            return "Please enter पिन कोड";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.pincode) && methodForFile.CheckPinCode(inoutData.address!.indiaAddress!.pincode))
+                        {
+                            if (string.IsNullOrEmpty(inoutData.address!.indiaAddress!.postOfficeName))
+                            {
+                                return "Please select Post Office Name / Enter correct Pin Code.";
+                            }
+                            return "पिन कोड field contains special characters";
+                        }
+
+                        if (methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.plotNo))
+                        {
+                            return "सदनिका / घर /प्लॉट नं. field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.building!) && methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.building!))
+                        {
+                            return "इमारत (बिल्डिंग)/सोसायटी क्रमांक किंवा नाव field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.mainRoad!) && methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.mainRoad!))
+                        {
+                            return "मुख्य रस्ता field contains special characters";
+                        }
+                        if (methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.impSymbol!))
+                        {
+                            return "महत्त्वाची खूण field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.area!) && methodForFile.CheckIndianAddress(inoutData.address!.indiaAddress!.area!))
+                        {
+                            return "महत्त्वाची खूण field contains special characters";
+                        }
+                        if (!string.IsNullOrEmpty(inoutData.address!.indiaAddress!.mobile!) && methodForFile.CheckMobNo(inoutData.address!.indiaAddress!.mobile!))
+                        {
+                            return "मोबाईल field contains special characters";
+                        }
+                        //if (methodForFile.CheckPinCode(inoutData.address!.indiaAddress!.pincode!))
+                        //{
+                        //    return "पिन कोड field contains special characters";
+                        //}
+
+                        kharediNondModel.mobileno = inoutData.address.indiaAddress!.mobile;
+                        kharediNondModel.mobilenoverified = inoutData.address.indiaAddress.mobileOTP;
+                        kharediNondModel.emailid = "NA";
+                        kharediNondModel.emailidverified = "NA";
+
+                        kharediNondModel.address = "NA";
+                        kharediNondModel.state = inoutData.address.indiaAddress.state;
+                        kharediNondModel.district = inoutData.address.indiaAddress.district;
+                        kharediNondModel.taluka = inoutData.address.indiaAddress.taluka;
+                        kharediNondModel.city = inoutData.address.indiaAddress.city;
+                        kharediNondModel.plotno = inoutData.address.indiaAddress.plotNo;
+                        kharediNondModel.building = inoutData.address.indiaAddress.building;
+                        kharediNondModel.mainroad = inoutData.address.indiaAddress.mainRoad;
+                        kharediNondModel.impSymbol = inoutData.address.indiaAddress.impSymbol;
+                        kharediNondModel.area = inoutData.address.indiaAddress.area;
+                        kharediNondModel.pincode = inoutData.address.indiaAddress.pincode;
+                        kharediNondModel.post_office_name = inoutData.address.indiaAddress.postOfficeName;
+                        kharediNondModel.address_proof_name = inoutData.address.indiaAddress.addressProofName;
+                        kharediNondModel.address_proof_src = inoutData.address.indiaAddress.addressProofSrc == "" ? "NA" : inoutData.address.indiaAddress.addressProofSrc!;
+                        kharediNondModel.signature_name = inoutData.address.indiaAddress.signatureName == "" ? "NA" : inoutData.address.indiaAddress.signatureName;
+                        kharediNondModel.signature_src = inoutData.address.indiaAddress.signatureSrc == "" ? "NA" : inoutData.address.indiaAddress.signatureSrc!;
+                    }
+                    else if (kharediNondModel.address_type == "FOREIGN")
+                    {
+                        if (string.IsNullOrEmpty(inoutData.address.foreignAddress!.address) || string.IsNullOrEmpty(inoutData.address.foreignAddress!.email))
+                        {
+                            return "पत्ता and ई मेल field is mandatory";
+                        }
+                        if (methodForFile.CheckForeignAddress(inoutData.address.foreignAddress!.address))
+                        {
+                            return "पत्ता field contains special characters";
+                        }
+                        if (methodForFile.CheckEmail(inoutData.address.foreignAddress!.email))
+                        {
+                            return "ई मेल field contains special characters";
+                        }
+                        kharediNondModel.address = inoutData.address.foreignAddress!.address;
+                        kharediNondModel.mobileno = inoutData.address.foreignAddress.mobile;
+                        kharediNondModel.emailid = inoutData.address.foreignAddress.email;
+                        kharediNondModel.emailidverified = inoutData.address.foreignAddress.emailOTP;
+                        kharediNondModel.signature_name = inoutData.address.foreignAddress.signatureName;
+                        //kharediNondModel.signature_src = kharediNondDataForGiver.address.foreignAddress!.signatureSrc == "" ? null : Convert.FromBase64String(kharediNondDataForGiver.address.foreignAddress.signatureSrc!.Split(",")[1]);
+
+                        kharediNondModel.state = "NA";
+                        kharediNondModel.district = "NA";
+                        kharediNondModel.taluka = "NA";
+                        kharediNondModel.city = "NA";
+                        kharediNondModel.plotno = "NA";
+                        kharediNondModel.building = "NA";
+                        kharediNondModel.mainroad = "NA";
+                        kharediNondModel.impSymbol = "NA";
+                        kharediNondModel.area = "NA";
+                        kharediNondModel.pincode = "NA";
+                        kharediNondModel.post_office_name = "NA";
+                        kharediNondModel.address_proof_name = "NA";
+                        kharediNondModel.address_proof_src = "NA";
+                        //kharediNondModel.signature_name = kharediNondDataForGiver.address.foreignAddress.signatureName;
+                    }
+
+                    kharediNondModel.usertype_code = inoutData.usertype_code;
+                    kharediNondModel.usertype = inoutData.usertype;
+
+                    if (kharediNondModel.hasProperty!.Trim().ToUpper() == "YES")
+                    {
+                        //if (kharediNondModel.propType.propertytypeid == 1 && string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.khataNo))
+                        //{
+                        //    return "When Property Type Is 7/12 Then Khate No Should Not Be Empty";
+                        //}
+                        if (kharediNondModel.propType.propertytypeid == 2 && string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.naBhu))
+                        {
+                            return "When Property Type Is Property Card Then City Servey No Should Not Be Empty";
+                        }
+                        if (kharediNondModel.propType.propertytypeid == 3 && string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.ulpin))
+                        {
+                            return "When Property Type Is ULPIN Then ULPIN Should Not Be Empty";
+                        }
+                        //kharediNondModel.khatano = string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.khataNo) ? "NA" : inoutData.isMHProperty.userDetails.khataNo;
+                        kharediNondModel.city_servey_no = string.IsNullOrEmpty(inoutData.isMHProperty.userDetails.naBhu) ? "NA" : inoutData.isMHProperty.userDetails.naBhu;
+                        kharediNondModel.ulpin = string.IsNullOrEmpty(inoutData.isMHProperty.userDetails.ulpin) ? "NA" : inoutData.isMHProperty.userDetails.ulpin;
+                        //if (kharediNondModel.propType.propertytypeid == 1)
+                        //{
+                        //    kharediNondModel.city_servey_no = "NA";
+                        //    kharediNondModel.ulpin = "NA";
+                        //}
+                        //else if (kharediNondModel.propType.propertytypeid == 2)
+                        //{
+                        //    kharediNondModel.khatano = "NA";
+                        //    kharediNondModel.ulpin = "NA";
+                        //}
+                        //else if (kharediNondModel.propType.propertytypeid == 3)
+                        //{
+                        //    kharediNondModel.khatano = "NA";
+                        //    kharediNondModel.city_servey_no = "NA";
+                        //}
+
+                    }
+                    else
+                    {
+                        kharediNondModel.khatano = "NA";
+                        //Gouri
+                        kharediNondModel.city_servey_no = "NA";
+                        kharediNondModel.ulpin = "NA";
+                    }
+
+                    //isMHproperty
+                    kharediNondModel.hasProperty = inoutData.isMHProperty!.hasProperty;
+                    //kharediNondModel.propType = inoutData.isMHProperty.propType;
+
+                    if (kharediNondModel.usertype_code == 1)
+                    {
+
+                        if (string.IsNullOrEmpty(inoutData.dharak!.userdharak!.holderType!.owner_status_description))
+                        {
+                            return "Please Select धारक प्रकार";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.dharak!.userdharak!.gender!.gender_description))
+                        {
+                            return "Please Select लिंग ";
+                        }
+                        if (string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.firstName!)
+                           || string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.middleName!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.lastName!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.firstNameEng!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.middleNameEng!) ||
+                           string.IsNullOrEmpty(inoutData.isMHProperty!.userDetails!.lastNameEng!))
+                        {
+                            return "Please enter घेणाऱ्याचे नाव (मराठी मध्ये) / घेणाऱ्याचे नाव (इंग्रजी मध्ये)";
+                        }
+
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.firstName!) ||
+                            methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.middleName!) ||
+                            methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.lastName!))
+                        {
+                            return "घेणाऱ्याचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.firstNameEng!)
+                            || methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.middleNameEng!) ||
+                            methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.lastNameEng!))
+
+                        {
+                            return "घेणाऱ्याचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.dharak!.userdharak!.aliceName!))
+                        {
+                            return "घेणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
+                        }
+
+                        if (methodForFile.ContainsSpecialCharactersInName(inoutData.dharak!.userdharak!.motherNameEng!))
+                        {
+                            return "आईचे नाव (इंग्रजी मध्ये) Field contains special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.dharak!.userdharak!.motherName!))
+                        {
+                            return "आईचे नाव (मराठी मध्ये) Field contains English Letter /special characters / Numbers!";
+                        }
+
+                        //DOB validations
+                        if (!string.IsNullOrEmpty(inoutData.dharak!.userdharak!.dob!))
+                        {
+                            DateTime dob = DateTime.Parse(inoutData.dharak!.userdharak!.dob!);
+                            DateTime compareDate = new DateTime(2024, 5, 01);
+                            if (dob > compareDate)
+                            {
+                                if (string.IsNullOrEmpty(kharediNondModel.motherName_in_marathi = inoutData.dharak.userdharak.motherName) ||
+                                    (string.IsNullOrEmpty(kharediNondModel.motherName_in_eng = inoutData.dharak.userdharak.motherNameEng)))
+                                {
+                                    return "जन्म तारीख १ मे २०२४ नंतरची असेल तर आईचे नाव टाकणे गरजेचे आहे";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return "Please Select जन्म दिनांक";
+                        }
+
+
+                        // for APk validation for future use
+                        //int age = DateTime.Today.Year - dob.Year;
+                        //if (dob > DateTime.Today.AddYears(-age)) age--;
+
+                        //if (age >= 18)
+                        //{
+                        //    return "Age must be at least 18 years.";
+                        //}
+                        kharediNondModel.prefixcode_marathi = inoutData.isMHProperty.userDetails!.suffixcode;
+                        kharediNondModel.prefixcode_eng = inoutData.isMHProperty.userDetails.suffixCodeEng;
+                        kharediNondModel.prefix_in_eng = inoutData.isMHProperty!.userDetails!.suffixEng;
+                        kharediNondModel.fname_in_eng = inoutData.isMHProperty.userDetails!.firstNameEng;
+                        kharediNondModel.mname_in_eng = inoutData.isMHProperty.userDetails!.middleNameEng;
+                        kharediNondModel.lname_in_eng = inoutData.isMHProperty.userDetails!.lastNameEng;
+                        kharediNondModel.prefix_in_marathi = inoutData.isMHProperty.userDetails!.suffix;
+                        kharediNondModel.fname_in_marathi = inoutData.isMHProperty!.userDetails!.firstName;
+                        kharediNondModel.mname_in_marathi = inoutData.isMHProperty!.userDetails.middleName;
+                        kharediNondModel.lname_in_marathi = inoutData.isMHProperty!.userDetails.lastName;
+                        kharediNondModel.companyName = "NA";
+                        kharediNondModel.companyNameEng = "NA";
+                        if (kharediNondModel.hasProperty == "yes")
+                        {
+                            kharediNondModel.khatano = inoutData.isMHProperty!.userDetails!.khataNo;
+                            kharediNondModel.city_servey_no = inoutData.isMHProperty.userDetails.naBhu;
+                            kharediNondModel.ulpin = inoutData.isMHProperty.userDetails.ulpin;
+                            kharediNondModel.userName = inoutData.isMHProperty.userDetails.userName;
+                            kharediNondModel.district_code = inoutData.isMHProperty.userDetails.district!.district_code;
+                            kharediNondModel.district_name_in_marathi = inoutData.isMHProperty.userDetails.district!.district_name!;
+                            kharediNondModel.district_name_in_eng = inoutData.isMHProperty.userDetails.district!.district_english_name!;
+                            kharediNondModel.office_code = inoutData.isMHProperty.userDetails.taluka!.office_code;
+                            kharediNondModel.office_name = inoutData.isMHProperty.userDetails.taluka!.office_name;
+                            kharediNondModel.village_code = inoutData.isMHProperty.userDetails.village!.village_code;
+                            kharediNondModel.village_name = inoutData.isMHProperty.userDetails.village!.village_name;
+                        }
+                        //Dharak details
+                        kharediNondModel.aliceName = inoutData.dharak!.userdharak!.aliceName;
+                        kharediNondModel.apk_code = inoutData.dharak!.userdharak!.aapakDropdown!.apk_code;
+                        kharediNondModel.apk_description = inoutData.dharak.userdharak.aapakDropdown.apk_description;
+                        kharediNondModel.aapak = inoutData.dharak.userdharak.aapak;
+                        kharediNondModel.relation_code = Convert.ToInt32(inoutData.dharak.userdharak.aapakRelation!.relation_code);
+                        kharediNondModel.relation_name = inoutData.dharak.userdharak.aapakRelation.relation_name;
+
+
+                        kharediNondModel.gender_code = inoutData.dharak.userdharak.gender!.gender_code;
+                        kharediNondModel.gender_description = inoutData.dharak.userdharak.gender.gender_description;
+
+                        //kharediNondModel.khataType = inoutData.dharak.userdharak.khataType;
+                        //kharediNondModel.khataCode = inoutData.dharak!.userdharak!.khataType!.khataCode;
+                        //kharediNondModel.khataLabel = inoutData.dharak!.userdharak!.khataType!.khataLabel;
+                        kharediNondModel.khataCode = "NA";
+                        kharediNondModel.khataLabel = "NA";
+                        kharediNondModel.owner_status_code = inoutData.dharak.userdharak.holderType!.owner_status_code;
+                        kharediNondModel.owner_status_description = inoutData.dharak.userdharak.holderType.owner_status_description;
+                        kharediNondModel.dob = inoutData.dharak.userdharak.dob;
+                        kharediNondModel.motherName_in_marathi = inoutData.dharak.userdharak.motherName;
+                        kharediNondModel.motherName_in_eng = inoutData.dharak.userdharak.motherNameEng;
+                        kharediNondModel.landBuyArea = inoutData.dharak.userdharak!.landBuyArea;
+                    }
+                    else
+                    {
+                        if (methodForFile.ContainsSpecialCharactersInMarathiName(inoutData.isMHProperty!.userDetails!.companyName!))
+                        {
+                            return "घेणाऱ्याचे नाव (मराठी मध्ये) Field contains English Letters / special characters / Numbers!";
+                        }
+                        if (methodForFile.ContainsSpecialCharactersInName(inoutData.isMHProperty!.userDetails!.companyNameEng!))
+                        {
+                            return "घेणाऱ्याचे नाव (इंग्रजी मध्ये) Field contains English Letters / special characters/ Numbers!";
+                        }
+
+                        kharediNondModel.prefixcode_eng = "NA";
+                        kharediNondModel.prefixcode_marathi = "NA";
+                        kharediNondModel.sub_property_no = "999999";
+                        kharediNondModel.prefix_in_eng = "NA";
+                        kharediNondModel.fname_in_eng = "NA";
+                        kharediNondModel.mname_in_eng = "NA";
+                        kharediNondModel.lname_in_eng = "NA";
+                        kharediNondModel.prefix_in_marathi = "NA";
+                        kharediNondModel.fname_in_marathi = "NA";
+                        kharediNondModel.mname_in_marathi = "NA";
+                        kharediNondModel.lname_in_marathi = "NA";
+                        kharediNondModel.khatano = "NA";
+                        kharediNondModel.city_servey_no = "NA";
+                        kharediNondModel.ulpin = "NA";
+                        kharediNondModel.userName = "NA";
+                        kharediNondModel.district_code = "NA";
+                        kharediNondModel.district_name_in_marathi = "NA";
+                        kharediNondModel.district_name_in_eng = "NA";
+                        kharediNondModel.office_code = "NA";
+                        kharediNondModel.office_name = "NA";
+                        kharediNondModel.village_code = "NA";
+                        kharediNondModel.village_name = "NA";
+                        kharediNondModel.companyName = inoutData.isMHProperty.userDetails!.companyName;
+                        kharediNondModel.companyNameEng = inoutData.isMHProperty.userDetails!.companyNameEng;
+
+                        //Dharak details
+                        kharediNondModel.aliceName = "NA";
+                        kharediNondModel.aapak = "NA";
+                        kharediNondModel.apk_code = 1;
+                        kharediNondModel.apk_description = "स्वतः";
+                        kharediNondModel.relation_code = 0;
+                        kharediNondModel.relation_name = "NA";
+                        kharediNondModel.gender_code = "NA";
+                        kharediNondModel.gender_description = "NA";
+                        //  kharediNondModel.khataCode = inoutData.dharak!.companydharak!.khataType!.khataCode;
+                        // kharediNondModel.khataLabel = inoutData.dharak!.companydharak!.khataType!.khataLabel;
+                        kharediNondModel.owner_status_code = inoutData.dharak!.companydharak!.holderType!.owner_status_code;
+                        kharediNondModel.owner_status_description = inoutData.dharak.companydharak.holderType.owner_status_description;
+                        //kharediNondModel.apk_code = inoutData.dharak.companydharak!.aapakDropdown!.apk_code;
+                        //kharediNondModel.apk_description = inoutData.dharak.companydharak!.aapakDropdown.apk_description;
+                        //kharediNondModel.aapak = inoutData.dharak.companydharak.aapak;
+                        kharediNondModel.landBuyArea = inoutData.dharak.companydharak.landBuyArea;
+                        kharediNondModel.dob = "NA";
+                        kharediNondModel.motherName_in_marathi = "NA";
+                        kharediNondModel.motherName_in_eng = "NA";
+                    }
+
+                    //Assign Data to Table fields to insert new records
+                    //Set Default Value - Mrunal
+                    dbTable.mobileno = "NA";
+                    dbTable.mobilenoverified = "NA";
+                    dbTable.emailid = "NA";
+                    dbTable.emailidverified = "NA";
+                    dbTable.prefixcode_marathi = "0";
+                    dbTable.prefixcode_eng = "0";
+                    dbTable.sub_property_no = "999999";
+                    dbTable.prefix_in_marathi = "NA";
+                    dbTable.fname_in_marathi = "NA";
+                    dbTable.mname_in_marathi = "NA";
+                    dbTable.lname_in_marathi = "NA";
+                    dbTable.prefix_in_eng = "NA";
+                    dbTable.fname_in_eng = "NA";
+                    dbTable.mname_in_eng = "NA";
+                    dbTable.lname_in_eng = "NA";
+                    dbTable.khatano = "NA";
+                    dbTable.city_servey_no = "NA";
+                    dbTable.ulpin = "NA";
+                    dbTable.userName = "NA";
+                    dbTable.district_code = "NA";
+                    dbTable.district_name_in_marathi = "NA";
+                    dbTable.district_name_in_eng = "NA";
+                    dbTable.ofc_code = "NA";
+                    dbTable.ofc_name = "NA";
+                    dbTable.village_code = "NA";
+                    dbTable.village_name = "NA";
+                    dbTable.alias_name = "NA";
+                    dbTable.holder_type = "NA";
+                    dbTable.owner_status_code = "NA";
+                    dbTable.owner_status_description = "NA";
+                    dbTable.dob = "NA";
+                    dbTable.mother_name_in_marathi = "NA";
+                    dbTable.mother_name_in_eng = "NA";
+                    dbTable.userName = "NA";
+                    dbTable.lr_property_id = "NA";
+                    dbTable.milkat = "NA";
+                    dbTable.namud = "NA";
+
+                    dbTable.isFullAreaGiven = "NA";
+                    dbTable.actual_area = "NA";
+                    dbTable.mutation_area = "NA";
+                    dbTable.available_area = "NA";
+
+                    dbTable.address_type = "NA";
+
+                    dbTable.flatno_plotno = "NA";
+                    dbTable.societyname = "NA";
+                    dbTable.mainstreet = "NA";
+                    dbTable.landmark = "NA";
+                    dbTable.locality = "NA";
+                    dbTable.pincode = "NA";
+                    dbTable.post_office_name = "NA";
+                    dbTable.city = "NA";
+                    dbTable.taluka = "NA";
+                    dbTable.district = "NA";
+                    dbTable.state = "NA";
+                    dbTable.address_proof_document_name = "NA";
+                    dbTable.address_proof_document_path = "NA";
+
+                    dbTable.address = "NA";
+                    dbTable.signed_file_name = "NA";
+                    dbTable.signed_file_path = "NA";
+
+                    dbTable.user_type = "NA";
+                    dbTable.profile_pic_file_name = "NA";
+                    dbTable.profile_pic_file_path = "NA";
+                    dbTable.has_property = "NA";
+                    //dbTable.prop_type = "NA";
+                    //   dbTable.khata_type = "NA";
+                    dbTable.company_name_in_marathi = "NA";
+                    dbTable.company_name_in_eng = "NA";
+                    dbTable.aapak = "NA";
+                    dbTable.land_buy_area = "NA";
+                    //dbTable.gift_area = "NA";
+                    dbTable.apk_code = 1;
+                    dbTable.apk_description = "स्वतः";
+                    dbTable.relation_code = 0;
+                    dbTable.relation_name = "NA";
+                    dbTable.khata_type_code = "NA";
+                    dbTable.khata_type_name = "NA";
+                    dbTable.cts_number = "NA";
+                    dbTable.mutation_srno = "NA";
+                    dbTable.owner_number = "NA";
+                    dbTable.sellerid = "NA";
+                    dbTable.buyerid = "NA";
+                    dbTable.owner_status_code = "NA";
+                    dbTable.owner_status_description = "NA";
+                    dbTable.account_type_code = 0;
+                    dbTable.account_type_description = "NA";
+                    dbTable.varas_relation_code = 0;
+                    dbTable.varas_relation_name = "NA";
+                    dbTable.relation_code = 0;
+                    dbTable.relation_name = "NA";
+                    dbTable.holder_type = "NA";
+                    dbTable.gender_code = "NA";
+                    dbTable.gender_description = "NA";
+                    //dbTable.aapak_name = "NA";
+                    //dbTable.relation = "NA";
+                    //dbTable.is_address_same = false;
+                    string city_servey_no = string.Empty, sub_property_no = string.Empty;
+                    if (inoutData.giver != null)
+                    {
+                        for (int i = 0; i < inoutData.giver.Count; i++)
+                        {
+                            if (i == 0)
+                            {
+                                city_servey_no = inoutData.giver[i].nabhu!;
+                                sub_property_no = inoutData.giver[i].subPropNo!;
+                            }
+                            else
+                            {
+                                city_servey_no = city_servey_no + "," + inoutData.giver[i].nabhu!;
+                                sub_property_no = sub_property_no + "," + inoutData.giver[i].subPropNo!;
+                            }
+                        }
+                    }
+
+                    kharediNondModel.city_servey_no = city_servey_no;
+                    kharediNondModel.sub_property_no = sub_property_no;
+                    //Set actual Value
+
+                    dbTable.userMaster = kharediNondModel.userMaster;
+                    dbTable.applicationDTL = kharediNondModel.applicationDTL;
+                    dbTable.user_type = kharediNondModel.usertype;
+                    dbTable.user_type_code = kharediNondModel.usertype_code;
+                    dbTable.mobileno = kharediNondModel.mobileno;
+                    dbTable.mobilenoverified = string.IsNullOrEmpty(kharediNondModel.mobilenoverified) ? "NO" : kharediNondModel.mobilenoverified.ToUpper();
+                    dbTable.emailid = kharediNondModel.emailid;
+                    dbTable.emailidverified = string.IsNullOrEmpty(kharediNondModel.emailidverified) ? "NO" : kharediNondModel.emailidverified.ToUpper();
+                    dbTable.has_property = kharediNondModel.hasProperty;
+                    dbTable.prop_type = kharediNondModel.propType;
+                    dbTable.khatano = kharediNondModel.khatano;
+                    dbTable.city_servey_no = kharediNondModel.city_servey_no;
+                    dbTable.sub_property_no = kharediNondModel.sub_property_no;
+                    dbTable.ulpin = kharediNondModel.ulpin;
+                    dbTable.userName = kharediNondModel.userName;
+                    dbTable.district_code = kharediNondModel.district_code;
+                    dbTable.district_name_in_marathi = kharediNondModel.district_name_in_marathi;
+                    dbTable.district_name_in_eng = kharediNondModel.district_name_in_eng;
+                    dbTable.ofc_code = kharediNondModel.office_code;
+                    dbTable.ofc_name = kharediNondModel.office_name;
+                    dbTable.village_code = kharediNondModel.village_code;
+                    dbTable.village_name = kharediNondModel.village_name;
+                    dbTable.prefixcode_marathi = kharediNondModel.prefixcode_marathi == "" || kharediNondModel.prefixcode_marathi == null ? "0" : kharediNondModel.prefixcode_marathi;
+                    dbTable.prefixcode_eng = kharediNondModel.prefixcode_eng == "" || kharediNondModel.prefixcode_eng == null ? "0" : kharediNondModel.prefixcode_eng;
+                    dbTable.prefix_in_eng = kharediNondModel.prefix_in_eng;
+                    dbTable.fname_in_eng = kharediNondModel.fname_in_eng;
+                    dbTable.mname_in_eng = (kharediNondModel.mname_in_eng == null || kharediNondModel.mname_in_eng == "") ? "NA" : kharediNondModel.mname_in_eng;
+                    dbTable.lname_in_eng = (kharediNondModel.lname_in_eng == null || kharediNondModel.lname_in_eng == "") ? "NA" : kharediNondModel.lname_in_eng;
+                    dbTable.prefix_in_marathi = kharediNondModel.prefix_in_marathi;
+                    dbTable.fname_in_marathi = kharediNondModel.fname_in_marathi;
+                    dbTable.mname_in_marathi = (kharediNondModel.mname_in_marathi == null || kharediNondModel.mname_in_marathi == "") ? "NA" : kharediNondModel.mname_in_marathi;
+                    dbTable.lname_in_marathi = (kharediNondModel.lname_in_marathi == null || kharediNondModel.lname_in_marathi == "") ? "NA" : kharediNondModel.lname_in_marathi;
+
+                    //
+                    dbTable.alias_name = kharediNondModel.aliceName;
+                    dbTable.gender_code = kharediNondModel.gender_code;
+                    dbTable.gender_description = kharediNondModel.gender_description;
+                    //dbTable.khata_type_code = kharediNondModel.khataCode;
+                    //dbTable.khata_type_name = kharediNondModel.khataLabel;
+                    dbTable.owner_status_code = kharediNondModel.owner_status_code;
+                    dbTable.owner_status_description = kharediNondModel.owner_status_description;
+                    dbTable.dob = kharediNondModel.dob;
+                    dbTable.mother_name_in_marathi = kharediNondModel.motherName_in_marathi;
+                    dbTable.mother_name_in_eng = kharediNondModel.motherName_in_eng;
+                    //Company
+                    dbTable.company_name_in_marathi = kharediNondModel.companyName;
+                    dbTable.company_name_in_eng = kharediNondModel.companyNameEng;
+                    dbTable.apk_code = kharediNondModel.apk_code == null ? 1 : kharediNondModel.apk_code;
+                    dbTable.apk_description = kharediNondModel.apk_description == null ? "स्वतः" : kharediNondModel.apk_description;
+                    dbTable.aapak = kharediNondModel.aapak;
+                    dbTable.relation_code = kharediNondModel.relation_code == null ? 0 : kharediNondModel.relation_code;
+                    dbTable.relation_name = kharediNondModel.relation_name == null || kharediNondModel.relation_name == "" ? "NA" : kharediNondModel.relation_name;
+                    dbTable.land_buy_area = kharediNondModel.landBuyArea;
+
+                    dbTable.address_type = kharediNondModel.address_type;
+                    dbTable.address = kharediNondModel.address;
+                    dbTable.state = kharediNondModel.state;
+                    dbTable.district = kharediNondModel.district;
+                    dbTable.taluka = kharediNondModel.taluka;
+                    dbTable.city = kharediNondModel.city;
+                    dbTable.flatno_plotno = kharediNondModel.plotno;
+                    dbTable.societyname = kharediNondModel.building;
+                    dbTable.mainstreet = kharediNondModel.mainroad;
+                    dbTable.landmark = kharediNondModel.impSymbol;
+                    dbTable.locality = kharediNondModel.area;
+                    dbTable.pincode = kharediNondModel.pincode;
+                    dbTable.post_office_name = kharediNondModel.post_office_name;
+                    //Gauri
+                    dbTable.isTaker = 1;
+                    /*dbTable.alias_name = "NA";
+                    dbTable.gender = "NA";
+                    dbTable.khata_type = "NA";
+                    dbTable.holder_type = "NA";
+                    dbTable.dob = "NA";
+                    dbTable.mother_name_in_marathi = "NA";
+                    dbTable.mother_name_in_eng = "NA";
+                    dbTable.aapakDropdown = "NA";
+                    dbTable.aapak = "NA";
+                    dbTable.landBuyArea = "NA";
+                    dbTable.power_of_attorney_code = GeneratePowerOfAttorneyCode(kharediNondDataForGiver.applicationid, false);*/
+                    _context.mutationDTL.Add(dbTable);
+                    _context.SaveChanges();
+
+
+
+                    //Get Saved Row ID
+                    int kharediNondID = (int)dbTable.mutation_givertaker_id!;
+
+                    string CurrentDateTime = DateTime.Now.ToString("yyyy-MMM-dd-HHmmss");
+                    bool checkAddressFlag = true;
+                    //bool checkSignFlag = false;
+                    //bool checkpassportFlag = true;
+
+                    //Save passport Photo Details
+                    //string[] passportData = inoutData.photo!.passportSrc!.Split(",");
+                    //checkpassportFlag = methodForFile.SaveImageForApplicant(passportData[1], inoutData.photo.passportName!, kharediNondID.ToString(), "PassportPhoto", FolderPath + @"\", CurrentDateTime);
+                    //string passportProofExt = Path.GetExtension(inoutData.photo.passportName!);
+                    //kharediNondModel.passport_name = "PassportPhoto" + kharediNondID + "_" + CurrentDateTime + passportProofExt;
+                    //kharediNondModel.passport_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.passport_name;
+
+                    //var UpdatePassportFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                    //if (UpdatePassportFilePath != null)
+                    //{
+                    //    dbTable.profile_pic_file_name = kharediNondModel.passport_name;
+                    //    dbTable.profile_pic_file_path = kharediNondModel.passport_src;
+                    //    _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                    //    _context.SaveChanges();
+                    //}
+
+                    if (kharediNondModel.address_type == "INDIA")
+                    {
+                        if (!string.IsNullOrEmpty(inoutData.address.indiaAddress!.addressProofSrc) && !string.IsNullOrEmpty(inoutData.address.indiaAddress!.addressProofName))
+                        {
+                            string imageName = System.IO.Path.GetFileNameWithoutExtension(inoutData.address.indiaAddress.addressProofName!);
+                            if (methodForFile.ContainsSpecialCharacters(imageName))
+                            {
+                                return inoutData.address.indiaAddress.addressProofName! + " Image Name contains special Characters";
+                            }
+                            else
+                            {
+                                string[] AddressData = inoutData.address.indiaAddress!.addressProofSrc!.Split(",");
+                                checkAddressFlag = methodForFile.SaveImageForApplicant(AddressData[1], inoutData.address.indiaAddress.addressProofName!, kharediNondID.ToString(), "AddressProof", FolderPath + @"\", CurrentDateTime);
+                                string AddressProofExt = Path.GetExtension(inoutData.address.indiaAddress.addressProofName!);
+                                kharediNondModel.address_proof_name = "AddressProof" + kharediNondID + "_" + CurrentDateTime + AddressProofExt;
+                                kharediNondModel.address_proof_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.address_proof_name;
+
+                                var UpdateAddressFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                                if (UpdateAddressFilePath != null)
+                                {
+                                    dbTable.address_proof_document_name = kharediNondModel.address_proof_name;
+                                    dbTable.address_proof_document_path = kharediNondModel.address_proof_src;
+                                    _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                                    _context.SaveChanges();
+                                }
+                            }
+
+                        }
+
+                        //if (inoutData.address.indiaAddress.signatureSrc != "")
+                        //{
+                        //    string[] signData = inoutData.address.indiaAddress.signatureSrc!.Split(",");
+                        //    checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], inoutData.address.indiaAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+                        //    string SignatureExt = Path.GetExtension(inoutData.address.indiaAddress.signatureName!);
+                        //    kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                        //    kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+
+                        //    var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                        //    if (UpdateSignFilePath != null)
+                        //    {
+                        //        dbTable.signed_file_name = kharediNondModel.signature_name;
+                        //        dbTable.signed_file_path = kharediNondModel.signature_src;
+                        //        _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                        //        _context.SaveChanges();
+                        //    }
+                        //}
+                    }
+                    //if (kharediNondModel.address_type == "FOREIGN")
+                    //{
+                    //    if (inoutData.address.foreignAddress!.signatureSrc != "")
+                    //    {
+                    //        string[] signData = inoutData.address.foreignAddress!.signatureSrc!.Split(",");
+                    //        checkSignFlag = methodForFile.SaveImageForApplicant(signData[1], inoutData.address.foreignAddress.signatureName!, kharediNondID.ToString(), "Signature", FolderPath + @"\", CurrentDateTime);
+
+                    //        string SignatureExt = Path.GetExtension(inoutData.address.foreignAddress.signatureName!);
+                    //        kharediNondModel.signature_name = "Signature" + kharediNondID + "_" + CurrentDateTime + SignatureExt;
+                    //        kharediNondModel.signature_src = FolderPath + @"\" + kharediNondID + @"\" + kharediNondModel.signature_name;
+                    //        var UpdateSignFilePath = _context.mutationDTL.Where(w => w.mutation_givertaker_id == kharediNondID).FirstOrDefault();
+                    //        if (UpdateSignFilePath != null)
+                    //        {
+                    //            dbTable.signed_file_name = kharediNondModel.signature_name;
+                    //            dbTable.signed_file_path = kharediNondModel.signature_src;
+                    //            _context.Entry(dbTable).CurrentValues.SetValues(dbTable);
+                    //            _context.SaveChanges();
+                    //        }
+                    //    }
+                    //}
+                    /*if (checkAddressFlag || checkSignFlag)
+                    {*/
+                    var applicationDTLdata = _context.applicationDTL.Where(data => data.applicationid!.Equals(inoutData.applicationid)).FirstOrDefault();
+                    if (applicationDTLdata != null)
+                    {
+                        if (!string.IsNullOrEmpty(applicationDTLdata.mutationtakerIDs) && !applicationDTLdata.mutationtakerIDs.Contains(kharediNondID.ToString()))
+                        {
+                            applicationDTLdata.mutationtakerIDs = applicationDTLdata.mutationtakerIDs + "," + kharediNondID.ToString();
+                        }
+                        else
+                        {
+                            applicationDTLdata.mutationtakerIDs = kharediNondID.ToString();
+                        }
+                        applicationDTLdata.status = 5;
+                        _context.Entry(applicationDTLdata).CurrentValues.SetValues(applicationDTLdata);
+                        _context.SaveChanges();
+                    }
+                    scope.Complete();
+                    return "Success";
+                    /* }
+                     if (!checkAddressFlag)
+                     {
+                         _context.mutationDTL.Remove(dbTable);
+                         _context.SaveChanges();
+                         return "Address Proof File Is Not Uploaded";
+                     }
+                     if (!checkSignFlag)
+                     {
+                         _context.mutationDTL.Remove(dbTable);
+                         _context.SaveChanges();
+                         return "Signature File Is Not Uploaded";
+                     }
+                     else
+                     {
+                         _context.mutationDTL.Remove(dbTable);
+                         _context.SaveChanges();
+                         return "Some Files Are Not Uploaded";
+                     }*/
+                }
+                catch (Exception ex)
+                {
+                    //_context.mutationDTL.Remove(dbTable);
+                    //_context.SaveChanges();
+                    throw new HandleException(ex.Message.ToString());
+                }
+            }
+        }
+
+        public FetchVataniPatraNondDataForTaker FetchVataniPatraNondInformationDataForTaker(int mutationdtlid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
+                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Include(prop => prop.prop_type).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchVataniPatraNondDataForTaker fetchData = new FetchVataniPatraNondDataForTaker();
+                fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;
+                fetchData.userid = KharedinondInformation.userMaster!.userid;
+                fetchData.applicationid = KharedinondInformation.applicationDTL!.applicationid;
+                fetchData.usertype_code = KharedinondInformation.user_type_code;
+                fetchData.userType = KharedinondInformation.user_type;
+
+                fetchData.mobileNo = KharedinondInformation.mobileno;
+
+                //isMHDetails
+                isMHPropertyForVataniPatraNondTaker isMHproperty = new isMHPropertyForVataniPatraNondTaker();
+                isMHproperty.hasProperty = KharedinondInformation.has_property;
+                // PropertyTypeMaster proptype = new PropertyTypeMaster();
+
+                isMHproperty.propType = KharedinondInformation.prop_type!.propertytype;
+
+
+                UserDTLForVataniPatraNondTaker takeruserDetails = new UserDTLForVataniPatraNondTaker();
+                takeruserDetails.suffixcode = KharedinondInformation.prefixcode_marathi;
+                takeruserDetails!.suffix = KharedinondInformation.prefix_in_marathi;
+                takeruserDetails.firstName = KharedinondInformation.fname_in_marathi;
+                takeruserDetails.middleName = KharedinondInformation.mname_in_marathi;
+                takeruserDetails.lastName = KharedinondInformation.lname_in_marathi;
+                takeruserDetails.suffixCodeEng = KharedinondInformation.prefixcode_marathi;
+                takeruserDetails.suffixEng = KharedinondInformation.prefix_in_eng;
+                takeruserDetails.firstNameEng = KharedinondInformation.fname_in_eng;
+                takeruserDetails.middleNameEng = KharedinondInformation.mname_in_eng;
+                takeruserDetails.lastNameEng = KharedinondInformation.lname_in_eng;
+                takeruserDetails.companyName = KharedinondInformation.company_name_in_marathi!;
+                takeruserDetails.companyNameEng = KharedinondInformation.company_name_in_eng!;
+                takeruserDetails.khataNo = KharedinondInformation.khatano;
+                takeruserDetails.naBhu = KharedinondInformation.city_servey_no;
+                takeruserDetails.ulpin = KharedinondInformation.ulpin;
+                takeruserDetails.userName = KharedinondInformation.userName;
+
+
+                DistrictForGenericeTaker district = new DistrictForGenericeTaker();
+                district.district_code = KharedinondInformation.district_code;
+                district.district_name = KharedinondInformation.district_name_in_marathi;
+                district.district_english_name = KharedinondInformation.district_name_in_eng;
+                takeruserDetails.district = district;
+
+                TalukaForGenericeTaker taluka = new TalukaForGenericeTaker();
+                taluka.office_code = KharedinondInformation.ofc_code;
+                taluka.office_name = KharedinondInformation.ofc_name;
+                takeruserDetails.taluka = taluka;
+
+                VillageForGenericeTaker village = new VillageForGenericeTaker();
+                village.village_code = KharedinondInformation.village_code;
+                village.village_name = KharedinondInformation.village_name;
+                takeruserDetails.village = village;
+
+                isMHproperty.userDetails = takeruserDetails;
+                fetchData.isMHProperty = isMHproperty;
+
+                //Dharak Details
+                DharakVataniPatraNondTaker dharak = new DharakVataniPatraNondTaker();
+                if (KharedinondInformation.user_type_code == 1)
+                {
+                    //fetchData.fullNameInMarathi = KharedinondInformation.fname_in_marathi!.Trim() + " " + KharedinondInformation.mname_in_marathi!.Trim() + " " + KharedinondInformation.lname_in_marathi!.Trim();
+                    //fetchData.fullNameInEng = KharedinondInformation.fname_in_eng!.Trim() + " " + KharedinondInformation.mname_in_eng!.Trim() + " " + KharedinondInformation.lname_in_eng!.Trim();
+                    fetchData.fullNameInMarathi = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_marathi!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_marathi!.Trim());
+                    fetchData.fullNameInEng = commonFunctions.ReplaceNA(KharedinondInformation.fname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.mname_in_eng!.Trim()) + " " + commonFunctions.ReplaceNA(KharedinondInformation.lname_in_eng!.Trim());
+                    UserDharakVataniPatraNondTaker userdharak = new UserDharakVataniPatraNondTaker();
+                    userdharak!.aliceName = KharedinondInformation.alias_name;
+                    Gender gender = new Gender();
+                    gender.gender_code = KharedinondInformation.gender_code;
+                    gender.gender_description = KharedinondInformation.gender_description;
+                    userdharak.gender = gender;
+                    aapakDropdownForVataniPatraNondTaker aapakdropdown = new aapakDropdownForVataniPatraNondTaker();
+                    aapakdropdown.apk_code = KharedinondInformation.apk_code;
+                    aapakdropdown.apk_description = KharedinondInformation.apk_description;
+                    userdharak.aapakDropdown = aapakdropdown;
+                    userdharak.aapak = KharedinondInformation.aapak;
+                    aapakRelationForVataniPatraNondTaker aapakrelation = new aapakRelationForVataniPatraNondTaker();
+                    aapakrelation.relation_code = KharedinondInformation.relation_code.ToString();
+                    aapakrelation.relation_name = KharedinondInformation.relation_name;
+                    userdharak.aapakRelation = aapakrelation;
+
+                    //userdharak.khataType = KharedinondInformation.khata_type;
+                    //InputDataModel.KhataType khatatype = new KhataType();
+                    //khatatype.khataCode = KharedinondInformation.khata_type_code;
+                    //khatatype.khataLabel = KharedinondInformation.khata_type_name;
+                    //userdharak.khataType = khatatype;
+
+                    //userdharak.holderType = KharedinondInformation.holder_type;
+                    userdharak.dob = KharedinondInformation.dob;
+                    userdharak.motherName = KharedinondInformation.mother_name_in_marathi;
+                    userdharak.motherNameEng = KharedinondInformation.mother_name_in_eng;
+                    HolderTypeVataniPatraNondTaker holdertype = new HolderTypeVataniPatraNondTaker();
+                    holdertype.owner_status_code = KharedinondInformation.owner_status_code;
+                    holdertype.owner_status_description = KharedinondInformation.owner_status_description;
+                    userdharak.holderType = holdertype;
+                    userdharak.landBuyArea = KharedinondInformation.land_buy_area;
+                    dharak.userdharak = userdharak;
+                }
+                else
+                {
+                    fetchData.fullNameInMarathi = KharedinondInformation.company_name_in_marathi;
+                    fetchData.fullNameInEng = KharedinondInformation.company_name_in_eng;
+                    CompanyDharakVataniPatraTaker companydharak = new CompanyDharakVataniPatraTaker();
+                    companydharak.landBuyArea = KharedinondInformation.land_buy_area;
+                    HolderTypeVataniPatraNondTaker holdertype = new HolderTypeVataniPatraNondTaker();
+                    holdertype.owner_status_code = KharedinondInformation.owner_status_code;
+                    holdertype.owner_status_description = KharedinondInformation.owner_status_description;
+                    companydharak.holderType = holdertype;
+                    aapakDropdownForVataniPatraNondTaker aapak = new aapakDropdownForVataniPatraNondTaker();
+                    aapak.apk_code = KharedinondInformation.apk_code;
+                    aapak.apk_description = KharedinondInformation.apk_description;
+                    dharak.companydharak = companydharak;
+                }
+
+                fetchData.dharak = dharak;
+
+                //Address Details
+                AddressDTLVataniPatraNondTaker addressData = new AddressDTLVataniPatraNondTaker();
+                addressData.addressType = KharedinondInformation.address_type;
+                if (KharedinondInformation.address_type == "INDIA")
+                {
+                    IndiaAddressVataniPatraNondTaker addressForIndia = new IndiaAddressVataniPatraNondTaker();
+                    addressForIndia.state = KharedinondInformation.state;
+                    addressForIndia.district = KharedinondInformation.district;
+                    addressForIndia.city = KharedinondInformation.city;
+                    addressForIndia.taluka = KharedinondInformation.taluka;
+                    addressForIndia.plotNo = KharedinondInformation.flatno_plotno;
+                    addressForIndia.building = KharedinondInformation.societyname;
+                    addressForIndia.mainRoad = KharedinondInformation.mainstreet;
+                    addressForIndia.impSymbol = KharedinondInformation.landmark;
+                    addressForIndia.area = KharedinondInformation.locality;
+                    addressForIndia.pincode = KharedinondInformation.pincode;
+                    addressForIndia.postOfficeName = KharedinondInformation.post_office_name;
+                    addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                    addressForIndia.mobile = KharedinondInformation.mobileno;
+                    addressForIndia.mobileOTP = KharedinondInformation.mobilenoverified;
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+
+                    if (KharedinondInformation.address_proof_document_path != "NA")
+                    {
+                        string AddressProofExt = Path.GetExtension(KharedinondInformation.address_proof_document_path)!;
+                        string AddressProof = methodForFile.ConvertImageToBase64(KharedinondInformation.address_proof_document_path!);
+                        KharedinondInformation.address_proof_document_path = string.IsNullOrEmpty(AddressProof) ? "NA" : "data:image/" + AddressProofExt.Replace(".", "") + ";base64," + AddressProof;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    else
+                    {
+                        addressForIndia.addressProofName = KharedinondInformation.address_proof_document_name;
+                        addressForIndia.addressProofSrc = KharedinondInformation.address_proof_document_path;
+                    }
+                    //if (KharedinondInformation.signed_file_path != "NA")
+                    //{
+                    //    string SignatureExt = Path.GetExtension(KharedinondInformation.signed_file_path)!;
+                    //    string Signature = methodForFile.ConvertImageToBase64(KharedinondInformation.signed_file_path!);
+                    //    KharedinondInformation.signed_file_path = string.IsNullOrEmpty(Signature) ? "NA" : "data:image/" + SignatureExt.Replace(".", "") + ";base64," + Signature;
+                    //    addressForIndia.signatureSrc = KharedinondInformation.signed_file_path;
+                    //}
+                    addressForIndia.signatureName = KharedinondInformation.signed_file_name!;
+                    addressForIndia.signatureSrc = KharedinondInformation.signed_file_path!;
+                    addressData.indiaAddress = addressForIndia;
+                }
+                else if (KharedinondInformation.address_type == "FOREIGN")
+                {
+                    AddressForForeign addressForForeign = new AddressForForeign();
+                    addressForForeign.address = KharedinondInformation.address;
+                    addressForForeign.mobile = KharedinondInformation.mobileno;
+                    addressForForeign.email = KharedinondInformation.emailid;
+                    addressForForeign.emailOTP = KharedinondInformation.emailidverified;
+                    addressForForeign.signatureName = KharedinondInformation.signed_file_name;
+                    addressForForeign.signatureSrc = KharedinondInformation.signed_file_path;
                     addressData.foreignAddress = addressForForeign;
                 }
                 fetchData.address = addressData;

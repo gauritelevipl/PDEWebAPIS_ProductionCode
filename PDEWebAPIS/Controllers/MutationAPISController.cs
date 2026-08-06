@@ -6562,5 +6562,1596 @@ namespace PDEWebAPIS.Controllers
                 }
             }
         }
+
+        // Below code added on 06 Aug 2026
+        [Authorize]
+        [HttpPost]
+        [Route("CreateGenericNondForGiver")]
+        public string CreateGenericNondForGiver([FromBody] string val)
+        //List<GenericDataForGiver> giverData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Denar Nond For Giver - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                List<GenericDataForGiver> giverData = JsonConvert.DeserializeObject<List<GenericDataForGiver>>(decrypted!)!;
+                _logger.LogInformation("Create Denar Nond For Giver Request Data - " + decrypted);
+                string Response = string.Empty;
+                if (giverData != null)
+                {
+                    for (int i = 0; i < giverData.Count; i++)
+                    {
+                        giverData[i].userid = UserID;
+                    }
+                    Response = mutationServices.SaveGenericForGiver(giverData);
+                }
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(giverData![0].applicationid!, "Create Denar Nond Giver Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Denar Nond Is Created Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Denar Nond Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Create Denar Nond Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetGenericNondForGiver")]
+        public string GetGenericNondForGiver([FromBody] string val)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Generic Nond Giver Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Generic Nond Giver Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchGenericDataForGiver> dataList = new List<FetchGenericDataForGiver>();
+                if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+                {
+                    string[] giverIDS = applicationDTL.mutationgiverIDs.Split(",");
+                    if (giverIDS.Length > 0)
+                    {
+                        for (int i = 0; i < giverIDS.Length; i++)
+                        {
+                            FetchGenericDataForGiver fetchData = new FetchGenericDataForGiver();
+                            fetchData = mutationServices.FetchGenericNondInformationDataForGiver(Convert.ToInt32(giverIDS[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Generic Nond Giver Information Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Generic Nond Giver Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteGenericNondForGiver")]
+        public string DeleteGenericNondForGiver([FromBody] string val)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Generic Nond For Giver - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteMutation delete = JsonConvert.DeserializeObject<DeleteMutation>(decrypted!)!;
+                _logger.LogInformation("Delete Generic Nond For Giver Request Data - " + decrypted);
+                string Response = string.Empty;
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(delete.applicationid!);
+                if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+                {
+                    string[] giverIDS = applicationDTL.mutationgiverIDs!.Split(",");
+                    if (giverIDS.Length > 1)
+                    {
+                        Response = mutationServices.DeleteMutationGiver(delete);
+                    }
+                    if (giverIDS.Length == 1)
+                    {
+                        Response = mutationServices.DeleteMutationGiver(delete);
+                        if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+                        {
+                            string[] takerids = applicationDTL.mutationtakerIDs!.Split(",");
+                            if (takerids.Length > 0)
+                            {
+                                for (int i = 0; i < takerids.Length; i++)
+                                {
+                                    delete.MutationId = Convert.ToInt32(takerids[i]);
+                                    Response = mutationServices.DeleteMutationTaker(delete);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Generic Nond Giver Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Generic Nond Giver Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Generic Nond For Giver Exception - " + ex.Source!.ToString());
+                return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("SaveGenericAdditionalDTLForGiver")]
+        public string SaveGenericAdditionalDTLForGiver([FromBody] string val)
+        //GenericDataForGiver giverData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Generic Additional Details For Giver - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                GenericDataForGiver giverData = JsonConvert.DeserializeObject<GenericDataForGiver>(decrypted!)!;
+                _logger.LogInformation("Create Denar Nond For Giver Request Data - " + decrypted);
+                string Response = string.Empty;
+                if (giverData != null)
+                {
+                    Response = mutationServices.SaveGenericAdditionalDataGiver(giverData);
+                }
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(giverData!.applicationid!, "Save Generic Denar Additional Details", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Additional Details Are Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Generic Denar Additional Details Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Save Generic Denar Additional Details Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("CreateGenericeNondForTaker")]
+        public string CreateGenericeNondForTaker([FromBody] string val)
+        //GenericDataForTaker inputData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Generic Nond For Taker - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                GenericDataForTaker inputData = JsonConvert.DeserializeObject<GenericDataForTaker>(decrypted!)!;
+                _logger.LogInformation("Create Generic Nond For Taker Request Data - " + decrypted);
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveGenericNondTaker(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Create Generic Nond Taker Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Generic Nond Is Created Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Generic Nond For Taker Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Create Generic Nond For Taker Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetGenericNondTakerInfo")]
+        public string GetGenericNondTakerInfo([FromBody] string val)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Generic Nond Taker Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Generic Nond Taker Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchGenericNondDataForTaker> fetchGenericNondDataForTakerList = new List<FetchGenericNondDataForTaker>();
+                if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+                {
+                    string[] kharediNondIDs = applicationDTL.mutationtakerIDs!.Split(",");
+                    if (kharediNondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < kharediNondIDs.Length; i++)
+                        {
+                            FetchGenericNondDataForTaker fetchGenericNondDataForTaker = new FetchGenericNondDataForTaker();
+                            fetchGenericNondDataForTaker = mutationServices.FetchGenericNondInformationDataForTaker(Convert.ToInt32(kharediNondIDs[i]));
+                            if (fetchGenericNondDataForTaker != null)
+                            {
+                                fetchGenericNondDataForTakerList.Add(fetchGenericNondDataForTaker);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Generic Nond Taker Information Data Found", fetchGenericNondDataForTakerList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", fetchGenericNondDataForTakerList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", fetchGenericNondDataForTakerList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Generic Nond Taker Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteGenericNondForTaker")]
+        public string DeleteGenericNondForTaker([FromBody] string val)
+        //DeleteMutation delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Generic Nond For Taker - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteMutation delete = JsonConvert.DeserializeObject<DeleteMutation>(decrypted!)!;
+                _logger.LogInformation("Delete Generic Nond For Taker Request Data - " + decrypted);
+                string Response = mutationServices.DeleteMutationTaker(delete);
+                if (Response == "Success")
+                {
+                    ApplicationDTL applicationDTL = new ApplicationDTL();
+                    applicationDTL = applicationServices.FetchApplicationData(delete.applicationid!);
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Generic Nond Taker Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Generic Nond Taker Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Generic Nond For Taker Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Generic Nond For Taker Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("SaveErrorCorrectionInfo")]
+        public string SaveErrorCorrectionInfo([FromBody] string val)
+        //ErrorCorrectionData errorCorrectionData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                ReponseType type = ReponseType.Success;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Error Correction - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                ErrorCorrectionData errorCorrectionData = JsonConvert.DeserializeObject<ErrorCorrectionData>(decrypted!)!;
+                _logger.LogInformation("Error Correction Request Data - " + decrypted);
+
+                errorCorrectionData.userid = UserID;
+                string Response = mutationServices.SaveErrorCorrectionDTL(errorCorrectionData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(errorCorrectionData.applicationid!, "Error Correction Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Error Correction Data Is Submitted Successfully", ""))));
+                    //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Error Correction Data Is Submitted Successfully", "")));
+                }
+                else if (Response == "Update")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(errorCorrectionData.applicationid!, "Error Correction Data Updated Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Error Correction Data Is Updated Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Error Correction For Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                    //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, "")));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error Correction Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                    //return JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString())));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetErrorCorrectionInfo")]
+        public string GetErrorCorrectionInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Error Correction Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Error Correction Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchErrorCorrectionData> dataList = new List<FetchErrorCorrectionData>();
+                if (!string.IsNullOrEmpty(applicationDTL.errorcorrectionids))
+                {
+                    string[] errorCorrectionIDs = applicationDTL.errorcorrectionids.Split(",");
+                    if (errorCorrectionIDs.Length > 0)
+                    {
+                        for (int i = 0; i < errorCorrectionIDs.Length; i++)
+                        {
+                            FetchErrorCorrectionData fetchErrorCorrectionData = new FetchErrorCorrectionData();
+                            fetchErrorCorrectionData = mutationServices.FetchErrorCorrectionData(Convert.ToInt32(errorCorrectionIDs[i]));
+                            if (fetchErrorCorrectionData != null)
+                            {
+                                dataList.Add(fetchErrorCorrectionData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Error Correction Information Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Error Correction Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteErrorCorrectionInfo")]
+        public string DeleteErrorCorrectionInfo([FromBody] string val)
+        //DeleteErrrorCorrectionData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Error Correction Data - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteErrrorCorrectionData delete = JsonConvert.DeserializeObject<DeleteErrrorCorrectionData>(decrypted!)!;
+                _logger.LogInformation("Delete Error Correction Data Request Data - " + decrypted);
+                string Response = mutationServices.DeleteErrorCorrectionData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Error Correction Data", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Error Correction Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Error Correction Data Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Error Correction Data Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        // Navat Badal
+        [Authorize]
+        [HttpPost]
+        [Route("SaveNavatBadalData")]
+        public string SaveNavatBadalData([FromBody] string val)
+        //NameChangeData inputData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                ReponseType type = ReponseType.Success;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Save Navat Badal - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                NameChangeData inputData = JsonConvert.DeserializeObject<NameChangeData>(decrypted!)!;
+                _logger.LogInformation("Save Navat Badal Request Data - " + decrypted);
+
+                inputData.userid = UserID;
+                string Response = mutationServices.SaveNameChangeData(inputData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Navat Badal Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Navat Badal Data Is Created Successfully", ""))));
+                }
+                else if (Response == "Update")
+                {
+
+                    applicationServices.SaveApplicationDataSubmittedHistory(inputData.applicationid!, "Navat Badal Data Updated Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Navat Badal Is Updated Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Kharedi Nond For Giver Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Navat Badal Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetNavatBadalInfo")]
+        public string GetNavatBadalInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Error Correction Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Error Correction Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchNavatBadalData> dataList = new List<FetchNavatBadalData>();
+                if (!string.IsNullOrEmpty(applicationDTL.namechangeids))
+                {
+                    string[] nameChangeIDs = applicationDTL.namechangeids.Split(",");
+                    if (nameChangeIDs.Length > 0)
+                    {
+                        for (int i = 0; i < nameChangeIDs.Length; i++)
+                        {
+                            FetchNavatBadalData fetchData = new FetchNavatBadalData();
+                            fetchData = mutationServices.FetchNavatBadalData(Convert.ToInt32(nameChangeIDs[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Navat Badal Information Data Found", dataList))));
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Navat Badal Information Data Found", dataList)));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Navat Badal Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteNavatBadalInfo")]
+        public string DeleteNavatBadalInfo([FromBody] string val)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Navat Badal Data - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteNavatBadalData delete = JsonConvert.DeserializeObject<DeleteNavatBadalData>(decrypted!)!;
+                _logger.LogInformation("Delete Navat Badal Data Request Data - " + decrypted);
+                string Response = mutationServices.DeleteNavatBadalData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Navat Badal Data", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Navat Badal Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Navat Badal Data Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Navat Badal Data Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("SaveHibanamaWitnessInfo")]
+        public string SaveHibanamaWitnessInfo([FromBody] string val)
+        //HibanamaWitnessInfoInputModel witnessData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                ReponseType type = ReponseType.Success;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Hibanama Witness Data - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                HibanamaWitnessInfoInputModel witnessData = JsonConvert.DeserializeObject<HibanamaWitnessInfoInputModel>(decrypted!)!;
+                _logger.LogInformation("Hibanama Witness Request Data - " + decrypted);
+
+                witnessData.userid = UserID;
+                string Response = mutationServices.SaveHibanamaWitnessData(witnessData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(witnessData.applicationid!, "Hibanama Witness Data Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Hibanama Witness Info Saved Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Hibanama Witness Saved Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Hibanama Witness Saved Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetHibanamaWitnessInfo")]
+        public string GetHibanamaWitnessInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Hibanama Witness Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Hibanama Witness Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchHibanamaWitnessInfoData> dataList = new List<FetchHibanamaWitnessInfoData>();
+                if (!string.IsNullOrEmpty(applicationDTL.witnessids))
+                {
+                    string[] witnessIds = applicationDTL.witnessids.Split(",");
+                    if (witnessIds.Length > 0)
+                    {
+                        for (int i = 0; i < witnessIds.Length; i++)
+                        {
+                            FetchHibanamaWitnessInfoData fetchData = new FetchHibanamaWitnessInfoData();
+                            fetchData = mutationServices.FetchHibanamaWitnessData(Convert.ToInt32(witnessIds[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Hibanama Witness Information Data Found", dataList))));
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Hibanama Witness Information Data Found", dataList)));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Hibanama Witness Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteHibanamaWitnessInfo")]
+        public string DeleteHibanamaWitnessInfo([FromBody] string val)
+        //DeleteHibanamaWitnessData delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Hibanama Witness Data - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteHibanamaWitnessData delete = JsonConvert.DeserializeObject<DeleteHibanamaWitnessData>(decrypted!)!;
+                _logger.LogInformation("Delete Hibanama Witness Data Request Data - " + decrypted);
+                string Response = mutationServices.DeleteHibanamaWitnessData(delete);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Hibanama Witness Data", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Hibanama Witness Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Hibanama Witness Data Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Hibanama Witness Data Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        // वाटणीपत्र 
+        [Authorize]
+        [HttpPost]
+        [Route("CreateVataniPatraForGiver")]
+        public string CreateVataniPatraForGiver([FromBody] string val)
+        //VataniPatraDataForGiver giverData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Vatanipatra Nond For Giver - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                VataniPatraDataForGiver giverData = JsonConvert.DeserializeObject<VataniPatraDataForGiver>(decrypted!)!;
+                _logger.LogInformation("Create Vatanipatra Nond For Giver Request Data - " + decrypted);
+                giverData.userid = UserID;
+                string Response = mutationServices.SaveVataniPatraGiver(giverData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(giverData.applicationid!, "Create Vatanipatra Nond Giver Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatanipatra Nond Is Created Successfully", ""))));
+                }
+                else if (Response == "Update")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(giverData.applicationid!, "Create Vatanipatra Nond Giver Data Updated Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatanipatra Nond Is Updated Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Vatanipatra Nond For Giver Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Create Vatanipatra Nond For Giver Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetVataniPatraGiverInfo")]
+        public string GetVataniPatraGiverInfo([FromBody] string val)
+        //string ApplicationID)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Vatanipatra Nond Giver Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Vatanipatra Nond Giver Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchVataniPatraNondDataForGiver> dataList = new List<FetchVataniPatraNondDataForGiver>();
+                if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+                {
+                    string[] giverIDS = applicationDTL.mutationgiverIDs.Split(",");
+                    if (giverIDS.Length > 0)
+                    {
+                        for (int i = 0; i < giverIDS.Length; i++)
+                        {
+                            FetchVataniPatraNondDataForGiver fetchData = new FetchVataniPatraNondDataForGiver();
+                            fetchData = mutationServices.FetchVataniPatraDataForGiver(Convert.ToInt32(giverIDS[i]));
+                            if (fetchData != null)
+                            {
+                                dataList.Add(fetchData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatanipatra Nond Giver Information Data Found", dataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", dataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", dataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Vatanipatra Nond Giver Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteVataniPatraNondForGiver")]
+        public string DeleteVataniPatraNondForGiver([FromBody] string val)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Vatanipatra Nond For Giver - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteMutation delete = JsonConvert.DeserializeObject<DeleteMutation>(decrypted!)!;
+                _logger.LogInformation("Delete Vatanipatra Nond For Giver Request Data - " + decrypted);
+                string Response = string.Empty;
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(delete.applicationid!);
+                if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+                {
+                    string[] giverIDS = applicationDTL.mutationgiverIDs!.Split(",");
+                    if (giverIDS.Length > 1)
+                    {
+                        Response = mutationServices.DeleteMutationGiver(delete);
+                    }
+                    if (giverIDS.Length == 1)
+                    {
+                        Response = mutationServices.DeleteMutationGiver(delete);
+                        if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+                        {
+                            string[] takerids = applicationDTL.mutationtakerIDs!.Split(",");
+                            if (takerids.Length > 0)
+                            {
+                                for (int i = 0; i < takerids.Length; i++)
+                                {
+                                    delete.MutationId = Convert.ToInt32(takerids[i]);
+                                    Response = mutationServices.DeleteMutationTaker(delete);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Vatanipatra Nond Giver Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatanipatra Nond Giver Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Vatanipatra Nond For Giver Exception - " + ex.Source!.ToString());
+                return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("CreateVataniPatraNondForTaker")]
+        public string CreateVataniPatraNondForTaker([FromBody] string val)
+        //VataniPatraDataForTaker takerData)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Vatanipatra Nond - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                VataniPatraDataForTaker takerData = JsonConvert.DeserializeObject<VataniPatraDataForTaker>(decrypted!)!;
+                _logger.LogInformation("Create Vatanipatra Nond Request Data - " + decrypted);
+                takerData.userid = UserID;
+                string Response = mutationServices.SaveVataniPatraTaker(takerData);
+                if (Response == "Success")
+                {
+                    applicationServices.SaveApplicationDataSubmittedHistory(takerData.applicationid!, "Create Vatanipatra Nond Taker Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatanipatra Nond Taker Data Is Created Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Create Vatanipatra Nond Taker Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Create Vatanipatra Nond Taker Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("GetVataniPatraNondTakerInfo")]
+        public string GetVataniPatraNondTakerInfo([FromBody] string val)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Get Vatani Patra Nond Taker Info - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
+                _logger.LogInformation("Get Vatani Patra Nond Taker Info Request Data - " + ApplicationID);
+                ApplicationDTL applicationDTL = new ApplicationDTL();
+                applicationDTL = applicationServices.FetchApplicationData(ApplicationID);
+                List<FetchVataniPatraNondDataForTaker> takerDataList = new List<FetchVataniPatraNondDataForTaker>();
+                if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+                {
+                    string[] kharediNondIDs = applicationDTL.mutationtakerIDs!.Split(",");
+                    if (kharediNondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < kharediNondIDs.Length; i++)
+                        {
+                            FetchVataniPatraNondDataForTaker takerData = new FetchVataniPatraNondDataForTaker();
+                            takerData = mutationServices.FetchVataniPatraNondInformationDataForTaker(Convert.ToInt32(kharediNondIDs[i]));
+                            if (takerData != null)
+                            {
+                                takerDataList.Add(takerData);
+                            }
+                        }
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatani Patra Nond Taker Information Data Found", takerDataList))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Data Not Found", takerDataList))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Application Data not found", takerDataList))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Get Vatani Patra Nond Taker Info Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("DeleteVataniPatraNondForTaker")]
+        public string DeleteVataniPatraNondForTaker([FromBody] string val)
+        //DeleteMutation delete)
+        {
+            try
+            {
+                int UserID = 0;
+                var authorization = Request.Headers[HeaderNames.Authorization];
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                {
+                    // we have a valid AuthenticationHeaderValue that has the following details:
+                    var scheme = headerValue.Scheme;
+                    var Token = headerValue.Parameter;
+                    UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                    // scheme will be "Bearer"
+                    // parmameter will be the token itself.
+                }
+                ReponseType type = ReponseType.Success;
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Vatani Patra Nond For Taker - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                DeleteMutation delete = JsonConvert.DeserializeObject<DeleteMutation>(decrypted!)!;
+                _logger.LogInformation("Delete Vatani Patra Nond For Taker Request Data - " + decrypted);
+                string Response = mutationServices.DeleteMutationTaker(delete);
+                if (Response == "Success")
+                {
+                    ApplicationDTL applicationDTL = new ApplicationDTL();
+                    applicationDTL = applicationServices.FetchApplicationData(delete.applicationid!);
+                    applicationServices.SaveApplicationDataSubmittedHistory(delete.applicationid!, "Delete Vatani Patra Nond Taker Form", CallAPIForFlag);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Vatani Patra Nond Taker Data Deleted Successfully", ""))));
+                }
+                else
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("Delete Vatani Patra Nond For Taker Response Failed - " + Response);
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, Response, ""))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Delete Vatani Patra Nond For Taker Exception - " + ex.StackTrace!.ToString());
+                if (ex.Message.ToString() == "User Not Found")
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Unauthorized(ResponseHandler.GetUnauthorisedResponse(ex.Message.ToString()))));
+                }
+                else
+                {
+                    return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+                }
+            }
+        }
     }
 }

@@ -17,5 +17,21 @@
         public string? applicationid { get; set; }
         public int info_id { set; get; }
     }
+    public class DeleteErrrorCorrectionData
+    {
+        public int? ErrorCorrectionId { get; set; }
+        public string? applicationid { set; get; }
+    }
+
+    public class DeleteNavatBadalData
+    {
+        public int? NameChangeId { get; set; }
+        public string? applicationid { set; get; }
+    }
+    public class DeleteHibanamaWitnessData
+    {
+        public int? WitnessInfoId { get; set; }
+        public string? applicationid { set; get; }
+    }
 }
 
