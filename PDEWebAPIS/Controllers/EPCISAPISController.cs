@@ -2422,6 +2422,39 @@ namespace PDEWebAPIS.Controllers
 
         }
 
+        // Below code added on 06 Aug 2026
+        [HttpPost]
+        [Route("getCorrectionMaster")]
+        public async Task<string> getCorrectionMaster()
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                var response = await epcisServices.getCorrectionMaster(_logger);
+                _logger.LogInformation("getCorrectionMaster Resonse - " + response);
+                if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
+                {
+                    //_logger.LogInformation("IGR DIG List Resonse - " + response.Split("-")[0]);
+                    //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Correction Data Found", response.Split("|")[0])));
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Correction Data Found", response.Split("|")[0]))));
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Correction Data Not Found", response.Split("|")[0]))));
+                }
+            }
+            catch (Exception ex)
+            {
+                return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+            }
+        }
+
         [HttpPost]
         [Route("getDashboardMetrics")]
         public async Task<string> getDashboardMetrics([FromBody] string val)

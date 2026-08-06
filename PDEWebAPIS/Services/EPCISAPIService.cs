@@ -2977,6 +2977,57 @@ namespace PDEWebAPIS.Services
             //return response;
         }
 
+        // 06 Aug 2026
+        public async Task<string> getCorrectionMaster(ILogger _logger)
+        {
+            try
+            {
+                string query = string.Empty;
+                //List<EPCISCorrectionData> dataList = new List<EPCISCorrectionData>();
+                //var command = context.Database.GetDbConnection().CreateCommand();
+                //context.Database.OpenConnection();
+                //command.CommandText = "SELECT district_code,district_name FROM epcis.district WHERE updated_flag='FALSE'";
+                //using (var reader = command.ExecuteReader())
+                //{
+                //    while (reader.Read())
+                //    {
+                //        dataList.Add(new EPICDistrict()
+                //        {
+                //            district_code = reader["district_code"].ToString(),
+                //            district_name = reader["district_name"].ToString()
+                //        });
+                //    }
+                //    reader.Close();
+                //}
+                //context.Database.CloseConnection();
+                //if (dataList.Count > 0)
+                //{
+                //    return JsonConvert.SerializeObject(dataList) + "|" + "200";
+                //}
+                //else
+                //{
+                string response = await SendRequestAsync("getCorrectionMaster", HttpMethod.Post, _logger);
+                if (response.Split("|")[1] == "200")
+                {
+                    if (response.Split("|")[0] != null && response.Split("|")[0].ToList().Count > 0)
+                    {
+                        var correctionDataList = System.Text.Json.JsonSerializer.Deserialize<List<EPCISCorrectionData>>(response.Split("|")[0]);
+                        return JsonConvert.SerializeObject(correctionDataList) + "|" + response.Split("|")[1];
+                    }
+                    else
+                    {
+                        return "Data List is Empty" + "|" + response.Split("|")[1];
+                    }
+                }
+                else return response;
+                //}
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
         public async Task<string> getDashboardMetrics(EPCISgetDashboardMetricsRequestData body, ILogger _logger)
         {
             string response = await SendRequestAsync("getDashboardMetrics", HttpMethod.Post, _logger, body);

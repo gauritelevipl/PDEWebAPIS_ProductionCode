@@ -380,6 +380,11 @@ namespace PDEWebAPIS.Model
         public string? cts_no { get; set; }
     }
 
+    public class EPCISCorrectionData
+    {
+        public int? sr_no_180 { get; set; }
+        public string? name_180 { get; set; }
+    }
     public class EPCISgetDashboardMetricsRequestData
     {
         public string? type { get; set; }
