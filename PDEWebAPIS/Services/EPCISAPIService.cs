@@ -225,7 +225,8 @@ namespace PDEWebAPIS.Services
         //}
 
         //new
-        public async Task<string> SendRequestAsync(string urlMethod, HttpMethod method, ILogger _logger, object? body = null)
+        // Below code is commented on 28 Sept 2026
+        /*public async Task<string> SendRequestAsync(string urlMethod, HttpMethod method, ILogger _logger, object? body = null)
         {
             string url = "https://api.mahabhumi.gov.in/api/epcis/" + urlMethod;
             int maxRetries = 3;
@@ -417,9 +418,201 @@ namespace PDEWebAPIS.Services
             }
 
             //return "Data Not Found" + "|" + "400";
+        }*/
+
+        public async Task<string> SendRequestAsync(string urlMethod, HttpMethod method, ILogger _logger, object? body = null)
+        {
+            string url = "https://api.mahabhumi.gov.in/api/epcis/" + urlMethod;
+            int maxRetries = 3;
+            int delayMilliseconds = 1000;
+            int attempt = 0;
+
+            while (attempt < maxRetries)
+            {
+                attempt++;
+                try
+                {
+                    // Create a new HttpRequestMessage
+                    var request = new HttpRequestMessage(method, url);
+
+                    // Add body if provided
+                    if (body != null)
+                    {
+                        string jsonBody = JsonConvert.SerializeObject(body);
+                        request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+                    }
+
+                    // Add headers
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _bearerToken);
+                    request.Headers.Add("API-KEY", _apiKey);
+                    request.Headers.Add("SECRET-KEY", _secretKey);
+
+                    // Send the request
+                    HttpResponseMessage response = await client.SendAsync(request);
+                    _logger.LogInformation($"Attempt {attempt}: Send Request URL ePICS - {url}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrEmpty(responseBody))
+                        {
+                            _logger.Log(LogLevel.Warning, $"Attempt {attempt}: Get Response Async ePICS - {responseBody}");
+
+                            var jsonObject = JsonConvert.DeserializeObject<LgdApiResponse>(responseBody);
+                            if (jsonObject != null && jsonObject.Status == 200)
+                            {
+                                if (jsonObject.Data is string encryptedData && !string.IsNullOrEmpty(encryptedData))
+                                {
+                                    // Decrypt the data if it's a non-empty string
+                                    var decrypted = decryptor.DecryptData(encryptedData);
+                                    if (urlMethod == "getVillageByOffice")
+                                    {
+                                        _logger.LogInformation("Gauri Tele -> " + responseBody);
+                                        _logger.LogInformation("Gauri Tele D -> " + decrypted);
+                                        //_logger.LogInformation("body check in get villege by office: " + body);
+                                        return decrypted + "$VIPL" + (int)response.StatusCode;
+                                    }
+                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+                                    {
+                                        return decrypted + "$" + (int)response.StatusCode;
+                                    }
+                                    else
+                                    {
+                                        return decrypted + "|" + (int)response.StatusCode;
+                                    }
+                                    //return decrypted + "|" + (int)response.StatusCode;
+                                }
+                                else if (jsonObject.Data is List<string>)
+                                {
+                                    // Handle the case where data is an empty array
+                                    if (urlMethod == "getVillageByOffice")
+                                    {
+                                        return "Data Not Found" + "$VIPL" + "400";
+                                    }
+                                    else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+                                    {
+                                        return "Data Not Found" + "$" + "400";
+                                    }
+                                    else
+                                    {
+                                        return "Data Not Found" + "|" + "400";
+                                    }
+                                }
+                                //return "Data Not Found" + "|" + "400";
+                            }
+                            //if we add $ for split then should use below code 
+                            else if (jsonObject!.Status == 400)
+                            {
+                                if (urlMethod == "getVillageByOffice")
+                                {
+                                    return jsonObject!.message! + "$VIPL" + jsonObject!.Status;
+                                }
+                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+                                {
+                                    return jsonObject!.message! + "$" + jsonObject!.Status;
+                                }
+                                /* else if (urlMethod == "getOwnerNameInfo")
+                                 {
+                                     return jsonObject!.message! + "|" + jsonObject!.Status;
+                                 }*/
+                                else
+                                {
+                                    return jsonObject!.message! + "|" + jsonObject!.Status;
+                                }
+                            }
+
+                            else if (jsonObject!.Status == 500)
+                            {
+                                _logger.Log(LogLevel.Warning, $"Attempt {attempt}: Response Status 500 - {responseBody}");
+
+                                if (urlMethod == "getVillageByOffice")
+                                {
+                                    return "Data Not Found" + "$VIPL" + "400";
+                                }
+                                if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+                                {
+                                    return "Data Not Found" + "$" + "400";
+                                }
+                                else
+                                {
+                                    return "Data Not Found" + "|" + "400";
+                                }
+                            }
+                            else
+                            {
+                                if (urlMethod == "getVillageByOffice")
+                                {
+                                    return "Invalid Response" + "$VIPL" + "400";
+
+                                }
+                                else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+                                {
+                                    return "Invalid Response" + "$" + "400";
+
+                                }
+                                else
+                                {
+                                    return "Invalid Response" + "|" + "400";
+
+                                }
+
+                                //return "Invalid Response" + "|" + "400";
+                            }
+                        }
+                    }
+
+                    else if ((int)response.StatusCode == 500)
+                    {
+                        string responseBody = await response.Content.ReadAsStringAsync();
+                        _logger.Log(LogLevel.Warning, $"Attempt {attempt}: Response Status 500 - {responseBody}");
+                        if (urlMethod == "getVillageByOffice")
+                        {
+                            return "Data Not Found" + "$VIPL" + "400";
+                        }
+                        else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+                        {
+                            return "Data Not Found" + "$" + "400";
+                        }
+                        else
+                        {
+                            return "Data Not Found" + "|" + "400";
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogError($"Attempt {attempt}: Error - {response.StatusCode}");
+                        string responseContent = await response.Content.ReadAsStringAsync();
+                        return $"Error {response.StatusCode}: {responseContent}";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Attempt {attempt}: Exception occurred - {ex.Message}");
+                }
+
+                if (attempt < maxRetries)
+                {
+                    _logger.LogWarning($"Retrying... Attempt {attempt + 1} in {delayMilliseconds}ms");
+                    await Task.Delay(delayMilliseconds); // Wait before retrying
+                }
+            }
+            _logger.LogError("All retry attempts failed.");
+
+            if (urlMethod == "getVillageByOffice")
+            {
+                return "Data Not Found" + "$VIPL" + "400";
+            }
+            else if (urlMethod.ToLower() == "getregion" || urlMethod.ToLower() == "getdistrictbyregion" || urlMethod.ToLower() == "getownernameinfo")
+            {
+                return "Data Not Found" + "$" + "400";
+            }
+            else
+            {
+                return "Data Not Found" + "|" + "400";
+            }
+
+            //return "Data Not Found" + "|" + "400";
         }
-
-
 
         //public async Task<string> GetallDistrict(ILogger _logger)
         //{
@@ -711,10 +904,11 @@ namespace PDEWebAPIS.Services
 
         }
 
-        public async Task<string> getOwnerNameInfo(RequestOwnerNameInfo body, ILogger _logger)
+        // Below Code commented on 28 Sept 2026
+        /*public async Task<string> getOwnerNameInfo(RequestOwnerNameInfo body, ILogger _logger)
         {
-            /*var body = new Dictionary<string, string>();
-            body.Add("mut_type", mut_type);*/
+            *//*var body = new Dictionary<string, string>();
+            body.Add("mut_type", mut_type);*//*
             string response = await SendRequestAsync("getOwnerNameInfo", HttpMethod.Post, _logger, body);
             if (response.Split("|")[1] == "200")
             {
@@ -724,8 +918,31 @@ namespace PDEWebAPIS.Services
             else return response;
             //return response;
 
-        }
+        }*/
+        public async Task<string> getOwnerNameInfo(RequestOwnerNameInfo body, ILogger _logger)
+        {
+            string response = await SendRequestAsync("getOwnerNameInfo", HttpMethod.Post, _logger, body);
+            /* if (response.Split("|")[1] == "200")
+             {
+                 var districts = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("|")[0]);
+                 return JsonConvert.SerializeObject(districts) + "|" + response.Split("|")[1];
+             }*/
+            if (response.Split("$")[1] == "200")
+            {
+                if (response.Split("$")[0] != null && response.Split("$")[0].ToList().Count > 0)
+                {
 
+                    var regions = JsonConvert.DeserializeObject<List<EPCIOwnerNameInfo>>(response.Split("$")[0]);
+                    _logger.LogInformation("Owner Data: " + regions);
+                    return JsonConvert.SerializeObject(regions) + "$" + response.Split("$")[1];
+                }
+                else
+                {
+                    return "Owner Name List is Empty" + "$" + response.Split("$")[1];
+                }
+            }
+            else return response;
+        }
         public async Task<string> getOwnerDetails(RequestOwnerDetails body, ILogger _logger)
         {
             /*var body = new Dictionary<string, string>();

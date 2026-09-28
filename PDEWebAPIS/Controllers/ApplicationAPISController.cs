@@ -4096,7 +4096,7 @@ namespace PDEWebAPIS.Controllers
         {
             try
             {
-                int UserID = 260;
+                int UserID = 0;
                 var authorization = Request.Headers[HeaderNames.Authorization];
                 string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
                 if (string.IsNullOrEmpty(CallAPIForFlag))

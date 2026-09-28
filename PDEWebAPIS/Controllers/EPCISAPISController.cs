@@ -544,7 +544,61 @@ namespace PDEWebAPIS.Controllers
         }
         //
 
-        //[Authorize]
+        // Below code commented on 28 Sept 2026
+        /* [HttpPost]
+         [Route("getOwnerNameInfo")]
+         public async Task<string> getOwnerNameInfo([FromBody] string val)
+         {
+             try
+             {
+                 string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                 if (string.IsNullOrEmpty(CallAPIForFlag))
+                 {
+                     throw new HandleException("Send CallAPIFor Flag In Header");
+                 }
+                 ReponseType type = ReponseType.Success;
+                 //int UserID = 0;
+                 *//*var authorization = Request.Headers[HeaderNames.Authorization];
+                 if (AuthenticationHeaderValue.TryParse(authorization, out var headerValue))
+                 {
+                     // we have a valid AuthenticationHeaderValue that has the following details:
+                     var scheme = headerValue.Scheme;
+                     var Token = headerValue.Parameter;
+                     UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag);
+                     // scheme will be "Bearer"
+                     // parmameter will be the token itself.
+                 }*//*
+                 bool check = true;
+                 check = Security.IsBase64String(val);
+                 if (!check)
+                 {
+                     type = ReponseType.Failure;
+                     _logger.LogInformation("getOwnerNameInfo - Inout String Is Not Encrypted");
+                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                 }
+                 var decrypted = Security.DeCryptData(val);
+                 RequestOwnerNameInfo requestcts = JsonConvert.DeserializeObject<RequestOwnerNameInfo>(decrypted!)!;
+                 _logger.LogInformation("Get Owner Name Details Request Data - " + requestcts);
+                 var response = await epcisServices.getOwnerNameInfo(requestcts, _logger);
+                 _logger.LogInformation("Get Owner Name Details Resonse - " + response);
+                 if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
+                 {
+                     //_logger.LogInformation("IGR DIG List Resonse - " + response.Split("-")[0]);
+                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Found", response.Split("|")[0]))));
+                 }
+                 else
+                 {
+                     type = ReponseType.NotFound;
+                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "माहिती उपलब्ध नाही, कृपया संबंधित कार्यालयाशी संपर्क साधा", response.Split("|")[0]))));
+                     //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Not Found", response.Split("|")[0]))));
+                 }
+             }
+             catch (Exception ex)
+             {
+                 return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+             }
+         }*/
+
         [HttpPost]
         [Route("getOwnerNameInfo")]
         public async Task<string> getOwnerNameInfo([FromBody] string val)
@@ -581,7 +635,32 @@ namespace PDEWebAPIS.Controllers
                 _logger.LogInformation("Get Owner Name Details Request Data - " + requestcts);
                 var response = await epcisServices.getOwnerNameInfo(requestcts, _logger);
                 _logger.LogInformation("Get Owner Name Details Resonse - " + response);
-                if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
+
+                string[] parts = response.Split("$");
+                if (parts.Length > 1 && int.TryParse(parts[1], out int statusCode))
+                {
+                    if (statusCode >= 200 && statusCode <= 299)
+                    {
+                        _logger.LogInformation($"Owner Name Data Found: {parts[0]}");
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Found", parts[0])));
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Found", parts[0]))));
+                    }
+                    else
+                    {
+                        type = ReponseType.NotFound;
+                        _logger.LogInformation($"Owner Name Not Data Found: {parts[0]}");
+                        //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0])));
+                        return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0]))));
+                    }
+                }
+                else
+                {
+                    type = ReponseType.NotFound;
+                    _logger.LogInformation($"Owner Not Data Found: {parts[0]}");
+                    //return JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0])));
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Owner Name List Data Not Found", parts[0]))));
+                }
+                /*if (Convert.ToInt32(response.Split("|")[1]) >= 200 && Convert.ToInt32(response.Split("|")[1]) <= 299)
                 {
                     //_logger.LogInformation("IGR DIG List Resonse - " + response.Split("-")[0]);
                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Found", response.Split("|")[0]))));
@@ -591,16 +670,15 @@ namespace PDEWebAPIS.Controllers
                     type = ReponseType.NotFound;
                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "माहिती उपलब्ध नाही, कृपया संबंधित कार्यालयाशी संपर्क साधा", response.Split("|")[0]))));
                     //return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get CTS Details Data Not Found", response.Split("|")[0]))));
-                }
+                }*/
             }
             catch (Exception ex)
             {
                 return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
             }
         }
-
         //getOwnerDetails
-       // [Authorize]
+        // [Authorize]
         [HttpPost]
         [Route("getOwnerDetails")]
         public async Task<string> getOwnerDetails([FromBody] string val)
