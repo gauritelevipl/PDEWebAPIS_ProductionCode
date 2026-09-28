@@ -24368,7 +24368,7 @@ namespace PDEWebAPIS.Services
                             return "दिलेले क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit दिलेले क्षेत्र (चौ.मी.)";
                         }
 
-                        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + giverData.applicationid + @"\GIVER";
+                        string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + giverData.applicationid + @"\GIVER";
                         // Assign Values to Model
                         KharediNondModel kharediNondModel = new KharediNondModel();
                         fetchData = _context.mutationDTL.Where(data => data.applicationDTL!.applicationid!.Equals(giverData.applicationid)
@@ -24657,7 +24657,7 @@ namespace PDEWebAPIS.Services
             {
                 try
                 {
-                    string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inoutData.applicationid + @"\TAKER";
+                    string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inoutData.applicationid + @"\TAKER";
                     // Assign Values to Model
                     KharediNondModel kharediNondModel = new KharediNondModel();
                     UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inoutData.userid!)!;
@@ -25577,7 +25577,7 @@ namespace PDEWebAPIS.Services
                     {
                         return "Please select अर्जामधील न.भू.क्र.";
                     }
-                    string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + errorCorrectionData.applicationid + @"\ERRORCORRECTIONDOC";
+                    string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + errorCorrectionData.applicationid + @"\ERRORCORRECTIONDOC";
                     // Assign Values to Model
                     UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == errorCorrectionData.userid!)!;
 
@@ -26113,7 +26113,7 @@ namespace PDEWebAPIS.Services
 
                         scope.Complete();
                         methodForFileUpload.PermanatlyDeleteFile(entity.address_proof_document_path!);
-                        var path =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\ERRORCORRECTIONDOC\" + deleteMutation.ErrorCorrectionId;
+                        var path = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\ERRORCORRECTIONDOC\" + deleteMutation.ErrorCorrectionId;
                         bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
                         return "Success";
                     }
@@ -26131,7 +26131,7 @@ namespace PDEWebAPIS.Services
             MethodForFileUpload methodForFile = new MethodForFileUpload();
             NameChangeDTL dbTable = new NameChangeDTL();
             NameChangeDTL fetchData = new NameChangeDTL();
-            string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inputData.applicationid + @"\NAMECHANGEDOCS";
+            string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inputData.applicationid + @"\NAMECHANGEDOCS";
             using (var scope = new TransactionScope())
             {
                 try
@@ -26701,7 +26701,7 @@ namespace PDEWebAPIS.Services
 
                         scope.Complete();
                         methodForFileUpload.PermanatlyDeleteFile(entity.address_proof_document_path!);
-                        var path =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\NAMECHANGEDOCS\" + deleteMutation.NameChangeId;
+                        var path = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\NAMECHANGEDOCS\" + deleteMutation.NameChangeId;
                         bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
                         return "Success";
                     }
@@ -26734,7 +26734,7 @@ namespace PDEWebAPIS.Services
                         {
                             return "देणाऱ्याचे उर्फ नाव (मराठी मध्ये) Field contains English Letter / special characters!";
                         }
-                        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + hibanamaWTData.applicationid + @"\WITNESSDOC";
+                        string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + hibanamaWTData.applicationid + @"\WITNESSDOC";
                         // Assign Values to Model
                         KharediNondModel kharediNondModel = new KharediNondModel();
                         UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == hibanamaWTData.userid!)!;
@@ -27172,7 +27172,7 @@ namespace PDEWebAPIS.Services
 
                         scope.Complete();
                         methodForFileUpload.PermanatlyDeleteFile(entity.address_proof_document_path!);
-                        var path =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\WITNESSDOC\" + deleteMutation.WitnessInfoId;
+                        var path = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + deleteMutation.applicationid + @"\WITNESSDOC\" + deleteMutation.WitnessInfoId;
                         bool isDeleted = methodForFileUpload.PermanatlyDeleteFile(path);
                         return "Success";
                     }
@@ -27232,7 +27232,7 @@ namespace PDEWebAPIS.Services
                             return " वाटणीपत्र देणाऱ्याच्या नावे क्षेत्र (चौ.मी.) field contains special character / please enter 10 digit ";
                         }
 
-                        string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + vataniPatraData.applicationid + @"\GIVER";
+                        string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + vataniPatraData.applicationid + @"\GIVER";
                         // Assign Values to Model
                         KharediNondModel kharediNondModel = new KharediNondModel();
                         UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == vataniPatraData.userid!)!;
@@ -28076,7 +28076,7 @@ namespace PDEWebAPIS.Services
             {
                 try
                 {
-                    string FolderPath =@"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inoutData.applicationid + @"\TAKER";
+                    string FolderPath = @"\\10.10.248.2\pde_propertycard\MUTATIONDOCS\" + inoutData.applicationid + @"\TAKER";
                     // Assign Values to Model
                     KharediNondModel kharediNondModel = new KharediNondModel();
                     UserMaster userMaster = _context.userMasters.FirstOrDefault(s => s.userid == inoutData.userid!)!;
