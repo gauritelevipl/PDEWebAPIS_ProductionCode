@@ -26,6 +26,9 @@ namespace PDEWebAPIS.ViewModel
 
         //Bhadepatta
         public FetchBhadepattaInfoData? fetchBhadepattaInfoData { get; set; }
+
+        // Hibanama Witness Info
+        public List<FetchHibanamaWitnessInfoData>? fetchHibanamaWitnessInfoDataList { get; set; }
     }
 
     public class FetchApplicationDTLs

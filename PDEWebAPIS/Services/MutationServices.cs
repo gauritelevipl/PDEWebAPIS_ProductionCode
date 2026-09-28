@@ -15273,7 +15273,10 @@ namespace PDEWebAPIS.Services
                 }
             }
             //bhadepatta Info Data
-            //FetchBhadepattaInfoData fetchBhadepattaInfoDataList = FetchBhadepattaInfoData(applicationid).GetAwaiter().GetResult();
+            FetchBhadepattaInfoData fetchBhadepattaInfoDataList = FetchBhadepattaInfoData(applicationid);
+            application.fetchBhadepattaInfoData = fetchBhadepattaInfoDataList;
+            //Hibanama
+            List<FetchHibanamaWitnessInfoData> fetchHibanamaWitnessInfoDataList = new List<FetchHibanamaWitnessInfoData>();
 
             /*application.mayatData = fetchmayatinfoList;
             application.mrutuDakhalaDetailsData = fetchMrutyuDetails;
@@ -15281,7 +15284,7 @@ namespace PDEWebAPIS.Services
             string mutationgivertype = "";
             string mutationtakertype = "";
             string varasnond = "";
-            string BhadepattaInfo = "";
+            string BhadepattaInfo = "", HibanamaInfo = ""; 
             if (applicationDTL.mutation_type_code == "01")
             {
                 mutationgivertype = "मयताची माहिती";
@@ -15313,6 +15316,12 @@ namespace PDEWebAPIS.Services
                 mutationtakertype = "गाहाणखत/तारण/बोजा घेणार";
 
             }
+            else if (applicationDTL.mutation_type_code == "07")
+            {
+                mutationgivertype = "गहाण खतानुसार तारण परत/ बोजा बँक / संस्था माहिती";
+                mutationtakertype = "गहाण खतानुसार तारण परत/ बोजा धारकाचे नाव";
+
+            }
             //HakkaSod Nond
             else if (applicationDTL.mutation_type_code == "09")
             {
@@ -15332,7 +15341,48 @@ namespace PDEWebAPIS.Services
                 mutationgivertype = "ए.कू.मॅ. नोंद कमी करणार";
                 mutationtakertype = "ए.कू.मॅ. सहधारकांची नावे";
             }
-
+            // Below code added on 28 Sept 26
+            //चुकदुरुस्ती नोंद
+            else if (applicationDTL.mutation_type_code == "30")
+            {
+                mutationgivertype = "चुकदुरुस्ती नोंद";
+                mutationtakertype = "";
+            }
+            //नावात बदल नोंद
+            else if (applicationDTL.mutation_type_code == "31")
+            {
+                mutationgivertype = "नावात बदल नोंद";
+                mutationtakertype = "";
+            }
+            //VataniPatra Nond
+            else if (applicationDTL.mutation_type_code == "08")
+            {
+                mutationgivertype = "वाटणीपत्र/वाटप नोंद देणार";
+                mutationtakertype = "वाटणीपत्र/वाटप नोंद घेणार";
+            }
+            else if (applicationDTL.mutation_type_code == "23")
+            {
+                mutationgivertype = "हिबानामा नोंद देणार";
+                mutationtakertype = "हिबानामा नोंद घेणार";
+                BhadepattaInfo = "हिबानामा साक्षीदार माहिती";
+                if (!string.IsNullOrEmpty(applicationDTL.witnessids))
+                {
+                    string[] witnessIds = applicationDTL.witnessids.Split(",");
+                    if (witnessIds.Length > 0)
+                    {
+                        for (int i = 0; i < witnessIds.Length; i++)
+                        {
+                            FetchHibanamaWitnessInfoData fetchData = new FetchHibanamaWitnessInfoData();
+                            fetchData = FetchHibanamaWitnessData(Convert.ToInt32(witnessIds[i]));
+                            if (fetchData != null)
+                            {
+                                fetchHibanamaWitnessInfoDataList.Add(fetchData);
+                            }
+                        }
+                    }
+                }
+            }
+            application.fetchHibanamaWitnessInfoDataList = fetchHibanamaWitnessInfoDataList;
             //Mutation Giver 
             List<dynamic> giver = mutationgiverData(applicationDTL);
             //Mutation Taker
@@ -15348,11 +15398,16 @@ namespace PDEWebAPIS.Services
             //for bhadepatta
             else if (applicationDTL.mutation_type_code == "10")
             {
-                FetchBhadepattaInfoData fetchBhadepattaInfoDataList = FetchBhadepattaInfoData(applicationid);
-                application.fetchBhadepattaInfoData = fetchBhadepattaInfoDataList;
                 mutation.Add(new MutationList { type = mutationgivertype, value = giver });
                 mutation.Add(new MutationList { type = mutationtakertype, value = taker });
                 mutation.Add(new MutationList { type = BhadepattaInfo, value = fetchBhadepattaInfoDataList });
+            }
+            //for Hibanama
+            else if (applicationDTL.mutation_type_code == "23")
+            {
+                mutation.Add(new MutationList { type = mutationgivertype, value = giver });
+                mutation.Add(new MutationList { type = mutationtakertype, value = taker });
+                mutation.Add(new MutationList { type = HibanamaInfo, value = fetchHibanamaWitnessInfoDataList });
             }
             else
             {
@@ -15767,7 +15822,7 @@ namespace PDEWebAPIS.Services
                 }
             }
             //Gahankhat Nond
-            else if (applicationDTL.mutation_type_code == "06")
+            else if (applicationDTL.mutation_type_code == "06" || applicationDTL.mutation_type_code == "07")
             {
                 if (!string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
                 {
@@ -15840,6 +15895,94 @@ namespace PDEWebAPIS.Services
                         {
                             FetchAkumaiNondDataForGiver fetchData = new FetchAkumaiNondDataForGiver();
                             fetchData = FetchAkumaiNondInformationDataForGiver(Convert.ToInt32(mutationgiverIDs[i]));
+                            if (fetchData != null)
+                            {
+                                mutationgiver.Add(fetchData);
+                            }
+                        }
+                    }
+                }
+            }
+            // Chukdurusti Nond
+            else if (applicationDTL.mutation_type_code == "30")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.errorcorrectionids))
+                {
+                    string[] errorCorrectionIDS = applicationDTL.errorcorrectionids.Split(",");
+
+                    if (errorCorrectionIDS.Length > 0)
+                    {
+                        for (int i = 0; i < errorCorrectionIDS.Length; i++)
+                        {
+                            FetchErrorCorrectionData fetchErrorCorrectionData = new FetchErrorCorrectionData();
+                            fetchErrorCorrectionData = FetchErrorCorrectionData(Convert.ToInt32(errorCorrectionIDS[i]));
+                            if (fetchErrorCorrectionData != null)
+                            {
+                                mutationgiver.Add(fetchErrorCorrectionData);
+                            }
+                        }
+
+                    }
+                }
+            }
+            // Navat Badal Nond
+            else if (applicationDTL.mutation_type_code == "31")
+            {
+                mutationgiver = new List<dynamic>();
+                if (!string.IsNullOrEmpty(applicationDTL.namechangeids))
+                {
+                    string[] namechangeIDS = applicationDTL.namechangeids.Split(",");
+
+                    if (namechangeIDS.Length > 0)
+                    {
+                        for (int i = 0; i < namechangeIDS.Length; i++)
+                        {
+                            FetchNavatBadalData fetchNavatBadalData = new FetchNavatBadalData();
+                            fetchNavatBadalData = FetchNavatBadalData(Convert.ToInt32(namechangeIDS[i]));
+                            if (fetchNavatBadalData != null)
+                            {
+                                mutationgiver.Add(fetchNavatBadalData);
+                            }
+                        }
+
+                    }
+                }
+            }
+            //Hibanama
+            else if (applicationDTL.mutation_type_code == "23")
+            {
+                if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+                {
+                    string[] mutationgiverIDs = applicationDTL.mutationgiverIDs.Split(",");
+
+                    if (mutationgiverIDs.Length > 0)
+                    {
+                        for (int i = 0; i < mutationgiverIDs.Length; i++)
+                        {
+                            FetchGenericDataForGiver fetchData = new FetchGenericDataForGiver();
+                            fetchData = FetchGenericNondInformationDataForGiver(Convert.ToInt32(mutationgiverIDs[i]));
+                            if (fetchData != null)
+                            {
+                                mutationgiver.Add(fetchData);
+                            }
+                        }
+                    }
+                }
+            }
+            //VataniPatra Nond
+            else if (applicationDTL.mutation_type_code == "08")
+            {
+                if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.mutationgiverIDs))
+                {
+                    string[] mutationgiverIDs = applicationDTL.mutationgiverIDs.Split(",");
+
+                    if (mutationgiverIDs.Length > 0)
+                    {
+                        for (int i = 0; i < mutationgiverIDs.Length; i++)
+                        {
+                            FetchVataniPatraNondDataForGiver fetchData = new FetchVataniPatraNondDataForGiver();
+                            fetchData = FetchVataniPatraDataForGiver(Convert.ToInt32(mutationgiverIDs[i]));
                             if (fetchData != null)
                             {
                                 mutationgiver.Add(fetchData);
@@ -15921,7 +16064,7 @@ namespace PDEWebAPIS.Services
                 }
             }
             //Gahankhat Nond
-            else if (applicationDTL.mutation_type_code == "06")
+            else if (applicationDTL.mutation_type_code == "06" || applicationDTL.mutation_type_code == "07")
             {
                 if (applicationDTL != null && !string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
                 {
@@ -15998,6 +16141,56 @@ namespace PDEWebAPIS.Services
                             if (fetchdata != null)
                             {
                                 mutationtaker.Add(fetchdata);
+                            }
+                        }
+                    }
+                }
+            }
+            // Chukdurusti Nond
+            else if (applicationDTL.mutation_type_code == "30")
+            {
+                mutationtaker = null;
+            }
+            // Navat badal Nond
+            else if (applicationDTL.mutation_type_code == "31")
+            {
+                mutationtaker = null;
+            }
+            //Hibanama
+            else if (applicationDTL.mutation_type_code == "23")
+            {
+                if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+                {
+                    string[] kharediNondIDs = applicationDTL.mutationtakerIDs!.Split(",");
+                    if (kharediNondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < kharediNondIDs.Length; i++)
+                        {
+                            FetchGenericNondDataForTaker fetchGenericNondDataForTaker = new FetchGenericNondDataForTaker();
+                            fetchGenericNondDataForTaker = FetchGenericNondInformationDataForTaker(Convert.ToInt32(kharediNondIDs[i]));
+                            if (fetchGenericNondDataForTaker != null)
+                            {
+                                mutationtaker.Add(fetchGenericNondDataForTaker);
+                            }
+                        }
+                    }
+                }
+            }
+            //VataniPatra Nond
+            else if (applicationDTL.mutation_type_code == "08")
+            {
+                if (!string.IsNullOrEmpty(applicationDTL.mutationtakerIDs))
+                {
+                    string[] kharediNondIDs = applicationDTL.mutationtakerIDs!.Split(",");
+                    if (kharediNondIDs.Length > 0)
+                    {
+                        for (int i = 0; i < kharediNondIDs.Length; i++)
+                        {
+                            FetchVataniPatraNondDataForTaker fetchData = new FetchVataniPatraNondDataForTaker();
+                            fetchData = FetchVataniPatraNondInformationDataForTaker(Convert.ToInt32(kharediNondIDs[i]));
+                            if (fetchData != null)
+                            {
+                                mutationtaker.Add(fetchData);
                             }
                         }
                     }
@@ -18265,6 +18458,7 @@ namespace PDEWebAPIS.Services
         //    }
         //}
 
+        //Below code commented on 28 Sept 26
         public FetchBhadepattaInfoData FetchBhadepattaInfoData(string applicationid)
         {
             try
@@ -18289,14 +18483,34 @@ namespace PDEWebAPIS.Services
                     fetchBhadepattaInfoData = null;
                     return fetchBhadepattaInfoData;
                 }
-               
+
             }
             catch (Exception ex)
             {
                 throw new HandleException(ex.Message.ToString());
             }
         }
+/*        public async Task<FetchBhadepattaInfoData> FetchBhadepattaInfoData(string applicationid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                BhadepattaInfoDtl bhadepattaInfoDtl = new BhadepattaInfoDtl();
+                FetchBhadepattaInfoData fetchBhadepattaInfoData = new FetchBhadepattaInfoData();
 
+                //fetch data from tbl
+                bhadepattaInfoDtl = await _ICommonRepository.GetBhadepattaInfoData(applicationid);
+
+                var returnData = _mapper.Map<FetchBhadepattaInfoData>(bhadepattaInfoDtl);
+
+                return returnData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+*/       
         public string DeleteBhadepattaInfo(DeleteBhadepattaInfo deleteBhadepattaInfo)
         {
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -24164,11 +24378,12 @@ namespace PDEWebAPIS.Services
             {
                 MethodForFileUpload methodForFile = new MethodForFileUpload();
                 MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
-                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+                KharedinondInformation = _contextR.mutationDTL.Include(i => i.userMaster).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
 
                 FetchGenericDataForGiver fetchData = new FetchGenericDataForGiver();
                 fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;
                 fetchData.userid = KharedinondInformation.userMaster!.userid;
+                //fetchData.userid = userid;
                 fetchData.applicationid = KharedinondInformation.applicationDTL!.applicationid;
                 fetchData.cts_number = KharedinondInformation.cts_number;
                 fetchData.mutation_srno = KharedinondInformation.mutation_srno;
@@ -25368,7 +25583,7 @@ namespace PDEWebAPIS.Services
             {
                 MethodForFileUpload methodForFile = new MethodForFileUpload();
                 MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
-                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Include(prop => prop.prop_type).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+                KharedinondInformation = _contextR.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Include(prop => prop.prop_type).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
 
                 FetchGenericNondDataForTaker fetchData = new FetchGenericNondDataForTaker();
                 fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;
@@ -25997,7 +26212,7 @@ namespace PDEWebAPIS.Services
             {
                 MethodForFileUpload methodForFile = new MethodForFileUpload();
                 ErrorCorrectionInformation errorCorrectionData = new ErrorCorrectionInformation();
-                errorCorrectionData = _context.errorCorrectionInformation.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.error_correction_id.Equals(errorcorrectionid)).FirstOrDefault()!;
+                errorCorrectionData = _contextR.errorCorrectionInformation.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.error_correction_id.Equals(errorcorrectionid)).FirstOrDefault()!;
 
                 FetchErrorCorrectionData fetchData = new FetchErrorCorrectionData();
                 fetchData.error_correction_id = errorCorrectionData.error_correction_id;
@@ -26541,7 +26756,7 @@ namespace PDEWebAPIS.Services
             {
                 MethodForFileUpload methodForFile = new MethodForFileUpload();
                 NameChangeDTL nameChangeDTL = new NameChangeDTL();
-                nameChangeDTL = _context.nameChangeDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.name_change_id.Equals(name_change_id)).FirstOrDefault()!;
+                nameChangeDTL = _contextR.nameChangeDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.name_change_id.Equals(name_change_id)).FirstOrDefault()!;
 
                 FetchNavatBadalData fetchData = new FetchNavatBadalData();
                 fetchData.name_change_id = nameChangeDTL.name_change_id;
@@ -27064,7 +27279,7 @@ namespace PDEWebAPIS.Services
             {
                 MethodForFileUpload methodForFile = new MethodForFileUpload();
                 WitnessDTL witnessData = new WitnessDTL();
-                witnessData = _context.witnessDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.witness_info_id.Equals(witnessid) && data.isDeleted == false).FirstOrDefault()!;
+                witnessData = _contextR.witnessDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.witness_info_id.Equals(witnessid) && data.isDeleted == false).FirstOrDefault()!;
 
                 FetchHibanamaWitnessInfoData fetchData = new FetchHibanamaWitnessInfoData();
                 fetchData.witness_info_id = witnessData.witness_info_id;
@@ -27966,7 +28181,7 @@ namespace PDEWebAPIS.Services
             {
                 MethodForFileUpload methodForFile = new MethodForFileUpload();
                 MutationGiverTakerDTL KharedinondInformation = new MutationGiverTakerDTL();
-                KharedinondInformation = _context.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
+                KharedinondInformation = _contextR.mutationDTL.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.mutation_givertaker_id.Equals(mutationdtlid) && data.isDeleted == false).FirstOrDefault()!;
 
                 FetchVataniPatraNondDataForGiver fetchData = new FetchVataniPatraNondDataForGiver();
                 fetchData.mutation_dtl_id = KharedinondInformation.mutation_givertaker_id;

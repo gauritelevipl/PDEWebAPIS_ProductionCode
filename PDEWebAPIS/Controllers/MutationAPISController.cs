@@ -4505,13 +4505,21 @@ namespace PDEWebAPIS.Controllers
                                 ));
                             }
                         }
-                        else if (mutation.value == null) //for bhadepatta
+                        else if (mutation.value == null && mutation.type == "भाडेपट्टा नोंद माहिती") //for bhadepatta
                         {
                             type = ReponseType.Failure;
                             return Security.EnCryptData(JsonConvert.SerializeObject(
                                 Ok(ResponseHandler.GetAppResponse(type, "कृपया फेरफार तपशील भरा.", fetchapplication.Mutation))
                             ));
                         }
+
+                        /*   else if (mutation.value == null) //for bhadepatta
+                           {
+                               type = ReponseType.Failure;
+                               return Security.EnCryptData(JsonConvert.SerializeObject(
+                                   Ok(ResponseHandler.GetAppResponse(type, "कृपया फेरफार तपशील भरा.", fetchapplication.Mutation))
+                               ));
+                           }*/
                         // case 3: value is single object → allow it
                     }
                 }
@@ -5267,7 +5275,7 @@ namespace PDEWebAPIS.Controllers
                     string[] BhadepattaIds = applicationDTL.mutationtakerIDs!.Split(",");
                     if (BhadepattaIds.Length == 1)
                     {
-                        FetchBhadepattaInfoData fetchBhadepattaInfoData =  mutationServices.FetchBhadepattaInfoData(delete.applicationid!);
+                        FetchBhadepattaInfoData fetchBhadepattaInfoData =   mutationServices.FetchBhadepattaInfoData(delete.applicationid!);
                         if (fetchBhadepattaInfoData != null)
                         {
                             DeleteBhadepattaInfo deleteBhadepattaInfo = new DeleteBhadepattaInfo();
@@ -5397,7 +5405,7 @@ namespace PDEWebAPIS.Controllers
                 var decrypted = Security.DeCryptData(val);
                 string ApplicationID = JsonConvert.DeserializeObject<string>(decrypted!)!;
                 _logger.LogInformation("Get Bhadepatta Info Data Request Data - " + ApplicationID);
-                FetchBhadepattaInfoData fetchBhadepattaInfoData =  mutationServices.FetchBhadepattaInfoData(ApplicationID);
+                FetchBhadepattaInfoData fetchBhadepattaInfoData =   mutationServices.FetchBhadepattaInfoData(ApplicationID);
                 if (fetchBhadepattaInfoData != null)
                 {
                     return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Get Bhadepatta Info Data Found", fetchBhadepattaInfoData))));
