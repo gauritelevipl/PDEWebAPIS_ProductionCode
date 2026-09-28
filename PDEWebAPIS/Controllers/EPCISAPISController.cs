@@ -2676,5 +2676,49 @@ namespace PDEWebAPIS.Controllers
                 return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
             }
         }
+
+        [HttpPost]
+        [Route("GetCountOfMutationsForNewDashboard")]
+        public async Task<string> GetCountOfMutationsForNewDashboard([FromBody] string val)
+        //GetApplicationCountForNewDashboardInput inputData)
+        {
+            try
+            {
+                string CallAPIForFlag = Request.Headers["CallAPIFor"]!;
+                if (string.IsNullOrEmpty(CallAPIForFlag))
+                {
+                    throw new HandleException("Send CallAPIFor Flag In Header");
+                }
+                ReponseType type = ReponseType.Success;
+                _logger.LogInformation("GetCountOfMutationsForNewDashboard count Request Data - ");
+                bool check = true;
+                check = Security.IsBase64String(val);
+                if (!check)
+                {
+                    type = ReponseType.Failure;
+                    _logger.LogInformation("GetCountOfMutations - Inout String Is Not Encrypted");
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Inout String Is Not Encrypted", ""))));
+                }
+                var decrypted = Security.DeCryptData(val);
+                GetApplicationCountForNewDashboardInput inputData = JsonConvert.DeserializeObject<GetApplicationCountForNewDashboardInput>(decrypted)!;
+                var res = await epcisServices.FetchNewDashboardMutationCountAsync(inputData);
+                if (res != null)
+                {
+                    _logger.LogInformation("GetCountOfMutationsForNewDashboard Response " + JsonConvert.SerializeObject(res));
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "Mutation count Found", res))));
+                }
+                else
+                {
+                    _logger.LogInformation("GetCountOfMutationsForNewDashboard Response Failed - " + res);
+                    type = ReponseType.NotFound;
+                    return Security.EnCryptData(JsonConvert.SerializeObject(Ok(ResponseHandler.GetAppResponse(type, "mutation Count Not Found", res))));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("GetCountOfMutationsForNewDashboard data Exception - " + ex.StackTrace!.ToString());
+                return Security.EnCryptData(JsonConvert.SerializeObject(BadRequest(ResponseHandler.GetExceptionResponse(ex.Message.ToString()))));
+            }
+        }
     }
 }

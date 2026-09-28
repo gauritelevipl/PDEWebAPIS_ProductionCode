@@ -3363,5 +3363,102 @@ namespace PDEWebAPIS.Services
                 throw new HandleException($"Fetch failed: {ex.Message}");
             }
         }
+
+        public async Task<List<FetchCountOfMutations>> FetchNewDashboardMutationCountAsync(GetApplicationCountForNewDashboardInput getAllApplicationIdForReport)
+        {
+            try
+            {
+                DateTime startDate = Convert.ToDateTime("2024-12-10");
+                DateTime endDate = DateTime.Now;
+                DateTime fromDate = DateTime.SpecifyKind((DateTime)startDate!, DateTimeKind.Utc);
+                DateTime toDate = DateTime.SpecifyKind((DateTime)endDate!, DateTimeKind.Utc).Date.AddDays(1).AddTicks(-1);
+
+
+                string regionCode = getAllApplicationIdForReport.region_code!;
+                string districtCode = getAllApplicationIdForReport.district_code!;
+                string officeCode = getAllApplicationIdForReport.office_code!;
+
+                List<int> partiallySubmitStatusCodes = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+                List<int> includedStatusCodes = new List<int> { 11, 13, 14 };
+
+                IQueryable<ApplicationDTL> query = context.applicationDTL
+                    .Where(s => s.createddatetime >= fromDate && s.createddatetime <= toDate && !partiallySubmitStatusCodes.Contains(s.status)
+                    && s.status > 9);
+
+
+                // Apply region/district/office filtering
+                if (regionCode != "0" && districtCode == "0" && officeCode == "0")
+                {
+                    var districtsData = await GetDistrictByRegion(Convert.ToInt32(regionCode), _logger);
+                    var parts = districtsData.Split('$');
+
+                    var districtList = JsonConvert.DeserializeObject<List<EPCIDistrictByRegionList>>(parts[0]);
+                    var districtCodes = districtList!
+                        .Select(d => d.district_code <= 9 ? $"0{d.district_code}" : d.district_code.ToString())
+                        .ToList();
+
+                    query = query.Where(s => districtCodes.Contains(s.district_code!));
+                }
+                else if (regionCode != "0" && districtCode != "0" && officeCode == "0")
+                {
+                    if (Convert.ToInt32(districtCode) <= 9)
+                        districtCode = "0" + districtCode;
+
+                    query = query.Where(s => s.district_code == districtCode);
+                }
+                else if (regionCode != "0" && districtCode != "0" && officeCode != "0")
+                {
+                    if (Convert.ToInt32(districtCode) <= 9)
+                        districtCode = "0" + districtCode;
+                    query = query.Where(s => s.district_code == districtCode && s.office_code == officeCode);
+                }
+
+                var rawData = query
+                //.Where(s => s.createddatetime >= fromDate && s.createddatetime <= toDate)
+                .Select(s => new
+                {
+                    MutationName = s.mutation_type_name ?? "Unknown",
+                    //StatusCode = s.status >= 11 && s.status <= 15 ? 0 : s.status
+                    StatusCode = includedStatusCodes.Contains(s.status) ? 0 : s.status
+                    //StatusCode = s.status
+                })
+                .ToList(); // Execute query here
+
+                var result = rawData
+                    .GroupBy(x => new { x.MutationName, x.StatusCode })
+                    .Select(g => new
+                    {
+                        MutationName = GetShortMutationName(g.Key.MutationName.Trim().ToLower()), //GetShortMutationName(g.Key.MutationName),
+                        StatusCode = g.Key.StatusCode,
+                        Count = g.Count()
+                    })
+                    .GroupBy(x => x.MutationName)
+                    .Select(g => new FetchCountOfMutations
+                    {
+                        MutationName = g.Key,
+                        Statuses = g.Select(x => new StatusDetail
+                        {
+                            ApplicationStatusCode = x.StatusCode,
+                            ApplicationStatus = x.StatusCode == 0 ? "Application Created in EPCIS " :
+                                                x.StatusCode == 10 ? "Inward No Generated application count EPCIS" :
+                                                x.StatusCode == 12 ? "Application is Rejected" :
+                                                x.StatusCode == 15 ? "Inward Number Error" :
+                                                "Unknown",
+                            CountOfMutation = x.Count
+                        }).ToList(),
+                        CountOfMutation = 0 // Optional: or g.Sum(x => x.Count) if needed
+                    })
+                    .ToList();
+                if (result == null)
+                {
+                    return result = null;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException($"Fetch failed: {ex.Message}");
+            }
+        }
     }
 }
