@@ -3279,7 +3279,7 @@ namespace PDEWebAPIS.Services
                 if (regionCode == "0" && districtCode == "0" && officeCode == "0")
                 {
                     var regionActualCounts = query
-                        .GroupBy(a => a.status >= 1 && a.status <= 9 ? 0 : a.status)
+                        .GroupBy(a => a.status >= 1 && a.status <= 15 ? 0 : a.status)
                         .Select(g => new
                         {
                             StatusCode = g.Key,
@@ -3339,7 +3339,7 @@ namespace PDEWebAPIS.Services
                 }
 
                 var actualCounts = query
-                    .GroupBy(a => a.status >= 1 && a.status <= 9 ? 0 : a.status)
+                    .GroupBy(a => a.status >= 1 && a.status <= 15 ? 0 : a.status)
                     .Select(g => new
                     {
                         StatusCode = g.Key,

@@ -1753,6 +1753,240 @@ namespace PDEWebAPIS.Services
                 fetchBhadepattaInfo.isDeleted = false;
                 fetchBhadepattaInfoList.Add(fetchBhadepattaInfo);
             }
+            //Fetch Hibanama Info Data
+            List<FetchHibanamaWitnessDataForNIC> fetchHibanamaWitnessInfoDataList = new List<FetchHibanamaWitnessDataForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.witnessids))
+            {
+                string[] witnessIds = applicationDTL.witnessids.Split(",");
+                if (witnessIds.Length > 0)
+                {
+                    for (int i = 0; i < witnessIds.Length; i++)
+                    {
+                        FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
+                        fetchData = FetchHibanamaWitnessData(Convert.ToInt32(witnessIds[i]));
+                        if (fetchData != null)
+                        {
+                            fetchHibanamaWitnessInfoDataList.Add(fetchData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
+                fetchData.witness_info_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.permission_no = "";
+                fetchData.permission_date = "";
+                fetchData.prefixcode_marathi = "";
+                fetchData.prefix_in_marathi = "";
+                fetchData.fname_in_marathi = "";
+                fetchData.mname_in_marathi = "";
+                fetchData.lname_in_marathi = "";
+                fetchData.prefixcode_eng = "";
+                fetchData.prefix_in_eng = "";
+                fetchData.fname_in_eng = "";
+                fetchData.mname_in_eng = "";
+                fetchData.lname_in_eng = "";
+                fetchData.alias_name = "";
+                fetchData.address_type = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.post_office_name = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.emailid = "";
+                fetchData.emailidverified = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchHibanamaWitnessInfoDataList.Add(fetchData);
+            }
+            //Fetch Error Correction data
+            List<FetchErrorCorrectionDataForNIC> fetchErrorCorrectionDataList = new List<FetchErrorCorrectionDataForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.errorcorrectionids))
+            {
+                string[] errorcorrectionIDS = applicationDTL.errorcorrectionids.Split(",");
+                if (errorcorrectionIDS.Length > 0)
+                {
+                    for (int i = 0; i < errorcorrectionIDS.Length; i++)
+                    {
+                        FetchErrorCorrectionDataForNIC fetchErrorCorrectionData = new FetchErrorCorrectionDataForNIC();
+                        fetchErrorCorrectionData = FetchErrorCorrectionData(Convert.ToInt32(errorcorrectionIDS[i]));
+                        if (fetchErrorCorrectionData != null)
+                        {
+                            fetchErrorCorrectionDataList.Add(fetchErrorCorrectionData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchErrorCorrectionDataForNIC fetchData = new FetchErrorCorrectionDataForNIC();
+                fetchData.error_correction_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.village_code = "";
+                fetchData.sub_property_no = "";
+                fetchData.city_servey_no = "";
+                fetchData.lr_property_id = "";
+                fetchData.milkat = "";
+                fetchData.namud = "";
+                //fetchData.var_village_code = "";
+                //fetchData.var_cts_number =
+                //fetchData.var_cts_puid =
+                //fetchData.var_mutation_srno =
+                //fetchData.var_entry_date =
+                //fetchData.var_mutation_number =
+                //fetchData.var_mutation_date =
+                //fetchData.var_sro_office_name_marathi =
+                //fetchData.var_sro_office_name_english =
+                //fetchData.var_document_number =
+                //fetchData.var_document_year =
+                //fetchData.var_document_date =
+                //fetchData.var_entry_details =
+                //fetchData.var_owner_details =
+                fetchData.reason = "";
+                fetchData.address_type = "";
+                fetchData.emailid = "";
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.post_office_name = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchErrorCorrectionDataList.Add(fetchData);
+            }
+
+            // Fetch Navatbadal Data
+            List<FetchNavatBadalDataForNIC> fetchNavatBadalDataList = new List<FetchNavatBadalDataForNIC>();
+            if (!string.IsNullOrEmpty(applicationDTL.namechangeids))
+            {
+                string[] namechangeIDS = applicationDTL.namechangeids.Split(",");
+                if (namechangeIDS.Length > 0)
+                {
+                    for (int i = 0; i < namechangeIDS.Length; i++)
+                    {
+                        FetchNavatBadalDataForNIC fetchNavatBadalData = new FetchNavatBadalDataForNIC();
+                        fetchNavatBadalData = FetchNavatBadalData(Convert.ToInt32(namechangeIDS[i]));
+                        if (fetchNavatBadalData != null)
+                        {
+                            fetchNavatBadalDataList.Add(fetchNavatBadalData);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                FetchNavatBadalDataForNIC fetchData = new FetchNavatBadalDataForNIC();
+                fetchData.name_change_id = 0;
+                fetchData.usermasteruserid = 0;
+                fetchData.applicationdtlapplicationid = "";
+                fetchData.village_code = "";
+                fetchData.subpropno = "";
+                fetchData.nabhu = "";
+                fetchData.lrpropertyuid = "";
+                fetchData.milkat = "";
+                fetchData.namud = "";
+                fetchData.name_change_by_code = 0;
+                fetchData.name_change_by_description = "";
+                fetchData.name_change_no = "";
+                fetchData.name_change_date = "";
+                // selectedMutation -> data from EPCIS
+                fetchData.selected_village_code = "";
+                fetchData.selected_cts_number = "";
+                fetchData.selected_mutation_srno = "";
+                fetchData.selected_entry_date = "";
+                fetchData.selected_entry_bracketed = "";
+                fetchData.selected_owner_number = "";
+                fetchData.selected_owner_name = "";
+                fetchData.selected_first_name = "";
+                fetchData.selected_middle_name = "";
+                fetchData.selected_last_name = "";
+                fetchData.selected_nick_name = "";
+                fetchData.selected_owner_bracketed = "";
+                fetchData.selected_area_bracketed = "";
+                fetchData.selected_email_id = "";
+                fetchData.selected_owner_cell_number = "";
+                fetchData.selected_pincode = "";
+                fetchData.selected_owner_type = "";
+                fetchData.selected_apk_code = "";
+                fetchData.selected_apk_name = "";
+                fetchData.selected_flat_or_house_number = "";
+                fetchData.selected_building_number = "";
+                fetchData.selected_road = "";
+                fetchData.selected_city_or_village = "";
+                fetchData.selected_taluka_name = "";
+                fetchData.selected_district_name = "";
+                fetchData.selected_state_name = "";
+                fetchData.selected_gender_code = "";
+                fetchData.selected_date_of_birth = "";
+                fetchData.selected_owner_area = "";
+                fetchData.selected_owner_area_bracketed = "";
+                // Updated Details
+                fetchData.updated_usertype = 0;
+                fetchData.updated_usertypelabel = "";
+                fetchData.updated_prefixcode_marathi = "";
+                fetchData.updated_prefix_in_marathi = "";
+                fetchData.updated_fname_in_marathi = "";
+                fetchData.updated_mname_in_marathi = "";
+                fetchData.updated_lname_in_marathi = "";
+                fetchData.updated_prefixcode_eng = "";
+                fetchData.updated_prefix_in_eng = "";
+                fetchData.updated_fname_in_eng = "";
+                fetchData.updated_mname_in_eng = "";
+                fetchData.updated_lname_in_eng = "";
+                fetchData.company_name_in_marathi = "";
+                fetchData.company_name_in_eng = "";
+                // Address Fields
+                fetchData.address_type = "";
+                fetchData.emailid = "";
+                fetchData.mobileno = "";
+                fetchData.mobilenoverified = "";
+                fetchData.address = "";
+                fetchData.state = "";
+                fetchData.district = "";
+                fetchData.taluka = "";
+                fetchData.city = "";
+                fetchData.flatno_plotno = "";
+                fetchData.societyname = "";
+                fetchData.mainstreet = "";
+                fetchData.landmark = "";
+                fetchData.locality = "";
+                fetchData.pincode = "";
+                fetchData.postofficename = "";
+                fetchData.address_proof_document_name = "";
+                fetchData.address_proof_document_path = "";
+                fetchData.createddatetime = "";
+                fetchData.isdeleted = false;
+                fetchData.deleteddate = "";
+                fetchNavatBadalDataList.Add(fetchData);
+            }
             //            //Mutation Giver 
             //            List<dynamic> giver = mutationgiverData(applicationDTL);
             ////Mutation Taker
@@ -1773,6 +2007,9 @@ namespace PDEWebAPIS.Services
 
             application.mutationgivertakerdtls = fetcMutationGiverTakerDTLs;
             application.bhadepattaInfoDtl = fetchBhadepattaInfoList;
+            application.errorcorrectiondtls = fetchErrorCorrectionDataList;
+            application.name_change_dtl = fetchNavatBadalDataList;
+            application.witness_info = fetchHibanamaWitnessInfoDataList;
             //Document Data
 
             var nabhuNoList = _contextR.mutationCTSNoDTLs.Include(app => app.applicationDTL).Where(app => app.applicationDTL!.applicationid == applicationid).Select(a => a.selected_city_servey_no).ToList();
@@ -2429,6 +2666,228 @@ namespace PDEWebAPIS.Services
                     fetchData = null;
                 }
                 return fetchData!;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public FetchErrorCorrectionDataForNIC FetchErrorCorrectionData(int errorcorrectionid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                ErrorCorrectionInformation errorCorrectionData = new ErrorCorrectionInformation();
+                errorCorrectionData = _contextR.errorCorrectionInformation.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.error_correction_id == errorcorrectionid && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchErrorCorrectionDataForNIC fetchData = new FetchErrorCorrectionDataForNIC();
+                fetchData.error_correction_id = errorCorrectionData.error_correction_id;
+                fetchData.applicationdtlapplicationid = errorCorrectionData.applicationDTL!.applicationid;
+                fetchData.usermasteruserid = errorCorrectionData.userMaster!.userid;
+                fetchData.village_code = errorCorrectionData.village_code;
+                fetchData.sub_property_no = errorCorrectionData.sub_property_no;
+                fetchData.city_servey_no = errorCorrectionData.city_servey_no;
+                fetchData.lr_property_id = errorCorrectionData.lr_property_id;
+                fetchData.milkat = errorCorrectionData.milkat;
+                fetchData.namud = errorCorrectionData.namud;
+                //fetchData.var_village_code = errorCorrectionData.
+                //fetchData.var_cts_number =
+                //fetchData.var_cts_puid =
+                //fetchData.var_mutation_srno =
+                //fetchData.var_entry_date =
+                //fetchData.var_mutation_number =
+                //fetchData.var_mutation_date =
+                //fetchData.var_sro_office_name_marathi =
+                //fetchData.var_sro_office_name_english =
+                //fetchData.var_document_number =
+                //fetchData.var_document_year =
+                //fetchData.var_document_date =
+                //fetchData.var_entry_details =
+                //fetchData.var_owner_details =
+                fetchData.reason = errorCorrectionData.reason;
+                fetchData.address_type = errorCorrectionData.address_type;
+                fetchData.state = commonFunctions.ReplaceNA(errorCorrectionData.state!);
+                fetchData.district = commonFunctions.ReplaceNA(errorCorrectionData.district!);
+                fetchData.city = commonFunctions.ReplaceNA(errorCorrectionData.city!);
+                fetchData.taluka = commonFunctions.ReplaceNA(errorCorrectionData.taluka!);
+                fetchData.flatno_plotno = commonFunctions.ReplaceNA(errorCorrectionData.flatno_plotno!);
+                fetchData.societyname = commonFunctions.ReplaceNA(errorCorrectionData.societyname!);
+                fetchData.mainstreet = commonFunctions.ReplaceNA(errorCorrectionData.mainstreet!);
+                fetchData.landmark = commonFunctions.ReplaceNA(errorCorrectionData.landmark!);
+                fetchData.locality = commonFunctions.ReplaceNA(errorCorrectionData.locality!);
+                fetchData.pincode = commonFunctions.ReplaceNA(errorCorrectionData.pincode!);
+                fetchData.post_office_name = commonFunctions.ReplaceNA(errorCorrectionData.post_office_name!);
+                fetchData.mobileno = commonFunctions.ReplaceNA(errorCorrectionData.mobileno!);
+                fetchData.mobilenoverified = commonFunctions.ReplaceNA(errorCorrectionData.mobilenoverified!);
+                fetchData.address_proof_document_name = commonFunctions.ReplaceNA(errorCorrectionData.address_proof_document_name!);
+                fetchData.address_proof_document_path = commonFunctions.ReplaceNA(errorCorrectionData.address_proof_document_path!);
+                fetchData.address = commonFunctions.ReplaceNA(errorCorrectionData.address!);
+                fetchData.emailid = commonFunctions.ReplaceNA(errorCorrectionData.emailid!);
+                TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+                DateTime indianTime = TimeZoneInfo.ConvertTimeFromUtc(Convert.ToDateTime(errorCorrectionData.createddatetime.ToString()), INDIAN_ZONE);
+                fetchData.createddatetime = indianTime.ToString("yyyy-MM-dd");
+                fetchData.isdeleted = errorCorrectionData.isDeleted;
+                fetchData.deleteddate = errorCorrectionData.deleteddate.ToString("yyyy-MM-dd");
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public FetchNavatBadalDataForNIC FetchNavatBadalData(int name_change_id)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                NameChangeDTL nameChangeDTL = new NameChangeDTL();
+                nameChangeDTL = _contextR.nameChangeDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.name_change_id == name_change_id && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchNavatBadalDataForNIC fetchData = new FetchNavatBadalDataForNIC();
+                fetchData.name_change_id = nameChangeDTL.name_change_id;
+                fetchData.usermasteruserid = nameChangeDTL.userMaster!.userid;
+                fetchData.applicationdtlapplicationid = nameChangeDTL.applicationDTL!.applicationid;
+                fetchData.village_code = nameChangeDTL.village_code;
+                fetchData.subpropno = nameChangeDTL.subPropNo;
+                fetchData.nabhu = nameChangeDTL.nabhu;
+                fetchData.lrpropertyuid = nameChangeDTL.lrPropertyUID;
+                fetchData.milkat = nameChangeDTL.milkat;
+                fetchData.namud = nameChangeDTL.namud;
+                fetchData.name_change_by_code = nameChangeDTL.name_change_by_code;
+                fetchData.name_change_by_description = commonFunctions.ReplaceNA(nameChangeDTL.name_change_by_description!);
+                fetchData.name_change_no = commonFunctions.ReplaceNA(nameChangeDTL.name_change_no!);
+                fetchData.name_change_date = commonFunctions.ReplaceNA(nameChangeDTL.name_change_date!);
+                // selectedMutation -> data from EPCIS
+                fetchData.selected_village_code = commonFunctions.ReplaceNA(nameChangeDTL.selected_village_code!);
+                fetchData.selected_cts_number = commonFunctions.ReplaceNA(nameChangeDTL.selected_cts_number!);
+                fetchData.selected_mutation_srno = commonFunctions.ReplaceNA(nameChangeDTL.selected_mutation_srno!);
+                fetchData.selected_entry_date = commonFunctions.ReplaceNA(nameChangeDTL.selected_entry_date!);
+                fetchData.selected_entry_bracketed = commonFunctions.ReplaceNA(nameChangeDTL.selected_entry_bracketed!);
+                fetchData.selected_owner_number = commonFunctions.ReplaceNA(nameChangeDTL.selected_owner_number!);
+                fetchData.selected_owner_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_owner_name!);
+                fetchData.selected_first_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_first_name!);
+                fetchData.selected_middle_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_middle_name!);
+                fetchData.selected_last_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_last_name!);
+                fetchData.selected_nick_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_nick_name!);
+                fetchData.selected_owner_bracketed = commonFunctions.ReplaceNA(nameChangeDTL.selected_owner_bracketed!);
+                fetchData.selected_area_bracketed = nameChangeDTL.selected_area_bracketed;
+                fetchData.selected_email_id = nameChangeDTL.selected_email_id;
+                fetchData.selected_owner_cell_number = nameChangeDTL.selected_owner_cell_number;
+                fetchData.selected_pincode = nameChangeDTL.selected_pincode;
+                fetchData.selected_owner_type = nameChangeDTL.selected_owner_type;
+                fetchData.selected_apk_code = nameChangeDTL.selected_apk_code;
+                fetchData.selected_apk_name = nameChangeDTL.selected_apk_name;
+                fetchData.selected_flat_or_house_number = commonFunctions.ReplaceNA(nameChangeDTL.selected_flat_or_house_number!);
+                fetchData.selected_building_number = commonFunctions.ReplaceNA(nameChangeDTL.selected_building_number!);
+                fetchData.selected_road = commonFunctions.ReplaceNA(nameChangeDTL.selected_road!);
+                fetchData.selected_city_or_village = commonFunctions.ReplaceNA(nameChangeDTL.selected_city_or_village!);
+                fetchData.selected_taluka_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_taluka_name!);
+                fetchData.selected_district_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_district_name!);
+                fetchData.selected_state_name = commonFunctions.ReplaceNA(nameChangeDTL.selected_state_name!);
+                fetchData.selected_gender_code = commonFunctions.ReplaceNA(nameChangeDTL.selected_gender_code!);
+                fetchData.selected_date_of_birth = commonFunctions.ReplaceNA(nameChangeDTL.selected_date_of_birth!);
+                fetchData.selected_owner_area = commonFunctions.ReplaceNA(nameChangeDTL.selected_owner_area!);
+                fetchData.selected_owner_area_bracketed = commonFunctions.ReplaceNA(nameChangeDTL.selected_owner_area_bracketed!);
+                // Updated Details
+                fetchData.updated_usertype = nameChangeDTL.updated_userType;
+                fetchData.updated_usertypelabel = commonFunctions.ReplaceNA(nameChangeDTL.updated_userTypeLabel!);
+                fetchData.updated_prefixcode_marathi = commonFunctions.ReplaceNA(nameChangeDTL.updated_prefixcode_marathi!);
+                fetchData.updated_prefix_in_marathi = commonFunctions.ReplaceNA(nameChangeDTL.updated_prefix_in_marathi!);
+                fetchData.updated_fname_in_marathi = commonFunctions.ReplaceNA(nameChangeDTL.updated_fname_in_marathi!);
+                fetchData.updated_mname_in_marathi = commonFunctions.ReplaceNA(nameChangeDTL.updated_mname_in_marathi!);
+                fetchData.updated_lname_in_marathi = commonFunctions.ReplaceNA(nameChangeDTL.updated_lname_in_marathi!);
+                fetchData.updated_prefixcode_eng = commonFunctions.ReplaceNA(nameChangeDTL.updated_prefixcode_eng!);
+                fetchData.updated_prefix_in_eng = commonFunctions.ReplaceNA(nameChangeDTL.updated_prefix_in_eng!);
+                fetchData.updated_fname_in_eng = commonFunctions.ReplaceNA(nameChangeDTL.updated_fname_in_eng!);
+                fetchData.updated_mname_in_eng = commonFunctions.ReplaceNA(nameChangeDTL.updated_mname_in_eng!);
+                fetchData.updated_lname_in_eng = commonFunctions.ReplaceNA(nameChangeDTL.updated_lname_in_eng!);
+                fetchData.company_name_in_marathi = commonFunctions.ReplaceNA(nameChangeDTL.company_name_in_marathi!);
+                fetchData.company_name_in_eng = commonFunctions.ReplaceNA(nameChangeDTL.company_name_in_eng!);
+                // Address Fields
+                fetchData.address_type = nameChangeDTL.address_type;
+                fetchData.emailid = commonFunctions.ReplaceNA(nameChangeDTL.emailid!);
+                fetchData.mobileno = commonFunctions.ReplaceNA(nameChangeDTL.mobileno!);
+                fetchData.mobilenoverified = commonFunctions.ReplaceNA(nameChangeDTL.mobilenoverified!);
+                fetchData.address = commonFunctions.ReplaceNA(nameChangeDTL.address!);
+                fetchData.state = commonFunctions.ReplaceNA(nameChangeDTL.state!);
+                fetchData.district = commonFunctions.ReplaceNA(nameChangeDTL.district!);
+                fetchData.taluka = commonFunctions.ReplaceNA(nameChangeDTL.taluka!);
+                fetchData.city = commonFunctions.ReplaceNA(nameChangeDTL.city!);
+                fetchData.flatno_plotno = commonFunctions.ReplaceNA(nameChangeDTL.flatno_plotno!);
+                fetchData.societyname = commonFunctions.ReplaceNA(nameChangeDTL.societyname!);
+                fetchData.mainstreet = commonFunctions.ReplaceNA(nameChangeDTL.mainstreet!);
+                fetchData.landmark = commonFunctions.ReplaceNA(nameChangeDTL.landmark!);
+                fetchData.locality = commonFunctions.ReplaceNA(nameChangeDTL.locality!);
+                fetchData.pincode = commonFunctions.ReplaceNA(nameChangeDTL.pincode!);
+                fetchData.postofficename = commonFunctions.ReplaceNA(nameChangeDTL.postofficename!);
+                fetchData.address_proof_document_name = commonFunctions.ReplaceNA(nameChangeDTL.address_proof_document_name!);
+                fetchData.address_proof_document_path = commonFunctions.ReplaceNA(nameChangeDTL.address_proof_document_path!);
+
+                TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+                DateTime indianTime = TimeZoneInfo.ConvertTimeFromUtc(Convert.ToDateTime(nameChangeDTL.createddatetime.ToString()), INDIAN_ZONE);
+                fetchData.createddatetime = indianTime.ToString("yyyy-MM-dd");
+                fetchData.isdeleted = nameChangeDTL.isDeleted;
+                fetchData.deleteddate = nameChangeDTL.deleteddate.ToString("yyyy-MM-dd");
+                return fetchData;
+            }
+            catch (Exception ex)
+            {
+                throw new HandleException(ex.Message.ToString());
+            }
+        }
+
+        public FetchHibanamaWitnessDataForNIC FetchHibanamaWitnessData(int witnessid)
+        {
+            try
+            {
+                MethodForFileUpload methodForFile = new MethodForFileUpload();
+                WitnessDTL witnessData = new WitnessDTL();
+                witnessData = _contextR.witnessDTLs.Include(i => i.userMaster).Include(app => app.applicationDTL).Where(data => data.witness_info_id.Equals(witnessid) && data.isDeleted == false).FirstOrDefault()!;
+
+                FetchHibanamaWitnessDataForNIC fetchData = new FetchHibanamaWitnessDataForNIC();
+                fetchData.witness_info_id = witnessData.witness_info_id;
+                fetchData.applicationdtlapplicationid = witnessData.applicationDTL!.applicationid;
+                fetchData.usermasteruserid = witnessData.userMaster!.userid;
+                fetchData.permission_no = commonFunctions.ReplaceNA(witnessData.permission_no!);
+                fetchData.permission_date = commonFunctions.ReplaceNA(witnessData.permission_date!);
+                fetchData.prefixcode_marathi = witnessData.prefixcode_marathi;
+                fetchData.prefix_in_marathi = witnessData.prefix_in_marathi;
+                fetchData.fname_in_marathi = witnessData.fname_in_marathi;
+                fetchData.mname_in_marathi = witnessData.mname_in_marathi;
+                fetchData.lname_in_marathi = witnessData.lname_in_marathi;
+                fetchData.prefixcode_eng = witnessData.prefixcode_eng;
+                fetchData.prefix_in_eng = witnessData.prefix_in_eng;
+                fetchData.fname_in_eng = witnessData.fname_in_eng;
+                fetchData.mname_in_eng = witnessData.mname_in_eng;
+                fetchData.lname_in_eng = witnessData.lname_in_eng;
+                fetchData.alias_name = witnessData.alias_name;
+                fetchData.address_type = witnessData.address_type;
+                fetchData.address = commonFunctions.ReplaceNA(witnessData.address!);
+                fetchData.state = commonFunctions.ReplaceNA(witnessData.state!);
+                fetchData.district = commonFunctions.ReplaceNA(witnessData.district!);
+                fetchData.city = commonFunctions.ReplaceNA(witnessData.city!);
+                fetchData.taluka = commonFunctions.ReplaceNA(witnessData.taluka!);
+                fetchData.flatno_plotno = commonFunctions.ReplaceNA(witnessData.flatno_plotno!);
+                fetchData.societyname = commonFunctions.ReplaceNA(witnessData.societyname!);
+                fetchData.mainstreet = commonFunctions.ReplaceNA(witnessData.mainstreet!);
+                fetchData.landmark = commonFunctions.ReplaceNA(witnessData.landmark!);
+                fetchData.locality = commonFunctions.ReplaceNA(witnessData.locality!);
+                fetchData.pincode = commonFunctions.ReplaceNA(witnessData.pincode!);
+                fetchData.post_office_name = commonFunctions.ReplaceNA(witnessData.post_office_name!);
+                fetchData.mobileno = commonFunctions.ReplaceNA(witnessData.mobileno!);
+                fetchData.mobilenoverified = commonFunctions.ReplaceNA(witnessData.mobilenoverified!);
+                fetchData.address_proof_document_name = commonFunctions.ReplaceNA(witnessData.address_proof_document_name!);
+                fetchData.address_proof_document_path = commonFunctions.ReplaceNA(witnessData.address_proof_document_path!);
+                fetchData.emailid = commonFunctions.ReplaceNA(witnessData.emailid!);
+                fetchData.emailidverified = witnessData.emailidverified;
+                TimeZoneInfo INDIAN_ZONE = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+                DateTime indianTime = TimeZoneInfo.ConvertTimeFromUtc(Convert.ToDateTime(witnessData.createddatetime.ToString()), INDIAN_ZONE);
+                fetchData.createddatetime = indianTime.ToString("yyyy-MM-dd");
+                fetchData.isdeleted = witnessData.isDeleted;
+                fetchData.deleteddate = witnessData.deleteddate.ToString("yyyy-MM-dd");
+                return fetchData;
             }
             catch (Exception ex)
             {

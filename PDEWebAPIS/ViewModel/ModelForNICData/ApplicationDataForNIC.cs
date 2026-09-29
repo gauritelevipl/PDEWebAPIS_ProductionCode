@@ -17,6 +17,9 @@ namespace PDEWebAPIS.ViewModel.ModelForNICData
         //public List<FetchPOAForTakerDataForNIC>? power_puof_attorney_information_taker { get; set; }
         public List<FetcMutationGiverTakerDTL>? mutationgivertakerdtls { get; set; }
         public List<FetchBhadepattaInfoDTLForNIC>? bhadepattaInfoDtl { get; set; }
+        public List<FetchErrorCorrectionDataForNIC>? errorcorrectiondtls { get; set; }
+        public List<FetchNavatBadalDataForNIC>? name_change_dtl { get; set; }
+        public List<FetchHibanamaWitnessDataForNIC>? witness_info { get; set; }
         //public dynamic? mutationgivertakerdtls { get; set; }
         //public List<FetchUploadedDocumentsForNIC>? uploaded_documents_dtl { get; set; }
         public List<FetchUploadedDocumentDataForNIC>? uploaded_documents_dtl { get; set; }
@@ -811,5 +814,181 @@ namespace PDEWebAPIS.ViewModel.ModelForNICData
         public string? deletedDateTime { get; set; }
         public bool? isDeleted { get; set; }
         public bool? leaseperiod { get; set; }
+    }
+
+    public class FetchErrorCorrectionDataForNIC
+    {
+        public int error_correction_id { get; set; }
+        public int usermasteruserid { get; set; }
+        public string? applicationdtlapplicationid { get; set; }
+        public string? village_code { get; set; }
+        public string? sub_property_no { get; set; }
+        public string? city_servey_no { get; set; }
+        public string? lr_property_id { get; set; }
+        public string? milkat { get; set; }
+        public string? namud { get; set; }
+        //public string? var_village_code { get; set; }
+        //public string? var_cts_number { get; set; }
+        //public string? var_cts_puid { get; set; }
+        //public string? var_mutation_srno { get; set; }
+        //public string? var_entry_date { get; set; }
+        //public string? var_mutation_number { get; set; }
+        //public string? var_mutation_date { get; set; }
+        //public string? var_sro_office_name_marathi { get; set; }
+        //public string? var_sro_office_name_english { get; set; }
+        //public string? var_document_number { get; set; }
+        //public string? var_document_year { get; set; }
+        //public string? var_document_date { get; set; }
+        //public string? var_entry_details { get; set; }
+        //public string? var_owner_details { get; set; }
+        public string? reason { get; set; }
+        public string? address_type { get; set; }
+        public string? emailid { get; set; }
+        public string? mobileno { get; set; }
+        public string? mobilenoverified { get; set; }
+        public string? address { get; set; }
+        public string? state { get; set; }
+        public string? district { get; set; }
+        public string? taluka { get; set; }
+        public string? city { get; set; }
+        public string? flatno_plotno { get; set; }
+        public string? societyname { get; set; }
+        public string? mainstreet { get; set; }
+        public string? landmark { get; set; }
+        public string? locality { get; set; }
+        public string? pincode { get; set; }
+        public string? post_office_name { get; set; }
+        public string? address_proof_document_name { get; set; }
+        public string? address_proof_document_path { get; set; }
+        public string? createddatetime { get; set; }
+        public bool isdeleted { set; get; }
+        public string? deleteddate { set; get; }
+    }
+    public class FetchNavatBadalDataForNIC
+    {
+        public int name_change_id { get; set; }
+        public int usermasteruserid { get; set; }
+        public string? applicationdtlapplicationid { get; set; }
+        public string? village_code { get; set; }
+        public string? subpropno { get; set; }
+        public string? nabhu { get; set; }
+        public string? lrpropertyuid { get; set; }
+        public string? milkat { get; set; }
+        public string? namud { get; set; }
+        public int name_change_by_code { get; set; }
+        public string? name_change_by_description { get; set; }
+        public string? name_change_no { get; set; }
+        public string? name_change_date { get; set; }
+        // selectedMutation -> data from EPCIS
+        public string? selected_village_code { get; set; }
+        public string? selected_cts_number { get; set; }
+        public string? selected_mutation_srno { get; set; }
+        public string? selected_entry_date { get; set; }
+        public string? selected_entry_bracketed { get; set; }
+        public string? selected_owner_number { get; set; }
+        public string? selected_owner_name { get; set; }
+        public string? selected_first_name { get; set; }
+        public string? selected_middle_name { get; set; }
+        public string? selected_last_name { get; set; }
+        public string? selected_nick_name { get; set; }
+        public string? selected_owner_bracketed { get; set; }
+        public string? selected_area_bracketed { get; set; }
+        public string? selected_email_id { get; set; }
+        public string? selected_owner_cell_number { get; set; }
+        public string? selected_pincode { get; set; }
+        public string? selected_owner_type { get; set; }
+        public string? selected_apk_code { get; set; }
+        public string? selected_apk_name { get; set; }
+        public string? selected_flat_or_house_number { get; set; }
+        public string? selected_building_number { get; set; }
+        public string? selected_road { get; set; }
+        public string? selected_city_or_village { get; set; }
+        public string? selected_taluka_name { get; set; }
+        public string? selected_district_name { get; set; }
+        public string? selected_state_name { get; set; }
+        public string? selected_gender_code { get; set; }
+        public string? selected_date_of_birth { get; set; }
+        public string? selected_owner_area { get; set; }
+        public string? selected_owner_area_bracketed { get; set; }
+        // Updated Details
+        public int updated_usertype { get; set; } = 0;
+        public string? updated_usertypelabel { get; set; }
+        public string? updated_prefixcode_marathi { get; set; }
+        public string? updated_prefix_in_marathi { get; set; }
+        public string? updated_fname_in_marathi { get; set; }
+        public string? updated_mname_in_marathi { get; set; }
+        public string? updated_lname_in_marathi { get; set; }
+        public string? updated_prefixcode_eng { get; set; }
+        public string? updated_prefix_in_eng { get; set; }
+        public string? updated_fname_in_eng { get; set; }
+        public string? updated_mname_in_eng { get; set; }
+        public string? updated_lname_in_eng { get; set; }
+        public string company_name_in_marathi { set; get; } = string.Empty;
+        public string company_name_in_eng { set; get; } = string.Empty;
+        // Address Fields
+        public string address_type { set; get; } = string.Empty;
+        public string? emailid { get; set; }
+        public string? mobileno { get; set; }
+        public string? mobilenoverified { get; set; }
+        public string address { set; get; } = string.Empty;
+        public string state { set; get; } = string.Empty;
+        public string district { set; get; } = string.Empty;
+        public string taluka { set; get; } = string.Empty;
+        public string city { set; get; } = string.Empty;
+        public string flatno_plotno { set; get; } = string.Empty;
+        public string societyname { set; get; } = string.Empty;
+        public string mainstreet { set; get; } = string.Empty;
+        public string landmark { set; get; } = string.Empty;
+        public string locality { set; get; } = string.Empty;
+        public string pincode { set; get; } = string.Empty;
+        public string postofficename { set; get; } = string.Empty;
+        public string address_proof_document_name { set; get; } = string.Empty;
+        public string address_proof_document_path { set; get; } = string.Empty;
+        public string? createddatetime { get; set; }
+        public bool isdeleted { set; get; }
+        public string? deleteddate { set; get; }
+    }
+    public class FetchHibanamaWitnessDataForNIC
+    {
+        public int witness_info_id { get; set; }
+        public int usermasteruserid { get; set; }
+        public string? applicationdtlapplicationid { get; set; }
+        public string? permission_no { get; set; }
+        public string? permission_date { get; set; }
+        public string? prefixcode_marathi { set; get; }
+        public string? prefix_in_marathi { set; get; }
+        public string? fname_in_marathi { set; get; }
+        public string? mname_in_marathi { set; get; }
+        public string? lname_in_marathi { set; get; }
+        public string? prefixcode_eng { set; get; }
+        public string? prefix_in_eng { set; get; }
+        public string? fname_in_eng { set; get; }
+        public string? mname_in_eng { set; get; }
+        public string? lname_in_eng { set; get; }
+        public string? alias_name { get; set; }
+
+        // Address Data
+        public string? address_type { get; set; }
+        public string? address { get; set; }
+        public string? state { get; set; }
+        public string? district { get; set; }
+        public string? taluka { get; set; }
+        public string? city { get; set; }
+        public string? flatno_plotno { get; set; }
+        public string? societyname { get; set; }
+        public string? mainstreet { get; set; }
+        public string? landmark { get; set; }
+        public string? locality { get; set; }
+        public string? pincode { get; set; }
+        public string? post_office_name { get; set; }
+        public string? address_proof_document_name { get; set; }
+        public string? address_proof_document_path { get; set; }
+        public string? mobileno { get; set; }
+        public string? mobilenoverified { get; set; }
+        public string? emailid { set; get; }
+        public string? emailidverified { set; get; }
+        public string? createddatetime { get; set; }
+        public bool isdeleted { set; get; }
+        public string? deleteddate { set; get; }
     }
 }
