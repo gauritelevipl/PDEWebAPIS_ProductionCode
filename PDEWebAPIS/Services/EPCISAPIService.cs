@@ -35,7 +35,7 @@ namespace PDEWebAPIS.Services
         private readonly string _secretKey;
         private readonly ILogger<EPCISAPIService> _logger;
 
-        public EPCISAPIService(AppDBContextR context, IOptions<EPCISConfig> config , ILogger<EPCISAPIService> logger)
+        public EPCISAPIService(AppDBContextR context, IOptions<EPCISConfig> config, ILogger<EPCISAPIService> logger)
         {
             this.context = context;
             _bearerToken = config.Value.BearerToken;
@@ -684,11 +684,11 @@ namespace PDEWebAPIS.Services
             }
         }
 
-        public async Task<string> getOfficeByDistrict(string district_code,ILogger _logger)
+        public async Task<string> getOfficeByDistrict(string district_code, ILogger _logger)
         {
             var body = new Dictionary<string, string>();
             body.Add("district_code", district_code);
-            string response = await SendRequestAsync("getOfficeByDistrict", HttpMethod.Post,_logger,body);
+            string response = await SendRequestAsync("getOfficeByDistrict", HttpMethod.Post, _logger, body);
             if (response.Split("|")[1] == "200")
             {
                 if (response.Split("|")[0] != null && response.Split("|")[0].ToList().Count > 0)
@@ -700,7 +700,7 @@ namespace PDEWebAPIS.Services
                 {
                     return "Data List is Empty" + "|" + response.Split("|")[1];
                 }
-                
+
             }
             else return response;
         }
@@ -815,7 +815,7 @@ namespace PDEWebAPIS.Services
         {
             //var body = new Dictionary<string, string>();
             //body.Add("mut_type", mut_type);
-            string response = await SendRequestAsync("getDocListMutationtype", HttpMethod.Post, _logger,body);
+            string response = await SendRequestAsync("getDocListMutationtype", HttpMethod.Post, _logger, body);
             if (response.Split("|")[1] == "200")
             {
                 var districts = System.Text.Json.JsonSerializer.Deserialize<List<EPCIDocument>>(response.Split("|")[0].ToString());//JsonConvert.DeserializeObject<List<EPCIDocListMutationtype>>(response.Split("|")[0]);
@@ -1021,7 +1021,7 @@ namespace PDEWebAPIS.Services
             string response = await SendRequestAsync("getFlatList", HttpMethod.Post, _logger, body);
             if (response.Split("|")[1] == "200")
             {
-                
+
                 if (response.Split("|")[0] != null && response.Split("|")[0].ToList().Count > 0)
                 {
                     var districts = JsonConvert.DeserializeObject<List<EPCIFlatDetails>>(response.Split("|")[0]);
@@ -1044,7 +1044,7 @@ namespace PDEWebAPIS.Services
             string response = await SendRequestAsync("getCTSDetails", HttpMethod.Post, _logger, body);
             if (response.Split("|")[1] == "200")
             {
-                
+
                 if (response.Split("|")[0] != null && response.Split("|")[0].ToList().Count > 0)
                 {
                     var districts = JsonConvert.DeserializeObject<List<EPCICTSDetails>>(response.Split("|")[0]);
@@ -2502,7 +2502,7 @@ namespace PDEWebAPIS.Services
                 Country = pincodesList.Country,
                 Pincode = pincodesList.Pincode
             }).ToList();
-            
+
             return fetchDataList;
         }
 
@@ -3261,6 +3261,10 @@ namespace PDEWebAPIS.Services
         {
             try
             {
+                DateTime startDate = Convert.ToDateTime("2025-04-04");
+                DateTime endDate = DateTime.Now;
+                DateTime fromDate = DateTime.SpecifyKind((DateTime)startDate!, DateTimeKind.Utc);
+                DateTime toDate = DateTime.SpecifyKind((DateTime)endDate!, DateTimeKind.Utc).Date.AddDays(1).AddTicks(-1);
                 string regionCode = inputData.region_code!;
                 string districtCode = inputData.district_code!;
                 string officeCode = inputData.office_code!;
@@ -3273,13 +3277,13 @@ namespace PDEWebAPIS.Services
                     //,{ 10, "generatedInwardNoCount" }
                 };
 
-                IQueryable<ApplicationDTL> query = context.applicationDTL;
+                IQueryable<ApplicationDTL> query = context.applicationDTL.Where(s => s.createddatetime >= fromDate && s.createddatetime <= toDate);
 
                 // All regions
                 if (regionCode == "0" && districtCode == "0" && officeCode == "0")
                 {
                     var regionActualCounts = query
-                        .GroupBy(a => a.status == 10 ? 0 : a.status)
+                        .GroupBy(a => a.status >= 10 && a.status <= 15 ? 0 : a.status)
                         .Select(g => new
                         {
                             StatusCode = g.Key,
@@ -3339,7 +3343,7 @@ namespace PDEWebAPIS.Services
                 }
 
                 var actualCounts = query
-                    .GroupBy(a => a.status == 10? 0 : a.status)
+                    .GroupBy(a => a.status >= 10 && a.status <= 15 ? 0 : a.status)
                     .Select(g => new
                     {
                         StatusCode = g.Key,
