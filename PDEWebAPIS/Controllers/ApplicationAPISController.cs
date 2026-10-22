@@ -4108,7 +4108,7 @@ namespace PDEWebAPIS.Controllers
                     // we have a valid AuthenticationHeaderValue that has the following details:
                     var scheme = headerValue.Scheme;
                     var Token = headerValue.Parameter;
-                    // UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
+                     UserID = userServices.FetchUserIDThroughToken(Token!, CallAPIForFlag!);
                     // scheme will be "Bearer"
                     // parmameter will be the token itself.
                 }
